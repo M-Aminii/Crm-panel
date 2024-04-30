@@ -55,7 +55,8 @@ class ProvincesTableSeeder extends Seeder
 
         foreach ($provinces as $province) {
             Province::create(['name' => $province]);
-            $this->command->info('add provinces to database');
+
         }
+        $this->command->info('add provinces to database');
     }
 }

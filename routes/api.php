@@ -2,6 +2,7 @@
 
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Glass\Layer;
 use App\Http\Controllers\IndividualCustomerController;
 use App\Http\Controllers\LegalCustomerController;
 use App\Http\Controllers\UserController;
@@ -48,6 +49,13 @@ Route::group(["middleware" => ['role:super-admin',"auth:api"],'prefix' => 'Admin
         Route::get('/list',[IndividualCustomerController::class ,'index']);
         Route::get('/{id}',[IndividualCustomerController::class ,'show']);
         Route::patch('/{id}',[IndividualCustomerController::class ,'update']);
+    });
+
+    Route::group(['prefix' => '/glass-layer'], function () {
+        Route::post('/',[Layer::class ,'store']);
+       /* Route::get('/list',[IndividualCustomerController::class ,'index']);
+        Route::get('/{id}',[IndividualCustomerController::class ,'show']);
+        Route::patch('/{id}',[IndividualCustomerController::class ,'update']);*/
     });
 
 
