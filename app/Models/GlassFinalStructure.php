@@ -5,17 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class GlassLayer extends Model
+class GlassFinalStructure extends Model
 {
     use HasFactory;
+
+    protected $table = 'glass_final_structure';
+
 
     protected $fillable = [
         'user_id',
         'product_id',
-        'layer_number',
-        'type_id',
-        'width_id',
-        'material_id',
+        'product_number',
+        'structure_data',
     ];
 
 
@@ -24,8 +25,8 @@ class GlassLayer extends Model
         parent::boot();
 
         static::saving(function ($glassLayer) {
-            $layerNumber = static::where('product_id', $glassLayer->product_id)->count() + 1;
-            $glassLayer->layer_number = $layerNumber;
+            $ProductNumber = static::where('product_id', $glassLayer->product_id)->count() + 1;
+            $glassLayer->product_number = $ProductNumber;
         });
     }
     public function isCreatedBy(User $user)

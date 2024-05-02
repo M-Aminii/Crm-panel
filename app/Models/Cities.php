@@ -10,6 +10,10 @@ class Cities extends Model
     use HasFactory;
 
     protected $fillable = [ 'name','province_id'];
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
 
     public function Province()
     {

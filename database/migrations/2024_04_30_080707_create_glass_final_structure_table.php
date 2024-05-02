@@ -13,7 +13,10 @@ return new class extends Migration
     {
         Schema::create('glass_final_structure', function (Blueprint $table) {
             $table->bigIncrements('id');
-
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('product_id');
+            $table->integer('product_number');
+            $table->text('structure_data')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
 

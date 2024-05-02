@@ -2,10 +2,12 @@
 
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Glass\Layer;
+use App\Http\Controllers\Glass\LayerController;
+use App\Http\Controllers\GlassFinalStructureController;
 use App\Http\Controllers\IndividualCustomerController;
 use App\Http\Controllers\LegalCustomerController;
 use App\Http\Controllers\UserController;
+use App\Models\Province;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +27,17 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('logout', [AuthController::class ,'logout']);
     Route::post('refresh', [AuthController::class ,'refresh']);
     Route::post('me', [AuthController::class ,'me']);
+});
+
+Route::get('/provinces', function () {
+    $provinces = Province::all();
+    return response()->json($provinces);
+});
+
+Route::get('/provinces/{id}/cities', function ($id) {
+    $province = Province::findOrFail($id);
+    $cities = $province->cities;
+    return response()->json($cities);
 });
 
 Route::group(["middleware" => ['role:super-admin',"auth:api"],'prefix' => 'Admin'], function () {
@@ -51,12 +64,19 @@ Route::group(["middleware" => ['role:super-admin',"auth:api"],'prefix' => 'Admin
         Route::patch('/{id}',[IndividualCustomerController::class ,'update']);
     });
 
-    Route::group(['prefix' => '/glass-layer'], function () {
-        Route::post('/',[Layer::class ,'store']);
-       /* Route::get('/list',[IndividualCustomerController::class ,'index']);
-        Route::get('/{id}',[IndividualCustomerController::class ,'show']);
-        Route::patch('/{id}',[IndividualCustomerController::class ,'update']);*/
-    });
+    Route::group(['prefix' => '/glass-structure'], function () {
+            Route::post('/',[GlassFinalStructureController::class ,'store']);
+            /*Route::get('/list',[IndividualCustomerController::class ,'index']);
+            Route::get('/{id}',[IndividualCustomerController::class ,'show']);
+            Route::patch('/{id}',[IndividualCustomerController::class ,'update']);*/
+        });
+
+   /* Route::group(['prefix' => '/glass-layer'], function () {
+        Route::post('/',[LayerController::class ,'store']);
+        //Route::get('/list',[IndividualCustomerController::class ,'index']);
+       // Route::get('/{id}',[IndividualCustomerController::class ,'show']);
+        Route::patch('/{id}',[LayerController::class ,'update']);
+    });*/
 
 
 

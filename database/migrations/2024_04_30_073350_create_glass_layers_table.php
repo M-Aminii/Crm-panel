@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('glass_layers', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('product_id');
             $table->integer('layer_number');
             $table->unsignedBigInteger('type_id');
@@ -20,6 +21,12 @@ return new class extends Migration
             $table->unsignedBigInteger('material_id');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
+
+
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
 
             $table->foreign('product_id')
                 ->references('id')

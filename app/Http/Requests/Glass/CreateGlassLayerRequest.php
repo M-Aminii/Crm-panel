@@ -2,11 +2,12 @@
 
 namespace App\Http\Requests\Glass;
 
-use App\Enums\UserGender;
-use App\Enums\UserStatus;
-use App\Rules\MobileRule;
-use App\Rules\PasswordRule;
+
+use App\Models\GlassLayer;
 use Illuminate\Foundation\Http\FormRequest;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Illuminate\Support\Facades\Gate;
+
 
 class CreateGlassLayerRequest extends FormRequest
 {
@@ -15,7 +16,11 @@ class CreateGlassLayerRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        /*$Layer = GlassLayer::find($this->id);
+        if (!$Layer) {
+            throw new NotFoundHttpException();
+        }
+        return Gate::allows('update-glass-layer', $Layer);*/
     }
 
     /**
