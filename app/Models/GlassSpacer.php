@@ -12,4 +12,8 @@ class GlassSpacer extends Model
     protected $fillable = [
         'size',
     ];
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\NoStructureInCreateException;
+use App\Exceptions\NotFoundPageException;
 use App\Http\Requests\GlassFinalStructure\CreateGlassFinalStructureRequest;
 use App\Models\GlassFinalStructure;
 use App\Models\Product;
@@ -38,7 +39,7 @@ class GlassFinalStructureController extends Controller
 
             $product = Product::find($request->product_id);
             if (!$product){
-                throw new NotFoundHttpException('محصول مورد نظر یافت نشد.');
+                throw new NotFoundPageException;
             }
             if (!$structureData){
                 throw new NoStructureInCreateException;
@@ -49,6 +50,7 @@ class GlassFinalStructureController extends Controller
             }
             $newStructure = GlassStructureService::processAndTransformData($structureData);
 
+
             GlassFinalStructure::create([
                 'user_id' =>auth('api')->id(),
                 'product_id' => $product_id,
@@ -57,7 +59,7 @@ class GlassFinalStructureController extends Controller
 
             DB::commit();
             return response()->json(['message' => 'ساختار نهایی محصول با موفقیت ایجاد شد'], 201);
-        } catch (NoStructureInCreateException $exception) {
+        } catch (NotFoundPageException |NoStructureInCreateException $exception) {
             DB::rollBack();
             return response(['message' => $exception->getMessage()], $exception->getCode());
         }catch (Exception $exception) {
@@ -67,34 +69,6 @@ class GlassFinalStructureController extends Controller
         }
 
 
-
-       /* try {
-            DB::beginTransaction();
-            $user = auth()->user();
-            $product = $request->product_id;
-            if (!$product) {
-                throw new NotFoundHttpException('محصول انتخابی وجود ندارد');
-            }
-            $structure = $request->input('structure');
-            if (!$structure){
-                throw new BadRequestException('برای این ساختار شیشه هیچ مشخصاتی ثبت نشده');
-            }
-            $newQuestions = GlassStructureService::existQuestions($structure);
-            GlassFinalStructure::create(
-                ['user_id'=> $user->id],
-                ['product_id' => $product], // جستجو بر اساس product_id
-                ['structure_data' => $newQuestions] // اطلاعات جدید برای ذخیره
-            );
-            DB::commit();
-            return response()->json(['message' => 'سوالات با موفقیت به آزمون اضافه شد'], 201);
-        } catch (NoActiveExamException | NoQuestionInExamException $exception) {
-            DB::rollBack();
-            return response(['message' => $exception->getMessage()], $exception->getCode());
-        }catch (Exception $exception) {
-            DB::rollBack();
-            Log::error($exception);
-            return response(['message' => 'خطایی رخ داده است'], 500);
-        }*/
     }
 
     /**
@@ -102,14 +76,29 @@ class GlassFinalStructureController extends Controller
      */
     public function show(string $id)
     {
-        // بازیابی اطلاعات مدل‌ها بر اساس شناسه محصول
-        $modelData = GlassStructureService::retrieveModelData($productId);
-
-        // بررسی نتیجه و ارسال پاسخ به درخواست کننده
-        if ($modelData) {
-            return response()->json($modelData, 200);
-        } else {
-            return response()->json(['error' => 'هیچ اطلاعاتی یافت نشد.'], 404);
+        try {
+            DB::beginTransaction();
+            $result = GlassFinalStructure::where('id', $id)->first();
+            if (!$result) {
+                throw new NotFoundPageException;
+            }
+            $dataArray = json_decode($result->structure_data, true);
+            // بازیابی اطلاعات مدل‌ها بر اساس شناسه محصول
+            $modelData = GlassStructureService::retrieveModelData($dataArray);
+            $title = GlassStructureService::generateTitles($modelData);
+            DB::commit();
+            // بررسی نتیجه و ارسال پاسخ به درخواست کننده
+            return response()->json([
+                'title' => $title,
+                'structure' => $modelData, // ارسال تمامی سوالات به عنوان یک آرایه
+            ], 201);
+        } catch (NotFoundPageException|NoStructureInCreateException $exception) {
+            DB::rollBack();
+            return response(['message' => $exception->getMessage()], $exception->getCode());
+        } catch (Exception $exception) {
+            DB::rollBack();
+            Log::error($exception);
+            return response(['message' => 'خطایی رخ داده است'], 500);
         }
     }
 

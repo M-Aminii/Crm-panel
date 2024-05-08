@@ -30,7 +30,7 @@ class UserFactory extends Factory
             'name'=>$this->faker->name,
             'last_name'=>$this->faker->lastName,
             'username'=>$this->faker->userName,
-            'password'=> '$2y$10$yHOVJzIYR5NRsj1JVFrKIuJ8X4JZHlW7Y7QAgRPpnd4MEp9uglwHK', // 123456
+            'password'=> '$2y$12$4JBC3Xk1oH3B9mMOpj5K1.Zb24LLbyN/7JDUuBLSKRv4YsprDkwIa', // M123456
             'avatar'=> null,
         ];
     }

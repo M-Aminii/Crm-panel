@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Glass\LayerController;
 use App\Http\Controllers\GlassFinalStructureController;
 use App\Http\Controllers\IndividualCustomerController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\LegalCustomerController;
 use App\Http\Controllers\UserController;
 use App\Models\Province;
@@ -66,11 +67,15 @@ Route::group(["middleware" => ['role:super-admin',"auth:api"],'prefix' => 'Admin
 
     Route::group(['prefix' => '/glass-structure'], function () {
             Route::post('/',[GlassFinalStructureController::class ,'store']);
-            /*Route::get('/list',[IndividualCustomerController::class ,'index']);
-            Route::get('/{id}',[IndividualCustomerController::class ,'show']);
-            Route::patch('/{id}',[IndividualCustomerController::class ,'update']);*/
+           // Route::get('/list',[IndividualCustomerController::class ,'index']);
+            Route::get('/{id}',[GlassFinalStructureController::class ,'show']);
+           // Route::patch('/{id}',[IndividualCustomerController::class ,'update']);
         });
 
+    Route::group(['prefix' => '/invoice'], function () {
+        Route::post('/',[InvoiceController::class ,'store']);
+
+    });
    /* Route::group(['prefix' => '/glass-layer'], function () {
         Route::post('/',[LayerController::class ,'store']);
         //Route::get('/list',[IndividualCustomerController::class ,'index']);
@@ -82,6 +87,7 @@ Route::group(["middleware" => ['role:super-admin',"auth:api"],'prefix' => 'Admin
 
 
 });
+
 
 /*Route::group(["middleware" => ['role:super-admin',"auth:api"],'prefix' => 'Admin'], function () {
 

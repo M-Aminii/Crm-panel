@@ -13,4 +13,9 @@ class GlassMaterial extends Model
         'name',
         'english_name',
     ];
+
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
 }
