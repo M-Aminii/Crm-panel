@@ -59,15 +59,15 @@ class InvoiceController extends Controller
             ->seller($client)
             ->buyer($customer)
             ->serialNumberFormat('{SEQUENCE}/{SERIES}')
-            ->date(now()->subWeeks(3))
+            ->date(now())
             ->dateFormat('m/d/Y')
             ->payUntilDays(14)
-            ->currencySymbol('$')
-            ->currencyCode('USD')
+            ->currencySymbol('ریال')
+            ->currencyCode('IRR')
             ->currencyFormat('{SYMBOL}{VALUE}')
-            ->currencyThousandsSeparator('.')
+            ->currencyThousandsSeparator(',')
             ->currencyDecimalPoint(',')
-            ->filename( $customer->name . '_invoice');
+            ->filename( $customer->name . '_invoice26');
 
 
 
@@ -77,8 +77,8 @@ class InvoiceController extends Controller
             $item = InvoiceItem::make($itemData['title'])
                 ->description(InvoiceService::mergeProductStructures($itemData['description']))
                 ->pricePerUnit($itemData['price_per_unit'])
-                ->quantity($itemData['quantity'])
-                ->discount($itemData['discount']);
+                ->quantity($itemData['quantity']);
+                //->discount($itemData['discount'])
             //->TechnicalDetails($itemData['technical_details']);
 
             $dimensions = [];
@@ -110,7 +110,7 @@ class InvoiceController extends Controller
 
         $link = $invoice->url();
 
-        return $invoice->stream();
+        return $invoice->download();
 
     }
 
