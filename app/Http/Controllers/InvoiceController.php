@@ -77,23 +77,54 @@ class InvoiceController extends Controller
             $item = InvoiceItem::make($itemData['title'])
                 ->description(InvoiceService::mergeProductStructures($itemData['description']))
                 ->pricePerUnit($itemData['price_per_unit'])
-                ->quantity($itemData['quantity']);
-                //->discount($itemData['discount'])
-            //->TechnicalDetails($itemData['technical_details']);
+                ->quantity($itemData['quantity'])
+                ->TechnicalDetails($itemData['technical_details']);
 
             $dimensions = [];
+            $totalQuantity = 0;
+            $totalArea = 0;
+            $totalEnvironment =0;
 
             foreach ($itemData['dimensions'] as $key=> $data) {
+                $area =InvoiceService::CalculateArea($data['height'] ,$data['width']);
+                $environment =InvoiceService::CalculateEnvironment($data['height'] ,$data['width'] ,$data['quantity']);
+                $over =InvoiceService::calculateAspectRatio($data['height'] ,$data['width']);
+                $total_area = $area * $data['quantity']; // محاسبه total_area
+
+                // گرد کردن مقادیر
+                $area = round($area, 3);
+                $environment = round($environment, 3);
+                $total_area = round($total_area, 3);
+
                 $dimensions[] = [
-                    'row' => $key+1,
+                    'row' => $key + 1,
                     'height' => $data['height'],
                     'width' => $data['width'],
                     'quantity' => $data['quantity'],
-                    'position' => $data['position']
+                    'position' => $data['position'],
+                    'area' => $area,
+                    'total_area' => $total_area,
+                    'environment' => $environment,
+                    'over' => $over
                 ];
+
+                // جمع کردن مقدار quantity
+                $totalQuantity += $data['quantity'];
+                $totalArea += $total_area;
+                $totalEnvironment +=$environment;
+
+
             }
 
-            $item->dimensions($dimensions);
+// اضافه کردن totalQuantity به آرایه dimensions
+            $result = [
+                'dimensions' => $dimensions,
+                'totalQuantity' => $totalQuantity,
+                'totalArea' => $totalArea,
+                'totalEnvironment'=>$totalEnvironment
+            ];
+
+            $item->dimensions($result);
 
             if (!isset($itemData['description'])) {
                 dd('not ok description');
@@ -106,6 +137,7 @@ class InvoiceController extends Controller
 
         // اضافه کردن تمام آیتم‌ها به فاکتور
         $invoice->addItems($items);
+        dd($invoice);
         $invoice->save('public');
 
         $link = $invoice->url();
