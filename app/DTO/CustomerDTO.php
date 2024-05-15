@@ -4,7 +4,7 @@ namespace App\DTO;
 
 use Illuminate\Support\Str;
 
-class LegalCustomerDTO
+class CustomerDTO
 {
 
     public $user_id;
@@ -13,6 +13,7 @@ class LegalCustomerDTO
     public $registration_number;
     public $phone;
     public $mobile;
+    public $type;
     public $postal_code;
     public $national_id;
     public $address;
@@ -33,6 +34,7 @@ class LegalCustomerDTO
         $this->registration_number = $data['registration_number'];
         $this->phone = $data['phone'] ?? null;
         $this->mobile =$data['mobile'] ?? null;
+        $this->type = $data['type'];
         $this->postal_code = $data['postal_code'];
         $this->address =$data['address'];
         $this->province_id = $data['province_id'];

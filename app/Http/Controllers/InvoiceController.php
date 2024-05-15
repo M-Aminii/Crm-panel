@@ -17,13 +17,11 @@ class InvoiceController extends Controller
     {
         //
     }
-
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-
 
         $sellerData= $request->user();
         // دریافت اطلاعات خریدار از ورودی کاربر
@@ -47,15 +45,15 @@ class InvoiceController extends Controller
             ],
         ]);
 
-
         // دریافت اطلاعات آیتم‌ها از ورودی کاربر
         $itemsDatas = $request->input('items');
 
         // ایجاد شیء جدید از کتابخانه Laravel Invoices
-        $invoice = Invoice::make('receipt')
-            ->series('BIG')
+        $invoice = Invoice::make('پیش فاکتور')
+            ->series('f-s')
             ->status(__('invoices::invoice.paid'))
-            ->sequence(667)
+            ->sequencePadding(4)
+            ->sequence(4990)
             ->seller($client)
             ->buyer($customer)
             ->serialNumberFormat('{SEQUENCE}/{SERIES}')
@@ -68,7 +66,6 @@ class InvoiceController extends Controller
             ->currencyThousandsSeparator(',')
             ->currencyDecimalPoint(',')
             ->filename( $customer->name . '_invoice26');
-
 
 
         $items = [];
@@ -112,8 +109,6 @@ class InvoiceController extends Controller
                 $totalQuantity += $data['quantity'];
                 $totalArea += $total_area;
                 $totalEnvironment +=$environment;
-
-
             }
 
 // اضافه کردن totalQuantity به آرایه dimensions
@@ -133,11 +128,9 @@ class InvoiceController extends Controller
             // افزودن آیتم به لیست آیتم‌ها
             $items[] = $item;
         }
-
-
         // اضافه کردن تمام آیتم‌ها به فاکتور
         $invoice->addItems($items);
-        dd($invoice);
+        //dd($invoice);
         $invoice->save('public');
 
         $link = $invoice->url();
@@ -145,7 +138,6 @@ class InvoiceController extends Controller
         return $invoice->download();
 
     }
-
     /**
      * Display the specified resource.
      */

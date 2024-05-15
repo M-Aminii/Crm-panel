@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\LegalCustomer;
 
+use App\Enums\CustomerType;
 use App\Enums\UserGender;
 use App\Enums\UserStatus;
 use App\Rules\MobileRule;
@@ -9,7 +10,7 @@ use App\Rules\PasswordRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class UpdateLegalCustomerRequest extends FormRequest
+class CreateCustomerRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,16 +28,16 @@ class UpdateLegalCustomerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['nullable', 'string', 'max:100'],
-            'national_id' => ['nullable', 'string', 'max:11', Rule::unique('legal_customers')],
-            'phone' => ['nullable', Rule::unique('legal_customers')],
-            'mobile' => ['nullable', new MobileRule ,Rule::unique('legal_customers')],
-            'registration_number' => ['nullable', 'string' , Rule::unique('legal_customers')],
-            'postal_code' => ['nullable', 'string', 'max:10', Rule::unique('legal_customers')],
-            'address' => ['nullable', 'string'],
+            'name' => ['required', 'string', 'max:100'],
+            'national_id' => ['nullable', 'string', 'max:11'],
+            'registration_number' => ['nullable', 'string' ,'max:4'],
+            'phone' => ['required_without:mobile'],
+            'mobile' => ['required_without:phone', new MobileRule ],
+            'type' => 'required|in:' . implode(',', CustomerType::toValues()),
+            'postal_code' => ['nullable', 'string', 'max:10'],
+            'address' => ['required', 'string'],
             'province_id' => ['nullable', 'exists:provinces,id'],
             'city_id' => ['nullable','exists:cities,id'],
-
         ];
     }
 }

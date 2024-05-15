@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\DTO\IndividualCustomerDTO;
-
-use App\Http\Requests\IndividualCustomer\CreateIndividualCustomerRequest;
-use App\Http\Requests\IndividualCustomer\UpdateIndividualCustomerRequest;
-use App\Models\IndividualCustomer;
+use App\DTO\CustomerDTO;
+use App\Http\Requests\LegalCustomer\CreateCustomerRequest;
+use App\Http\Requests\LegalCustomer\UpdateCustomerRequest;
+use App\Models\Customer;
 use App\Services\FilterService;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -14,33 +13,41 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class IndividualCustomerController extends Controller
+class CustomerController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $query = IndividualCustomer::query();
+        $query = Customer::query();
         // اعمال فیلترها
-        $query = FilterService::ApplyFilterCustomers($query,$request);
+        $filters = [
+            'name' => 'name',
+            'phone' => 'phone',
+            'national_id' => 'national_id',
+            'mobile' => 'mobile',
+        ];
+        $query = FilterService::ApplyFilterCustomers($query,$filters,$request);
         // انتخاب فیلدهای مورد نیاز
-        $fields = ['name', 'user_id', 'national_id', 'phone', 'mobile'];
+        $fields = ['name', 'user_id', 'national_id', 'registration_number', 'phone', 'mobile','type'];
         // انجام کوئری و بازگشت نتیجه
         $customers = $query->select($fields)->get();
         // بازگشت نتیجه به عنوان پاسخ
         return response()->json($customers);
     }
 
+
+
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CreateIndividualCustomerRequest $request)
+    public function store(CreateCustomerRequest $request)
     {
         try {
             DB::beginTransaction();
-            $LegalCustomerDTO = new IndividualCustomerDTO($request->validated());
-            IndividualCustomer::create((array) $LegalCustomerDTO);
+            $CustomerDTO = new CustomerDTO($request->validated());
+            Customer::create((array) $CustomerDTO);
             DB::commit();
             return response(['message' => 'مشخصات مشتری ثبت شد'], 201);
         } catch (Exception $exception) {
@@ -56,13 +63,13 @@ class IndividualCustomerController extends Controller
     public function show(string $id)
     {
         try {
-            // جستجوی شخص حقیقی با استفاده از شناسه
-            $individualCustomer = IndividualCustomer::findOrFail($id);
+            // جستجوی شخص با استفاده از شناسه
+            $Customer = Customer::findOrFail($id);
             // بازگشت نتیجه به عنوان پاسخ
-            return response()->json($individualCustomer);
+            return response()->json($Customer);
         } catch (ModelNotFoundException $exception) {
-            // در صورتی که شخص حقیقی پیدا نشود
-            return response()->json(['message' => 'individualCustomer not found'], 404);
+            // در صورتی که شخص  پیدا نشود
+            return response()->json(['message' => 'مشتری پیدا نشد'], 404);
         } catch (Exception $exception) {
             // در صورتی که خطای دیگری رخ دهد
             return response()->json(['message' => 'خطایی به وجود آمده است'], 500);
@@ -72,26 +79,26 @@ class IndividualCustomerController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateIndividualCustomerRequest $request, string $id)
+    public function update(UpdateCustomerRequest $request, string $id)
     {
         try {
             DB::beginTransaction();
-            // یافتن شخص حقیقی
-            $individualCustomer = IndividualCustomer::findOrFail($id);
+            // یافتن کاربر
+            $Customer = Customer::findOrFail($id);
             // پر کردن فیلدهای داده‌ای با استفاده از DTO
-            $individualCustomer->fill($request->validated());
+            $Customer->fill($request->validated());
             // بررسی تغییرات قبل از ذخیره
-            if ($individualCustomer->isDirty()) {
-                // ذخیره شخص حقیقی
-                $individualCustomer->save();
+            if ($Customer->isDirty()) {
+                // ذخیره کاربر
+                $Customer->save();
             }
-            //TODO:زمان تغییر نکردن موردی ریپانس برگرده
+                //TODO:زمان تغییر نکردن موردی ریپانس برگرده
 
             DB::commit();
-            return response()->json(['message' => 'اطلاعات شخص حقیقی با موفقیت بروزرسانی شد'], 200);
+            return response()->json(['message' => 'اطلاعات مشتری با موفقیت بروزرسانی شد'], 200);
         } catch (ModelNotFoundException $exception) {
             DB::rollBack();
-            return response(['message' => 'شخص حقیقی مورد نظر یافت نشد'], 404);
+            return response(['message' => 'مشتری مورد نظر یافت نشد'], 404);
         } catch (Exception $exception) {
             DB::rollBack();
             Log::error($exception);
