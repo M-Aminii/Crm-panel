@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\DTO\UserDTO;
 use App\Enums\UserStatus;
 use App\Http\Requests\User\CreateUserRequest;
-use App\Http\Requests\User\UpdateUserRequest;
+use App\Http\Requests\User\UpdateInvoiceRequest;
 use App\Models\User;
 use App\Services\FilterService;
 use Exception;
@@ -103,7 +103,7 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateUserRequest $request, string $id)
+    public function update(UpdateInvoiceRequest $request, string $id)
     {
         try {
             DB::beginTransaction();

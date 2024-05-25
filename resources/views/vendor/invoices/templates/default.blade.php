@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{{--<!DOCTYPE html>
 <html lang="en">
 <head>
     <title>{{ $invoice->name }}</title>
@@ -129,7 +129,7 @@
 </head>
 
 <body>
-{{-- Header --}}
+--}}{{-- Header --}}{{--
 @if($invoice->logo)
     <img src="{{ $invoice->getLogo() }}" alt="logo" height="100">
 @endif
@@ -155,7 +155,7 @@
     </tbody>
 </table>
 
-{{-- Seller - Buyer --}}
+--}}{{-- Seller - Buyer --}}{{--
 <table class="table">
     <thead>
     <tr>
@@ -249,7 +249,7 @@
     </tbody>
 </table>
 
-{{-- Table --}}
+--}}{{-- Table --}}{{--
 <table class="table table-items">
     <thead>
     <tr>
@@ -269,7 +269,7 @@
     </tr>
     </thead>
     <tbody>
-    {{-- Items --}}
+    --}}{{-- Items --}}{{--
     @foreach($invoice->items as $item)
         <tr>
             <td class="pl-0">
@@ -302,7 +302,7 @@
             </td>
         </tr>
     @endforeach
-    {{-- Summary --}}
+    --}}{{-- Summary --}}{{--
     @if($invoice->hasItemOrInvoiceDiscount())
         <tr>
             <td colspan="{{ $invoice->table_columns - 2 }}" class="border-0"></td>
@@ -383,4 +383,1015 @@
             }
 </script>
 </body>
+</html>--}}
+<!-- resources/views/pdf_template.blade.php -->
+{{--<!DOCTYPE html>
+<html lang="fa">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./reset.css" />
+    <link rel="stylesheet" href="./style.css" />
+    <title>Document</title>
+</head>
+<style>
+    html,
+    body,
+    div,
+    span,
+    applet,
+    object,
+    iframe,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    blockquote,
+    pre,
+    a,
+    abbr,
+    acronym,
+    address,
+    big,
+    cite,
+    code,
+    del,
+    dfn,
+    em,
+    img,
+    ins,
+    kbd,
+    q,
+    s,
+    samp,
+    small,
+    strike,
+    strong,
+    sub,
+    sup,
+    tt,
+    var,
+    b,
+    u,
+    i,
+    center,
+    dl,
+    dt,
+    dd,
+    ol,
+    ul,
+    li,
+    fieldset,
+    form,
+    label,
+    legend,
+    table,
+    caption,
+    tbody,
+    tfoot,
+    thead,
+    tr,
+    th,
+    td,
+    article,
+    aside,
+    canvas,
+    details,
+    embed,
+    figure,
+    figcaption,
+    footer,
+    header,
+    hgroup,
+    menu,
+    nav,
+    output,
+    ruby,
+    section,
+    summary,
+    time,
+    mark,
+    audio,
+    video {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        font-size: 100%;
+        font: inherit;
+        vertical-align: baseline;
+    }
+
+    article,
+    aside,
+    details,
+    figcaption,
+    figure,
+    footer,
+    header,
+    hgroup,
+    menu,
+    nav,
+    section {
+        display: block;
+    }
+
+    body {
+        line-height: 1;
+    }
+
+    ol,
+    ul {
+        list-style: none;
+    }
+
+    blockquote,
+    q {
+        quotes: none;
+    }
+
+    blockquote:before,
+    blockquote:after,
+    q:before,
+    q:after {
+        content: "";
+        content: none;
+    }
+
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+
+    body {
+        direction: rtl;
+
+    }
+
+    table,
+    th,
+    td {
+        padding: 0.3rem 0;
+        border: 1px solid black;
+    }
+
+    main {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 17px;
+    }
+
+    table {
+        width: 100%;
+    }
+
+    span {
+        margin: 0 0.5rem;
+    }
+
+    .container {
+        width: 80%;
+        margin: 5rem 0;
+        border: 8px solid #85e285;
+    }
+
+    .header-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        border: 1px solid #000000;
+    }
+
+    .ardakan-logo {
+        width: 15rem;
+    }
+
+    .omid-logo {
+        width: 5rem;
+    }
+
+    .invoice-title {
+        margin-left: 13rem;
+        text-align: center;
+    }
+
+    .invoice-title h1 {
+        font-weight: bold;
+        font-size: 25px;
+        white-space: nowrap;
+    }
+
+    .invoice-title h2 {
+        font-weight: bold;
+        font-size: 25px;
+        white-space: nowrap;
+    }
+
+    .invoice-title h2 {
+        font-size: 25px;
+        white-space: nowrap;
+    }
+
+    .background {
+        background-color: #85e285;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .direction-glass {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+    }
+</style>
+
+<body>
+<main>
+    <div class="container">
+        <div class="header-content">
+            --}}{{--<div>
+                <img
+                    src="./image/ardakan-logo.png"
+                    alt="ardakan-logo"
+                    class="ardakan-logo"
+                />
+            </div>--}}{{--
+            <div class="invoice-title">
+                <h1>گروه کارخانجات شیشه اردکان</h1>
+                <h2>نمایندگی شرکت امید</h2>
+                <h3>فرم جامع فروش</h3>
+            </div>
+           --}}{{-- <div>
+                <img src="./image/logo.png" alt="omid-logo" class="omid-logo" />
+            </div>--}}{{--
+        </div>
+
+        <table>
+            <tr>
+                <td style="width: 29.5%">
+                    <span>ثبت کننده:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>کارشناس:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>نوع فروش:</span>
+                    <span></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span>تاریخ سفارش:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span></span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>تلفن:</span>
+                    <span></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span>شماره مرجع:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>شماره امکان سنجی:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>شماره حواله:</span>
+                    <span></span>
+                </td>
+            </tr>
+
+            <tr class="background">
+                <th colspan="3">مشخصات فروشنده</th>
+            </tr>
+
+            <tr>
+                <td>
+                    <span>شخص حقیقی/حقوقی:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>شماره اقتصادی:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>شماره ثبت/شماره ملی:</span>
+                    <span></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span>تماس:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>کد پستی:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>شناسه ملی:</span>
+                    <span></span>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <span>نشانی:</span>
+                    <span></span>
+                </td>
+            </tr>
+
+            <tr class="background">
+                <th colspan="3">مشخصات خریدار</th>
+            </tr>
+
+            <tr>
+                <td>
+                    <span>شخص حقیقی/حقوقی:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>شماره اقتصادی:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>شماره ثبت/شماره ملی:</span>
+                    <span></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span>تماس:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>کد پستی:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>شناسه ملی:</span>
+                    <span></span>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <span>نشانی:</span>
+                    <span></span>
+                </td>
+            </tr>
+        </table>
+    </div>
+</main>
+</body>
+
+</html>--}}
+    <!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <style>
+        html,
+        body,
+        div,
+        span,
+        applet,
+        object,
+        iframe,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        p,
+        blockquote,
+        pre,
+        a,
+        abbr,
+        acronym,
+        address,
+        big,
+        cite,
+        code,
+        del,
+        dfn,
+        em,
+        img,
+        ins,
+        kbd,
+        q,
+        s,
+        samp,
+        small,
+        strike,
+        strong,
+        sub,
+        sup,
+        tt,
+        var,
+        b,
+        u,
+        i,
+        center,
+        dl,
+        dt,
+        dd,
+        ol,
+        ul,
+        li,
+        fieldset,
+        form,
+        label,
+        legend,
+            /* table, */
+        caption,
+            /* tbody, */
+            /* tfoot, */
+            /* thead, */
+            /* tr, */
+            /* th, */
+            /* td, */
+        article,
+        aside,
+        canvas,
+        details,
+        embed,
+        figure,
+        figcaption,
+        footer,
+        header,
+        hgroup,
+        menu,
+        nav,
+        output,
+        ruby,
+        section,
+        summary,
+        time,
+        mark,
+        audio,
+        video {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            font-size: 100%;
+            font: inherit;
+            vertical-align: baseline;
+        }
+
+        article,
+        aside,
+        details,
+        figcaption,
+        figure,
+        footer,
+        header,
+        hgroup,
+        menu,
+        nav,
+        section {
+            display: block;
+        }
+        body {
+            line-height: 1;
+        }
+        ol,
+        ul {
+            list-style: none;
+        }
+        blockquote,
+        q {
+            quotes: none;
+        }
+        blockquote:before,
+        blockquote:after,
+        q:before,
+        q:after {
+            content: "";
+            content: none;
+        }
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+
+        body {
+            direction: rtl;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+           /* font-size: 17px;*/
+        }
+        .container {
+            width: 100%;
+            border: 8px solid #85e285;
+            margin: 5rem 0;
+        }
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border: 1px solid #000000;
+        }
+        .ardakan-logo {
+            width: 2%;
+        }
+
+        .omid-logo {
+            width: 2%;
+        }
+
+        /*.header-content img {
+            width: 50px;
+        }*/
+        .invoice-title {
+            /*margin-left: 13rem;*/
+            margin-left: 30%;
+            text-align: center;
+        }
+        /*.invoice-title h1 {
+            font-weight: bold;
+            font-size: 25px;
+            white-space: nowrap;
+        }*/
+        .invoice-title h1 {
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .invoice-title h2 {
+            font-weight: bold;
+            font-size: 20px;
+            white-space: nowrap;
+            margin-top: 0.5rem
+        }
+
+        .invoice-title h2 {
+            font-size: 25px;
+            white-space: nowrap;
+        }
+        .invoice-title h3 {
+            /* font-size: 20px; */
+            margin-top: 0.5rem
+
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+        table, th, td {
+            padding: 0.3rem 0;
+            border: 1px solid black;
+        }
+        span {
+            margin: 0 0.5rem;
+        }
+        .background {
+            background-color: #85e285;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .direction-glass {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+        }
+
+
+    </style>
+</head>
+<body>
+<main>
+    <div class="container">
+        <div class="header-content">
+            <div>
+                <img
+                    src="./image/ardakan-logo.png"
+                    alt="ardakan-logo"
+                    class="ardakan-logo"
+                />
+            </div>
+            <div class="invoice-title">
+                <h1>گروه کارخانجات شیشه اردکان</h1>
+                <h2>نمایندگی شرکت امید</h2>
+                <h3>فرم جامع فروش</h3>
+            </div>
+            <div>
+                <img src="./image/logo.png" alt="omid-logo" class="omid-logo" />
+            </div>
+        </div>
+
+        <table>
+            <tr>
+                <td style="width: 29.5%">
+                    <span>ثبت کننده:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>کارشناس:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>نوع فروش:</span>
+                    <span></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span>تاریخ سفارش:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span></span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>تلفن:</span>
+                    <span></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span>شماره مرجع:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>شماره امکان سنجی:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>شماره حواله:</span>
+                    <span></span>
+                </td>
+            </tr>
+
+            <tr class="background">
+                <th colspan="3">مشخصات فروشنده</th>
+            </tr>
+
+            <tr>
+                <td>
+                    <span>شخص حقیقی/حقوقی:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>شماره اقتصادی:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>شماره ثبت/شماره ملی:</span>
+                    <span></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span>تماس:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>کد پستی:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>شناسه ملی:</span>
+                    <span></span>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <span>نشانی:</span>
+                    <span></span>
+                </td>
+            </tr>
+
+            <tr class="background">
+                <th colspan="3">مشخصات خریدار</th>
+            </tr>
+
+            <tr>
+                <td>
+                    <span>شخص حقیقی/حقوقی:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>شماره اقتصادی:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>شماره ثبت/شماره ملی:</span>
+                    <span></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span>تماس:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>کد پستی:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>شناسه ملی:</span>
+                    <span></span>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <span>نشانی:</span>
+                    <span></span>
+                </td>
+            </tr>
+        </table>
+
+        <table style="margin-top: 0.5rem">
+            <tr>
+                <td class="text-center" style="width: 3rem">a</td>
+                <td class="text-center" style="width: 20%">لمینت سفارشی</td>
+                <td class="text-center" colspan="5">
+                    سوپر کلیر 6 سکوریت + طلق 1/52 + دودی 6 سکوریت
+                </td>
+            </tr>
+
+            <tr>
+                <th class="text-center" rowspan="3" style="width: 3rem; height: 24rem; writing-mode: vertical-lr">
+                    ساختار نهایی شیشه
+                </th>
+                <td class="text-center" rowspan="3">لمینت سفارشی</td>
+
+                <td class="text-center" style="height: 2rem; width: 5rem"></td>
+
+                <td class="text-center" style="height: 2rem; width: 3rem"></td>
+
+                <td class="text-center" style="height: 2rem"></td>
+
+                <td class="text-center" style="height: 2rem; width: 3rem"></td>
+
+                <td class="text-center" style="height: 2rem; width: 5rem"></td>
+            </tr>
+
+            <tr>
+                <td
+                    rowspan="3"
+                    class="text-center"
+                    style="width: 3rem; font-size: 25px; writing-mode: vertical-lr"
+                >
+                    <div class="direction-glass">
+                <span>
+                  <img
+                      src="./image/indicating-outside.png"
+                      alt=""
+                      style="width: 5rem"
+                  />
+                </span>
+                        <span
+                            style="
+                    border: 1px solid black;
+                    border-radius: 4px;
+                    padding: 1rem 0.5rem;
+                  "
+                        >داخل</span
+                        >
+                    </div>
+                </td>
+                <td rowspan="1" class="text-center"></td>
+                <td rowspan="2" class="text-center">
+                    <!-- <img src='' alt="" /> -->
+                </td>
+                <td class="text-center"></td>
+                <td
+                    rowspan="2"
+                    class="text-center"
+                    style="width: 3rem; font-size: 25px; writing-mode: vertical-lr"
+                >
+                    <div class="direction-glass">
+                <span
+                    style="
+                    border: 1px solid black;
+                    border-radius: 4px;
+                    padding: 1rem 0.5rem;
+                  "
+                >بیرون</span
+                >
+                        <span>
+                  <img
+                      src="./image/Indicates-inside.png"
+                      alt=""
+                      style="width: 5rem"
+                  />
+                </span>
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="text-center" style="height: 11rem"></td>
+                <td class="text-center"></td>
+            </tr>
+        </table>
+
+        <table>
+            <tr>
+                <th
+                    rowspan="6"
+                    class="text-center"
+                    style="width: 3rem; writing-mode: vertical-lr"
+                >
+                    مشخصات فنی
+                </th>
+                <td style="width: 25%">
+                    <span>نوع لبه:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>قاب:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>نقشه ابعاد:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>نام ابعاد:</span>
+                    <span></span>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <span>نوع چسب:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>ایربالانس:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>دیدنقشه:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>شماره حواله:</span>
+                    <span></span>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <span>نوع ارسال:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>نوع خرک:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>تعداد خرک:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>کاربرد:</span>
+                    <span></span>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <span>تاریخ تحویل هر پارت:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>تعداد پارت:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>متراژ تحویل هر پارت:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span>نوع ماشین:</span>
+                    <span></span>
+                </td>
+            </tr>
+
+            <td>
+                <span>توضیحات:</span>
+                <span></span>
+            </td>
+        </table>
+
+        <table>
+            <tr>
+                <th
+                    class="text-center"
+                    rowspan="3"
+                    style="width: 3rem; font-size: 6px; writing-mode: vertical-lr"
+                >
+                    ملاحضات تولید
+                </th>
+                <td>
+                    <span>پارت تولید:</span>
+                    <span></span>
+                </td>
+                <td style="width: 17%"></td>
+                <td>
+                    <span>ساختار اولیه:</span>
+                    <span></span>
+                </td>
+                <td style="width: 17%"></td>
+                <td colspan="4" style="width: 20rem">
+                    <span>کد تولید:</span>
+                    <span></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span>مراحل تولید:</span>
+                    <span></span>
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        </table>
+
+        <table style="margin-top: 1.2rem">
+            <tr>
+                <th>ردیف</th>
+                <th>ارتفاع</th>
+                <th>عرض</th>
+                <th>تعداد</th>
+                <th>position</th>
+                <th>مساحت</th>
+                <th>مساحت کل</th>
+                <th>محیط</th>
+                <th>درصد اور</th>
+                <th style="width: 38.5%">توضیحات</th>
+            </tr>
+            <tr>
+                <td class="text-center">01</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+
+            <tr>
+                @foreach($invoice->items as $item)
+                <td class="text-center" colspan="3">جمع کل:</td>
+                <td>  {{ $invoice->formatCurrency($item->price_per_unit) }}</td>
+                <td colspan="2"></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                @endforeach
+            </tr>
+
+            <tr>
+                <td colspan="10">
+                    <span>توضیحات کالا:</span>
+                    @foreach($invoice->items as $item)
+                    <span> {{ $item->description }}</span>
+                    @endforeach
+                </td>
+            </tr>
+        </table>
+    </div>
+</main>
+</body>
 </html>
+

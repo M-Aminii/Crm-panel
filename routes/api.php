@@ -66,6 +66,11 @@ Route::group(["middleware" => ['role:super-admin',"auth:api"],'prefix' => 'Admin
 
     Route::group(['prefix' => '/invoice'], function () {
         Route::post('/',[InvoiceController::class ,'store']);
+        Route::get('/',[InvoiceController::class ,'index']);
+        Route::get('/{id}',[InvoiceController::class ,'show']);
+        Route::get('/download/{id}',[InvoiceController::class ,'download']);
+        Route::patch('/{id}',[InvoiceController::class ,'update']);
+        Route::delete('/{id}',[InvoiceController::class ,'destroy']);
 
     });
    /* Route::group(['prefix' => '/glass-layer'], function () {
