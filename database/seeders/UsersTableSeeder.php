@@ -34,6 +34,6 @@ class UsersTableSeeder extends Seeder
             ->each(function ($user) {
                 $user->assignRole('member');
             });
-            }
+    }
 }
 

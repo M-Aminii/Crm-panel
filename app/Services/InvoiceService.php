@@ -18,11 +18,9 @@ class InvoiceService
         try {
             // جستجو برای یافتن آخرین سریال
             $latestSerial = \App\Models\Invoice::orderBy('created_at', 'desc')->value('serial_number');
-
-
             // اگر سریال وجود داشت، 4 رقم به آن اضافه کنید
             if ($latestSerial) {
-                $newSerialNumber = 'f-s' . ((int) substr($latestSerial, 4) + 4);
+                $newSerialNumber = 'f-s'.((int) substr($latestSerial, 3) + 4);
                 return $newSerialNumber;
             } else {
                 // اگر سریال وجود نداشت، سریال اولیه را برگردانید
@@ -269,15 +267,15 @@ class InvoiceService
         foreach ($productStructures as $productStructure) {
             $tempDescription = '';
 
-            // ابتدا داده‌های color, thickness و Material را جمع‌آوری می‌کنیم
-            if (isset($productStructure['color'])) {
-                $tempDescription .= $productStructure['color'] . ' ';
+            // ابتدا داده‌های type, width و material را جمع‌آوری می‌کنیم
+            if (isset($productStructure['type'])) {
+                $tempDescription .= $productStructure['type'] . ' ';
             }
-            if (isset($productStructure['thickness'])) {
-                $tempDescription .= $productStructure['thickness'] . ' ';
+            if (isset($productStructure['width'])) {
+                $tempDescription .= $productStructure['width'] . ' ';
             }
-            if (isset($productStructure['Material'])) {
-                $tempDescription .= $productStructure['Material'] . ' ';
+            if (isset($productStructure['material'])) {
+                $tempDescription .= $productStructure['material'] . ' ';
             }
 
             // سپس داده‌های spacer و laminate را اضافه می‌کنیم
@@ -385,10 +383,10 @@ class InvoiceService
     protected $basePricDouble = 10900000; // قیمت پایه برای شیشه خام
     protected $basePriceDoubleSecurit = 10200000; // قیمت پایه برای یک یا هر دو شیشه سکوریت
 
-    protected $Doublethickness =700000;
+    protected $Doublewidth =700000;
 
     protected $options = [
-        'thickness' => [
+        'width' => [
             3 => 0, // قیمت اضافی برای 3 میلیمتر
             3.5 => 0,
             4 => 0,
@@ -399,7 +397,7 @@ class InvoiceService
             12 => 670000,
             15 => 1410000, // قیمت اضافی برای 15 میلیمتر
         ],
-        'color' => [
+        'type' => [
             'دودی' => 650000,
             'برنز' => 400000,
             'رفلکس طلایی' => 350000,
@@ -407,7 +405,7 @@ class InvoiceService
             'ساتینا' =>1300000,
             'سوپر کلیر' => 0,
         ],
-        'Material'=>[
+        'material'=>[
             'خام' => 0,
             'سکوریت' => 1500000,
         ],
@@ -447,19 +445,19 @@ class InvoiceService
             $finalPrice = $this->basePrice;
 
             // محاسبه قیمت بر اساس ضخامت
-            if (isset($selectedOptions['thickness']) && array_key_exists($selectedOptions['thickness'], $this->options['thickness'])) {
-                $finalPrice += $this->options['thickness'][$selectedOptions['thickness']];
+            if (isset($selectedOptions['width']) && array_key_exists($selectedOptions['width'], $this->options['width'])) {
+                $finalPrice += $this->options['width'][$selectedOptions['width']];
             }
             // محاسبه قیمت بر اساس رنگ
-            if (isset($selectedOptions['color'])) {
-                if ($selectedOptions['color'] === 'ساتینا') {
+            if (isset($selectedOptions['type'])) {
+                if ($selectedOptions['type'] === 'ساتینا') {
                     // قیمت ثابت برای شیشه ساتینا
-                    $finalPrice += $this->options['color']['ساتینا'];
-                } elseif (array_key_exists($selectedOptions['color'], $this->options['color'])) {
+                    $finalPrice += $this->options['type']['ساتینا'];
+                } elseif (array_key_exists($selectedOptions['type'], $this->options['type'])) {
                     // قیمت به ازای هر میلیمتر برای شیشه‌های دیگر
-                    $thickness = $selectedOptions['thickness'];
-                    $colorPrice = $this->options['color'][$selectedOptions['color']] * $thickness;
-                    $finalPrice += $colorPrice;
+                    $width = $selectedOptions['width'];
+                    $typePrice = $this->options['type'][$selectedOptions['type']] * $width;
+                    $finalPrice += $typePrice;
                 }
             }
 
@@ -474,34 +472,35 @@ class InvoiceService
         return $totalFinalPrice;
     }
 
-    public  function calculatePriceLaminate($selectedOptionsList) {
+    public function calculatePriceLaminate($selectedOptionsList) {
         $totalFinalPrice = 0;
 
         foreach ($selectedOptionsList as $selectedOptions) {
             $finalPrice = 0;
             $temperedCount = 0;
 
-            if (isset($selectedOptions['Material']) && $selectedOptions['Material'] == 'سکوریت') {
+            if (isset($selectedOptions['material']) && $selectedOptions['material'] == 'سکوریت') {
                 $temperedCount++;
             }
             if ($temperedCount > 0) {
-                $finalPrice += $temperedCount * $this->options['Material']['سکوریت'];
+                $finalPrice += $temperedCount * $this->options['material']['سکوریت'];
             }
 
             // محاسبه قیمت بر اساس ضخامت
-            if (isset($selectedOptions['thickness'])) {
-                $finalPrice += $selectedOptions['thickness'] * $this->Doublethickness ;
+            if (isset($selectedOptions['width'])) {
+                $finalPrice += $selectedOptions['width'] * $this->Doublewidth;
             }
+
             // محاسبه قیمت بر اساس رنگ
-            if (isset($selectedOptions['color'])) {
-                if ($selectedOptions['color'] === 'ساتینا') {
+            if (isset($selectedOptions['type'])) {
+                if ($selectedOptions['type'] === 'ساتینا') {
                     // قیمت ثابت برای شیشه ساتینا
-                    $finalPrice += $this->options['color']['ساتینا'];
-                } elseif (array_key_exists($selectedOptions['color'], $this->options['color'])) {
+                    $finalPrice += $this->options['type']['ساتینا'];
+                } elseif (array_key_exists($selectedOptions['type'], $this->options['type'])) {
                     // قیمت به ازای هر میلیمتر برای شیشه‌های دیگر
-                    $thickness = $selectedOptions['thickness'];
-                    $colorPrice = $this->options['color'][$selectedOptions['color']] * $thickness;
-                    $finalPrice += $colorPrice;
+                    $width = $selectedOptions['width'];
+                    $typePrice = $this->options['type'][$selectedOptions['type']] * $width;
+                    $finalPrice += $typePrice;
                 }
             }
 
@@ -511,8 +510,38 @@ class InvoiceService
             }
             $totalFinalPrice += $finalPrice;
         }
+
+        // محاسبه تعداد تکرار هر دسته و افزودن 20% به قیمت نهایی برای هر تکرار اضافی
+        $countType = 0;
+        $countWidth = 0;
+        $countMaterial = 0;
+        $countLaminate = 0;
+
+        foreach ($selectedOptionsList as $selectedOptions) {
+            if (isset($selectedOptions['type']) && $selectedOptions['type']) {
+                $countType++;
+            }
+            if (isset($selectedOptions['width']) && $selectedOptions['width']) {
+                $countWidth++;
+            }
+            if (isset($selectedOptions['material']) && $selectedOptions['material']) {
+                $countMaterial++;
+            }
+            if (isset($selectedOptions['laminate']) && $selectedOptions['laminate'] ) {
+                $countLaminate++;
+            }
+        }
+        // هر دسته اضافی 20% اضافه کند
+        $repeats = min($countType, $countWidth, $countMaterial, $countLaminate) - 1;
+
+        if ($repeats > 0) {
+            $totalFinalPrice += $totalFinalPrice * 20  / 100 * $repeats;
+        }
+
+        // تبدیل نتیجه نهایی به عدد صحیح
         return $totalFinalPrice;
     }
+
 
     public function calculatePriceDouble($selectedOptionsList) {
         $isTempered = false;
@@ -520,33 +549,33 @@ class InvoiceService
         $totalThickness = 0;
 
         foreach ($selectedOptionsList as $selectedOptions) {
-            if (isset($selectedOptions['Material']) && $selectedOptions['Material'] == 'سکوریت') {
+            if (isset($selectedOptions['material']) && $selectedOptions['material'] == 'سکوریت') {
                 $isTempered = true;
                 $temperedCount++;
             }
-            if (isset($selectedOptions['thickness'])) {
-                $totalThickness += $selectedOptions['thickness'];
+            if (isset($selectedOptions['width'])) {
+                $totalThickness += $selectedOptions['width'];
             }
         }
 
         $finalPrice = $isTempered ? $this->basePriceDoubleSecurit : $this->basePricDouble;
 
         if ($temperedCount > 0) {
-            $finalPrice += $temperedCount * $this->options['Material']['سکوریت'];
+            $finalPrice += $temperedCount * $this->options['material']['سکوریت'];
         }
 
         if ($totalThickness > 8) {
             $extraThickness = $totalThickness - 8;
-            $finalPrice += $extraThickness * $this->Doublethickness;
+            $finalPrice += $extraThickness * $this->Doublewidth;
         }
 
         foreach ($selectedOptionsList as $selectedOptions) {
             // محاسبه قیمت بر اساس نوع شیشه و ضخامت
-            if (isset($selectedOptions['color']) && isset($selectedOptions['thickness'])) {
-                $color = $selectedOptions['color'];
-                $thickness = $selectedOptions['thickness'];
-                if (array_key_exists($color, $this->options['color'])) {
-                    $finalPrice += $thickness * $this->options['color'][$color];
+            if (isset($selectedOptions['type']) && isset($selectedOptions['width'])) {
+                $type = $selectedOptions['type'];
+                $width = $selectedOptions['width'];
+                if (array_key_exists($type, $this->options['type'])) {
+                    $finalPrice += $width * $this->options['type'][$type];
                 }
             }
 

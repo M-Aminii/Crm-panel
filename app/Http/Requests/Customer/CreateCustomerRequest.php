@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\LegalCustomer;
+namespace App\Http\Requests\Customer;
 
 use App\Enums\CustomerType;
 use App\Enums\UserGender;
@@ -29,13 +29,13 @@ class CreateCustomerRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:100'],
-            'national_id' => ['nullable', 'string', 'max:11'],
-            'registration_number' => ['nullable', 'string' ,'max:4'],
+            'national_id' => ['nullable', 'string', 'max:11','unique:customers,national_id'],
+            'registration_number' => ['nullable', 'string' ,'max:4','unique:customers,registration_number'],
             'phone' => ['required_without:mobile'],
             'mobile' => ['required_without:phone', new MobileRule ],
             'type' => 'required|in:' . implode(',', CustomerType::toValues()),
-            'postal_code' => ['nullable', 'string', 'max:10'],
-            'address' => ['required', 'string'],
+            'postal_code' => ['nullable', 'string', 'max:10','unique:customers,postal_code'],
+            'address' => ['nullable', 'string'],
             'province_id' => ['nullable', 'exists:provinces,id'],
             'city_id' => ['nullable','exists:cities,id'],
         ];

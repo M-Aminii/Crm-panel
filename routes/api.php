@@ -53,43 +53,43 @@ Route::group(["middleware" => ['role:super-admin',"auth:api"],'prefix' => 'Admin
     Route::group(['prefix' => '/customer'], function () {
         Route::post('/',[CustomerController::class ,'store']);
         Route::get('/list',[CustomerController::class ,'index']);
-        Route::get('/{id}',[CustomerController::class ,'show']);
-        Route::patch('/{id}',[CustomerController::class ,'update']);
+        Route::get('/{customer}',[CustomerController::class ,'show']);
+        Route::patch('/{customer}',[CustomerController::class ,'update']);
 
     });
-    Route::group(['prefix' => '/glass-structure'], function () {
-            Route::post('/',[GlassFinalStructureController::class ,'store']);
-           // Route::get('/list',[IndividualCustomerController::class ,'index']);
-            Route::get('/{id}',[GlassFinalStructureController::class ,'show']);
-           // Route::patch('/{id}',[IndividualCustomerController::class ,'update']);
-        });
+
 
     Route::group(['prefix' => '/invoice'], function () {
         Route::post('/',[InvoiceController::class ,'store']);
         Route::get('/',[InvoiceController::class ,'index']);
-        Route::get('/{id}',[InvoiceController::class ,'show']);
-        Route::get('/download/{id}',[InvoiceController::class ,'download']);
-        Route::patch('/{id}',[InvoiceController::class ,'update']);
-        Route::delete('/{id}',[InvoiceController::class ,'destroy']);
-
+        Route::get('/{invoice}',[InvoiceController::class ,'show']);
+        Route::patch('/{invoice}',[InvoiceController::class ,'update']);
+        Route::delete('/{invoice}',[InvoiceController::class ,'destroy']);
     });
-   /* Route::group(['prefix' => '/glass-layer'], function () {
-        Route::post('/',[LayerController::class ,'store']);
-        //Route::get('/list',[IndividualCustomerController::class ,'index']);
-       // Route::get('/{id}',[IndividualCustomerController::class ,'show']);
-        Route::patch('/{id}',[LayerController::class ,'update']);
-    });*/
-
-
-
-
 });
 
 
-/*Route::group(["middleware" => ['role:super-admin',"auth:api"],'prefix' => 'Admin'], function () {
+/*Route::group(["middleware" => ['role:member',"auth:api"],'prefix' => 'Admin'], function () {
 
-    Route::get('/user',[LegalCustomerController::class ,'index']);
-    Route::delete('/user/{user_id}',[LegalCustomerController::class ,'delete']);
-    Route::put('/user/{user_id}',[LegalCustomerController::class ,'update']);
+    Route::group(['prefix' => '/customer'], function () {
+        Route::post('/',[CustomerController::class ,'store']);
+        Route::get('/list',[CustomerController::class ,'index']);
+        Route::get('/{id}',[CustomerController::class ,'show']);
+        Route::patch('/{id}',[CustomerController::class ,'update']);
+
+    });
+
+
+    Route::group(['prefix' => '/invoice'], function () {
+        Route::post('/',[InvoiceController::class ,'store']);
+        Route::get('/',[InvoiceController::class ,'index']);
+        Route::get('/{invoice}',[InvoiceController::class ,'show']);
+        Route::patch('/{invoice}',[InvoiceController::class ,'update']);
+        Route::delete('/{invoice}',[InvoiceController::class ,'destroy']);
+    });
+
+
+
+
 
 });*/

@@ -1,14 +1,18 @@
 <?php
 
-namespace App\Http\Requests\LegalCustomer;
+namespace App\Http\Requests\Customer;
 
+use App\Enums\CustomerStatus;
 use App\Enums\CustomerType;
 use App\Enums\UserGender;
 use App\Enums\UserStatus;
+use App\Models\Customer;
 use App\Rules\MobileRule;
 use App\Rules\PasswordRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class UpdateCustomerRequest extends FormRequest
 {
@@ -17,7 +21,13 @@ class UpdateCustomerRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        // بررسی وجود مشتری
+        $customer = Customer::find($this->route('customer'));
+        if (!$customer) {
+            throw new NotFoundHttpException('مشتری وجود ندارد');
+        }
+        // استفاده از Gate برای بررسی مجوز
+        return Gate::allows('update', $customer);
     }
 
     /**
@@ -34,6 +44,7 @@ class UpdateCustomerRequest extends FormRequest
             'phone' => ['nullable_without:mobile'],
             'mobile' => ['nullable_without:phone', new MobileRule ],
             'type' => 'nullable|in:' . implode(',', CustomerType::toValues()),
+            'status' => 'nullable|in:' . implode(',', CustomerStatus::toValues()),
             'postal_code' => ['nullable', 'string', 'max:10'],
             'address' => ['nullable', 'string'],
             'province_id' => ['nullable', 'exists:provinces,id'],

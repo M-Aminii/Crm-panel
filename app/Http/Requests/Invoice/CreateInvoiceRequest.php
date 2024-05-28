@@ -4,9 +4,12 @@ namespace App\Http\Requests\Invoice;
 
 use App\Enums\UserGender;
 use App\Enums\UserStatus;
+use App\Models\Customer;
 use App\Rules\MobileRule;
 use App\Rules\PasswordRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Gate;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class CreateInvoiceRequest extends FormRequest
 {
@@ -15,7 +18,13 @@ class CreateInvoiceRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+
+        $customer = Customer::find($this->buyer);
+        if (!$customer) {
+            throw new NotFoundHttpException('مشتری وجود ندارد');
+        }
+
+        return Gate::allows('createInvoice', $customer);
     }
 
     /**
@@ -26,8 +35,16 @@ class CreateInvoiceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'buyer' => ['required', 'exists:customers,id'],
-            'items' => ['required', 'array'],
+            'buyer' => 'required|exists:customers,id',
+            'items' => 'required|array',
+            'items.*.product' => 'required|exists:products,id',
+            'items.*.description' => 'required|array',
+            'items.*.technical_details' => 'required|array',
+            'items.*.dimensions' => 'required|array',
+            'items.*.dimensions.*.height' => 'required|integer',
+            'items.*.dimensions.*.width' => 'required|integer',
+            'items.*.dimensions.*.quantity' => 'required|integer',
+            'items.*.dimensions.*.description' => 'required|string'
         ];
     }
 }

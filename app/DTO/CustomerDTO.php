@@ -30,7 +30,7 @@ class CustomerDTO
     {
         $this->user_id = auth('api')->id();
         $this->name = $data['name'];
-        $this->national_id =$data['national_id'];
+        $this->national_id =$data['national_id']?? null;
         $this->registration_number = $data['registration_number'];
         $this->phone = $data['phone'] ?? null;
         $this->mobile =$data['mobile'] ?? null;
