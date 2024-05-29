@@ -74,44 +74,80 @@ class InvoiceController extends Controller
 
         $invoiceService = new InvoiceService();*/
         // اعتبارسنجی داده‌های ورودی
+        // اعتبارسنجی داده‌های ورودی
         $validatedData = $request->all();
-
+        try {
         // استفاده از تراکنش برای اطمینان از صحت ذخیره‌سازی داده‌ها
         DB::transaction(function () use ($validatedData) {
+            $lastInvoiceSerial = InvoiceService::generateNewSerial();
             // ایجاد فاکتور جدید
             $invoice = \App\Models\Invoice::create([
-                'serial_number' => 'SR-' . time(), // مقدار نمونه، شما می‌توانید این را تغییر دهید
+                'serial_number' => $lastInvoiceSerial, // مقدار نمونه، شما می‌توانید این را تغییر دهید
                 'user_id' => auth()->id(),
                 'customer_id' => $validatedData['buyer'],
-                'position' => 'Some Position', // مقدار نمونه، شما می‌توانید این را تغییر دهید
-                'status' => 'informal', // مقدار نمونه، شما می‌توانید این را تغییر دهید
+                'position' => $validatedData['position'], // مقدار نمونه، شما می‌توانید این را تغییر دهید
+                'status' => $validatedData['status'], // مقدار نمونه، شما می‌توانید این را تغییر دهید
             ]);
 
+            // تعریف توابع محاسبه قیمت بر اساس محصول
+            $productFunctions = [
+                1 => 'calculatePriceSecorit',
+                2 => 'calculatePriceLaminate',
+                3 => 'calculatePriceDouble'
+            ];
+
+            // ایجاد یک نمونه از سرویس فاکتور
+            $invoiceService = new InvoiceService();
+
             foreach ($validatedData['items'] as $itemIndex => $item) {
+                $productId = $item['product'];
+
+                // محاسبه قیمت بر اساس محصول
+                if (array_key_exists($productId, $productFunctions)) {
+                    $functionName = $productFunctions[$productId];
+                    if (is_array($item['description'])) {
+                        $calculatedPrice = $invoiceService->$functionName($item['description']);
+                        if ($calculatedPrice !== null) {
+                            $item['price_per_unit'] = $calculatedPrice;
+                        } else {
+                            throw new \Exception('مشکل در محاسبه قیمت محصول');
+                        }
+                    }
+                }
+
+                // ترکیب توضیحات محصول
+                if (is_array($item['description'])) {
+                    $item['description'] = $invoiceService->mergeProductStructures($item['description']);
+                }
+
                 // ایجاد آیتم نوعی جدید
                 $typeItem = TypeItem::create([
+                    'key' =>  $itemIndex + 1,
                     'invoice_id' => $invoice->id,
                     'product_id' => $item['product'],
-                    'description' => 'ggggggg',
-                    'price' => 0 // مقدار نمونه، شما می‌توانید این را تغییر دهید
+                    'description' => $item['description'],
+                    'price' => $item['price_per_unit'] ?? 0 // قیمت محاسبه شده یا مقدار نمونه
                 ]);
 
                 // ایجاد آیتم فنی جدید برای هر بعد
                 foreach ($item['dimensions'] as $dimensionIndex => $dimension) {
-                    TechnicalItem::create([
+
+                    DimensionItem::create([
+                        'key' => $dimensionIndex + 1,
                         'invoice_id' => $invoice->id,
                         'type_id' => $typeItem->id,
                         'height' => $dimension['height'],
                         'width' => $dimension['width'],
-                        'over' => $dimension['quantity'], // استفاده از 'quantity' به عنوان 'over'
-                        'description' => $dimension['description'],
-                        'index' => $dimensionIndex + 1
+                        'weight' =>$dimension['weight'],
+                        'quantity' => $dimension['quantity'],
+                        'over' => $dimension['quantity'],  //TODO: اضافه کردن درصد اور
+                        'description' => $dimension['description']
                     ]);
                 }
 
                 // ایجاد آیتم‌های ابعاد جدید
                 $technicalDetails = $item['technical_details'];
-                DimensionItem::create([
+                TechnicalItem::create([
                     'invoice_id' => $invoice->id,
                     'type_id' => $typeItem->id,
                     'edge_type' => $technicalDetails['edge_type'],
@@ -129,64 +165,19 @@ class InvoiceController extends Controller
                     'order_number' => $technicalDetails['order_number'],
                     'usage' => $technicalDetails['usage'],
                     'car_type' => $technicalDetails['car_type'],
-                    'product_index' => $itemIndex + 1
                 ]);
             }
         });
-
-        return response()->json(['message' => 'Invoice created successfully'], 201);
-
+        DB::commit();
+        return response()->json(['message' => 'فاکتور با موفقیت ایجاد شد'], 201);
+        } catch (Exception $exception) {
+            DB::rollBack();
+            Log::error($exception);
+            return response(['message' => 'خطایی به وجود آمده است'], 500);
+        }
     }
 
-    /*foreach ($items as &$item) {
-                $productId = $item['title'];
 
-                // اعمال تغییرات بر روی هر بخش از description
-                if (array_key_exists($productId, $productFunctions)) {
-                    $functionName = $productFunctions[$productId];
-                    if (is_array($item['description'])) {
-                        $calculatedPrice = $invoiceService->$functionName($item['description']);
-                        if ($calculatedPrice !== null) {
-                            $item['price_per_unit'] = $calculatedPrice;
-                        } else {
-                            return response()->json(['message' => 'مشکل در محاسبه قیمت محصول'], 500);
-                        }
-                    }
-                }
-
-                // بروزرسانی فیلد title
-                $product = Product::select('name')->find($item['title']);
-                if ($product) {
-                    $item['title'] = $product->name;
-                }
-
-                // اعمال تغییرات بر روی description
-                if (is_array($item['description'])) {
-                    $item['description'] = $invoiceService->mergeProductStructures($item['description']);
-                }
-            }
-            unset($item); // پاک کردن ارجاع به $item
-
-            try {
-                DB::beginTransaction();
-                $lastInvoiceSerial = InvoiceService::generateNewSerial();
-                \App\Models\Invoice::create([
-                    'user_id' => $userId,
-                    'customer_id' => $buyerId,
-                    'serial_number' => $lastInvoiceSerial,
-                    'status' => "informal",
-                    'items' => json_encode($items) // ذخیره کردن کل آیتم‌ها به صورت JSON
-                ]);
-                DB::commit();
-
-                return response()->json([
-                    'message' => 'فاکتور با موفقیت ایجاد شد',
-                ], 201);
-            } catch (Exception $exception) {
-                DB::rollBack();
-                Log::error($exception);
-                return response()->json(['message' => 'خطایی به وجود آمده است'], 500);
-            }*/
     /**
      * Display the specified resource.
      */
@@ -252,45 +243,281 @@ class InvoiceController extends Controller
      */
     public function update(UpdateInvoiceRequest $request, string $id)
     {
+        // اعتبارسنجی داده‌های ورودی
+        $validatedData = $request->all();
+        $invoiceId = $request->invoice;
         try {
-            DB::beginTransaction();
-            // یافتن فاکتور
-            $Invoice =  \App\Models\Invoice::findOrFail($id);
-            // پر کردن فیلدهای داده‌ای با استفاده از DTO
-            $Invoice->fill($request->validated());
-            // بررسی تغییرات قبل از ذخیره
-            if ($Invoice->isDirty()) {
-                // ذخیره کاربر
-                $Invoice->save();
-            }
-            //TODO:زمان تغییر نکردن موردی ریپانس برگرده
+            // استفاده از تراکنش برای اطمینان از صحت ذخیره‌سازی داده‌ها
+            DB::transaction(function () use ($validatedData, $invoiceId) {
+                // پیدا کردن فاکتور مورد نظر
+                $invoice = \App\Models\Invoice::findOrFail($invoiceId);
+
+                // بروزرسانی اطلاعات فاکتور
+                $invoice->update([
+                    'customer_id' => $validatedData['buyer'],
+                    'position' => $validatedData['position'],
+                    'status' => $validatedData['status'],
+                ]);
+
+                // تعریف توابع محاسبه قیمت بر اساس محصول
+                $productFunctions = [
+                    1 => 'calculatePriceScorit',
+                    2 => 'calculatePriceLaminate',
+                    3 => 'calculatePriceDouble'
+                ];
+
+                // ایجاد یک نمونه از سرویس فاکتور
+                $invoiceService = new InvoiceService();
+
+                foreach ($validatedData['items'] as $itemIndex => $item) {
+                    $productId = $item['product'];
+
+                    // محاسبه قیمت بر اساس محصول
+                    if (array_key_exists($productId, $productFunctions)) {
+                        $functionName = $productFunctions[$productId];
+                        if (is_array($item['description'])) {
+                            $calculatedPrice = $invoiceService->$functionName($item['description']);
+                            if ($calculatedPrice !== null) {
+                                $item['price_per_unit'] = $calculatedPrice;
+                            } else {
+                                throw new \Exception('مشکل در محاسبه قیمت محصول');
+                            }
+                        }
+                    }
+
+                    // ترکیب توضیحات محصول
+                    if (is_array($item['description'])) {
+                        $item['description'] = $invoiceService->mergeProductStructures($item['description']);
+                    }
+
+                    // بروزرسانی یا ایجاد آیتم نوعی جدید
+                    $typeItem = TypeItem::updateOrCreate(
+                        ['invoice_id' => $invoice->id, 'key' => $itemIndex + 1],
+                        [
+                            'product_id' => $item['product'],
+                            'description' => $item['description'],
+                            'price' => $item['price_per_unit'] ?? 0 // قیمت محاسبه شده یا مقدار نمونه
+                        ]
+                    );
+
+                    // بروزرسانی یا ایجاد آیتم فنی جدید برای هر بعد
+                    foreach ($item['dimensions'] as $dimensionIndex => $dimension) {
+                        DimensionItem::updateOrCreate(
+                            ['invoice_id' => $invoice->id, 'type_id' => $typeItem->id, 'key' => $dimensionIndex + 1],
+                            [
+                                'height' => $dimension['height'],
+                                'width' => $dimension['width'],
+                                'weight' => $dimension['weight'],
+                                'quantity' => $dimension['quantity'],
+                                'over' => $dimension['quantity'],  //TODO: اضافه کردن درصد اور
+                                'description' => $dimension['description']
+                            ]
+                        );
+                    }
+
+                    // بروزرسانی یا ایجاد آیتم‌های ابعاد جدید
+                    $technicalDetails = $item['technical_details'];
+                    TechnicalItem::updateOrCreate(
+                        ['invoice_id' => $invoice->id, 'type_id' => $typeItem->id],
+                        [
+                            'edge_type' => $technicalDetails['edge_type'],
+                            'glue_type' => $technicalDetails['glue_type'],
+                            'post_type' => $technicalDetails['post_type'],
+                            'delivery_date' => $technicalDetails['delivery_date'],
+                            'frame' => $technicalDetails['frame'],
+                            'balance' => $technicalDetails['balance'],
+                            'vault_type' => $technicalDetails['vault_type'],
+                            'part_number' => $technicalDetails['part_number'],
+                            'map_dimension' => $technicalDetails['map_dimension'],
+                            'map_view' => $technicalDetails['map_view'],
+                            'vault_number' => $technicalDetails['vault_number'],
+                            'delivery_meterage' => $technicalDetails['delivery_meterage'],
+                            'order_number' => $technicalDetails['order_number'],
+                            'usage' => $technicalDetails['usage'],
+                            'car_type' => $technicalDetails['car_type']
+                        ]
+                    );
+                }
+            });
 
             DB::commit();
-            return response()->json(['message' => 'اطلاعات فاکتور با موفقیت بروزرسانی شد'], 200);
-        } catch (ModelNotFoundException $exception) {
-            DB::rollBack();
-            return response(['message' => 'فاکتور مورد نظر یافت نشد'], 404);
+            return response()->json(['message' => 'فاکتور با موفقیت بروزرسانی شد'], 200);
         } catch (Exception $exception) {
             DB::rollBack();
             Log::error($exception);
-            return response(['message' => 'خطایی به وجود آمده است'], 500);
+            return response()->json(['message' => 'خطایی به وجود آمده است'], 500);
         }
+        /*// استفاده از تراکنش برای اطمینان از صحت ویرایش داده‌ها
+        DB::transaction(function () use ($validatedData, $invoiceId) {
+            // پیدا کردن فاکتور مورد نظر
+            $invoice = \App\Models\Invoice::findOrFail($invoiceId);
+
+            // بروزرسانی اطلاعات فاکتور
+            $invoice->update([
+                'customer_id' => $validatedData['buyer'],
+                'position' => $validatedData['position'],
+                'status' => $validatedData['status'],
+            ]);
+
+            // تعریف توابع محاسبه قیمت بر اساس محصول
+            $productFunctions = [
+                1 => 'calculatePriceScorit',
+                2 => 'calculatePriceLaminate',
+                3 => 'calculatePriceDouble'
+            ];
+
+            // ایجاد یک نمونه از سرویس فاکتور
+            $invoiceService = new InvoiceService();
+
+            foreach ($validatedData['items'] as $itemIndex => $item) {
+                $productId = $item['product'];
+
+                // محاسبه قیمت بر اساس محصول
+                if (array_key_exists($productId, $productFunctions)) {
+                    $functionName = $productFunctions[$productId];
+                    if (is_array($item['description'])) {
+                        $calculatedPrice = $invoiceService->$functionName($item['description']);
+                        if ($calculatedPrice !== null) {
+                            $item['price_per_unit'] = $calculatedPrice;
+                        } else {
+                            throw new \Exception('مشکل در محاسبه قیمت محصول');
+                        }
+                    }
+                }
+
+                // ترکیب توضیحات محصول
+                if (is_array($item['description'])) {
+                    $item['description'] = $invoiceService->mergeProductStructures($item['description']);
+                }
+
+                // بروزرسانی یا ایجاد آیتم نوعی جدید
+                $typeItem = TypeItem::updateOrCreate(
+                    ['invoice_id' => $invoice->id, 'product_id' => $item['product']],
+                    ['key' => $itemIndex + 1, 'description' => $item['description'], 'price' => $item['price_per_unit'] ?? 0]
+                );
+
+                // بروزرسانی یا ایجاد آیتم‌های فنی
+                $existingTechnicalItems = DimensionItem::where('invoice_id', $invoice->id)->where('type_id', $typeItem->id)->get();
+                $newTechnicalItems = collect($item['dimensions']);
+
+                foreach ($newTechnicalItems as $dimensionIndex => $dimension) {
+                    $technicalItem = $existingTechnicalItems->firstWhere('key', $dimensionIndex + 1);
+
+                    if ($technicalItem) {
+                        $technicalItem->update([
+                            'height' => $dimension['height'],
+                            'width' => $dimension['width'],
+                            'weight'=>$dimension['weight'],
+                            'quantity' => $dimension['quantity'],
+                            'over' => $dimension['quantity'],
+                            'description' => $dimension['description']
+                        ]);
+                    } else {
+                        DimensionItem::create([
+                            'key' => $dimensionIndex + 1,
+                            'invoice_id' => $invoice->id,
+                            'type_id' => $typeItem->id,
+                            'height' => $dimension['height'],
+                            'width' => $dimension['width'],
+                            'weight'=>$dimension['weight'],
+                            'quantity' => $dimension['quantity'],
+                            'over' => $dimension['quantity'],
+                            'description' => $dimension['description']
+                        ]);
+                    }
+                }
+
+                $existingTechnicalItems->each(function ($existingTechnicalItem) use ($newTechnicalItems) {
+                    if (!$newTechnicalItems->contains('key', $existingTechnicalItem->key)) {
+                        $existingTechnicalItem->delete();
+                    }
+                });
+
+                // بروزرسانی یا ایجاد آیتم‌های ابعاد
+                $existingDimensionItems = TechnicalItem::where('invoice_id', $invoice->id)->where('type_id', $typeItem->id)->get();
+                $technicalDetails = $item['technical_details'];
+                $dimensionItem = $existingDimensionItems->first();
+
+                if ($dimensionItem) {
+                    $dimensionItem->update([
+                        'edge_type' => $technicalDetails['edge_type'],
+                        'glue_type' => $technicalDetails['glue_type'],
+                        'post_type' => $technicalDetails['post_type'],
+                        'delivery_date' => $technicalDetails['delivery_date'],
+                        'frame' => $technicalDetails['frame'],
+                        'balance' => $technicalDetails['balance'],
+                        'vault_type' => $technicalDetails['vault_type'],
+                        'part_number' => $technicalDetails['part_number'],
+                        'map_dimension' => $technicalDetails['map_dimension'],
+                        'map_view' => $technicalDetails['map_view'],
+                        'vault_number' => $technicalDetails['vault_number'],
+                        'delivery_meterage' => $technicalDetails['delivery_meterage'],
+                        'order_number' => $technicalDetails['order_number'],
+                        'usage' => $technicalDetails['usage'],
+                        'car_type' => $technicalDetails['car_type'],
+                    ]);
+                } else {
+                    DimensionItem::create([
+                        'invoice_id' => $invoice->id,
+                        'type_id' => $typeItem->id,
+                        'edge_type' => $technicalDetails['edge_type'],
+                        'glue_type' => $technicalDetails['glue_type'],
+                        'post_type' => $technicalDetails['post_type'],
+                        'delivery_date' => $technicalDetails['delivery_date'],
+                        'frame' => $technicalDetails['frame'],
+                        'balance' => $technicalDetails['balance'],
+                        'vault_type' => $technicalDetails['vault_type'],
+                        'part_number' => $technicalDetails['part_number'],
+                        'map_dimension' => $technicalDetails['map_dimension'],
+                        'map_view' => $technicalDetails['map_view'],
+                        'vault_number' => $technicalDetails['vault_number'],
+                        'delivery_meterage' => $technicalDetails['delivery_meterage'],
+                        'order_number' => $technicalDetails['order_number'],
+                        'usage' => $technicalDetails['usage'],
+                        'car_type' => $technicalDetails['car_type'],
+                    ]);
+                }
+            }
+        });
+
+        return response()->json(['message' => 'فاکتور با موفقیت ویرایش شد'], 200);*/
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(string $invoice)
     {
         try {
-            DB::beginTransaction();
-            \App\Models\Invoice::destroy($id);
+            // استفاده از تراکنش برای اطمینان از صحت عملیات حذف
+            DB::transaction(function () use ($invoice) {
+                // پیدا کردن فاکتور به همراه وابستگی‌هایش
+                $invoice = \App\Models\Invoice::with(['typeItems.technicalItems', 'typeItems.dimensionItems'])
+                    ->findOrFail($invoice);
+
+                // حذف وابستگی‌های فاکتور
+                foreach ($invoice->typeItems as $typeItem) {
+                    // حذف آیتم‌های فنی مرتبط با آیتم نوعی
+                    foreach ($typeItem->technicalItems as $technicalItem) {
+                        $technicalItem->delete();
+                    }
+                    // حذف آیتم‌های ابعاد مرتبط با آیتم نوعی
+                    foreach ($typeItem->dimensionItems as $dimensionItem) {
+                        $dimensionItem->delete();
+                    }
+                    // حذف آیتم نوعی
+                    $typeItem->delete();
+                }
+                // حذف خود فاکتور
+                $invoice->delete();
+            });
+
             DB::commit();
-            return response(['message' => 'فاکتور مورد نظر با موفقیت حذف شد'], 200);
-        } catch (\Exception $exception) {
+            return response()->json(['message' => 'فاکتور و تمام وابستگی‌های آن با موفقیت حذف شد'], 200);
+        } catch (Exception $exception) {
             DB::rollBack();
             Log::error($exception);
-            return response(['message' => 'حذف سوال با شکست مواجه شد'], 500);
+            return response()->json(['message' => 'خطایی به وجود آمده است'], 500);
         }
     }
 }

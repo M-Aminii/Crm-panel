@@ -8,6 +8,7 @@ class TypeItemResource extends JsonResource
     public function toArray($request)
     {
         return [
+            'key' =>$this->key,
             'product' => new ProductResource($this->whenLoaded('product')),
             'description' => $this->description,
             'price' => $this->price,

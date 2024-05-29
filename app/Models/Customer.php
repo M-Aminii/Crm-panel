@@ -9,6 +9,7 @@ class Customer extends Model
 {
     use HasFactory;
 
+    protected $appends = ['province_name', 'city_name'];
 
     protected $fillable = [
         'name',
@@ -29,6 +30,24 @@ class Customer extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+    public function province()
+    {
+        return $this->belongsTo(province::class);
+    }
+    public function city()
+    {
+        return $this->belongsTo(Cities::class);
+    }
+
+    public function getProvinceNameAttribute()
+    {
+        return $this->province ? $this->province->name : null;
+    }
+
+    public function getCityNameAttribute()
+    {
+        return $this->city ? $this->city->name : null;
     }
 
 }

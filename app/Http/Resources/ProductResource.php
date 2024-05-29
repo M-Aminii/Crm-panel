@@ -10,7 +10,7 @@ class ProductResource extends JsonResource
     {
         return [
             'name' => $this->name,
-            'description' => $this->description,
+            'english_name' => $this->english_name,
             // سایر فیلدهای مورد نظر
         ];
     }

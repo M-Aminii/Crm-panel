@@ -6,10 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class TechnicalItem extends Model
 {
+
     use HasFactory;
 
     protected $fillable = [
-        'index','invoice_id', 'type_id', 'height', 'width', 'over', 'description'
+        'invoice_id', 'type_id', 'edge_type', 'glue_type', 'post_type',
+        'delivery_date', 'frame', 'balance', 'vault_type', 'part_number',
+        'map_dimension', 'map_view', 'vault_number', 'delivery_meterage',
+        'order_number', 'usage', 'car_type'
     ];
 
     public function invoice()

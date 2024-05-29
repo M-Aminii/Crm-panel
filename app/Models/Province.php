@@ -16,6 +16,10 @@ class Province extends Model
         'updated_at',
     ];
 
+    public function customers()
+    {
+        return $this->hasMany(Customer::class);
+    }
     public function cities()
     {
         return $this->hasMany(Cities::class);

@@ -13,13 +13,23 @@ return new class extends Migration
     {
         Schema::create('technical_items', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('index');
             $table->unsignedBigInteger('invoice_id');
             $table->unsignedBigInteger('type_id');
-            $table->integer('height');
-            $table->integer('width');
-            $table->integer('over');
-            $table->string('description');
+            $table->string('edge_type');
+            $table->string('glue_type');
+            $table->string('post_type');
+            $table->string('delivery_date');
+            $table->string('frame');
+            $table->string('balance');
+            $table->string('vault_type');
+            $table->string('part_number');
+            $table->string('map_dimension');
+            $table->string('map_view');
+            $table->string('vault_number');
+            $table->string('delivery_meterage');
+            $table->string('order_number');
+            $table->string('usage');
+            $table->string('car_type');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
 

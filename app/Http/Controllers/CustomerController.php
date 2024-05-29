@@ -7,6 +7,7 @@ use App\Http\Requests\Customer\CreateCustomerRequest;
 use App\Http\Requests\Customer\ListCustomerRequest;
 use App\Http\Requests\Customer\ShowCustomerRequest;
 use App\Http\Requests\Customer\UpdateCustomerRequest;
+use App\Http\Resources\CustomerResource;
 use App\Models\Customer;
 use App\Services\CustomerService;
 use App\Services\FilterService;
@@ -25,17 +26,15 @@ class CustomerController extends Controller
     public function index(ListCustomerRequest $request)
     {
         $user = Auth::user();
-        // انتخاب فیلدهای مورد نیاز
-        $fields = ['name', 'user_id', 'national_id', 'registration_number', 'phone', 'mobile','type'];
-        // اگر کاربر ادمین است، همه مشتریان را دریافت کن
+
         if ($user->hasAnyAdminRole()) {
-            $query = Customer::all($fields);
+            $customers = Customer::with(['province', 'city'])->get();
         } else {
-            // در غیر این صورت، فقط مشتریان کاربر جاری را دریافت کن
-            $query = $user->customers()->select($fields)->get();
+            $customers = $user->customers()->with(['province', 'city'])->get();
         }
-        // بازگشت نتیجه به عنوان پاسخ
-        return response()->json($query);
+
+        // بازگشت نتیجه به عنوان پاسخ با استفاده از CustomerResource
+        return CustomerResource::collection($customers);
     }
 
     /**
@@ -69,12 +68,12 @@ class CustomerController extends Controller
     public function show(ShowCustomerRequest $request)
     {
         try {
-            // جستجوی شخص با استفاده از شناسه
-            $Customer = Customer::findOrFail($request->customer);
-            // بازگشت نتیجه به عنوان پاسخ
-            return response()->json($Customer);
+            // جستجوی شخص با استفاده از شناسه و بارگذاری روابط
+            $customer = Customer::with(['province', 'city'])->findOrFail($request->customer);
+            // بازگشت نتیجه به عنوان پاسخ با استفاده از CustomerResource
+            return new CustomerResource($customer);
         } catch (ModelNotFoundException $exception) {
-            // در صورتی که شخص  پیدا نشود
+            // در صورتی که شخص پیدا نشود
             return response()->json(['message' => 'مشتری پیدا نشد'], 404);
         } catch (Exception $exception) {
             // در صورتی که خطای دیگری رخ دهد

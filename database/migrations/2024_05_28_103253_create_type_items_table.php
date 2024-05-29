@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('type_items', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->integer('key');
             $table->unsignedBigInteger('invoice_id');
             $table->unsignedBigInteger('product_id');
             $table->string('description');
-            $table->decimal('price');
+            $table->decimal('price', 11, 0);
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
 

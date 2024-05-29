@@ -13,24 +13,15 @@ return new class extends Migration
     {
         Schema::create('dimension_items', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('product_index');
+            $table->integer('key');
             $table->unsignedBigInteger('invoice_id');
             $table->unsignedBigInteger('type_id');
-            $table->string('edge_type');
-            $table->string('glue_type');
-            $table->string('post_type');
-            $table->string('delivery_date');
-            $table->string('frame');
-            $table->string('balance');
-            $table->string('vault_type');
-            $table->string('part_number');
-            $table->string('map_dimension');
-            $table->string('map_view');
-            $table->string('vault_number');
-            $table->string('delivery_meterage');
-            $table->string('order_number');
-            $table->string('usage');
-            $table->string('car_type');
+            $table->integer('height');
+            $table->integer('width');
+            $table->integer('weight');
+            $table->integer('quantity');
+            $table->integer('over');
+            $table->string('description');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
 
