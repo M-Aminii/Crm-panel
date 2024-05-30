@@ -67,18 +67,13 @@ class InvoiceController extends Controller
         $validatedData = $request->all();
         try {
         DB::transaction(function () use ($validatedData) {
-            $customer = Customer::find($validatedData['buyer']);
-
-            if ($customer->status === "Incomplete" || $customer->status === "Inactive") {
-                return response()->json(['message' => 'امکان صدور فاکتور برای این مشتری وجود ندارد'], 404);
-            }
             $lastInvoiceSerial = InvoiceService::generateNewSerial();
             // ایجاد فاکتور جدید
             $invoice = \App\Models\Invoice::create([
                 'serial_number' => $lastInvoiceSerial, // مقدار نمونه، شما می‌توانید این را تغییر دهید
                 'user_id' => auth()->id(),
                 'customer_id' => $validatedData['buyer'],
-                'position' => "4554545545", // مقدار نمونه، شما می‌توانید این را تغییر دهید
+                'position' => random_int(1000,9999), // مقدار نمونه، شما می‌توانید این را تغییر دهید
                 'status' => $validatedData['status'], // مقدار نمونه، شما می‌توانید این را تغییر دهید
             ]);
 
@@ -133,7 +128,7 @@ class InvoiceController extends Controller
                         'width' => $dimension['width'],
                         'weight' =>$dimension['weight'],
                         'quantity' => $dimension['quantity'],
-                        'over' => $dimension['quantity'],  //TODO: اضافه کردن درصد اور
+                        'over' => $invoiceService->calculateAspectRatio( $dimension['height'] , $dimension['width']),  //TODO: اضافه کردن درصد اور
                         'description' => $dimension['description']
                     ]);
                 }
@@ -225,7 +220,6 @@ class InvoiceController extends Controller
                 // بروزرسانی اطلاعات فاکتور
                 $invoice->update([
                     'customer_id' => $validatedData['buyer'],
-                    'position' => $validatedData['position'],
                     'status' => $validatedData['status'],
                 ]);
 
@@ -279,7 +273,7 @@ class InvoiceController extends Controller
                                 'width' => $dimension['width'],
                                 'weight' => $dimension['weight'],
                                 'quantity' => $dimension['quantity'],
-                                'over' => $dimension['quantity'],  //TODO: اضافه کردن درصد اور
+                                'over' => $invoiceService->calculateAspectRatio( $dimension['height'] , $dimension['width']),  //TODO: اضافه کردن درصد اور
                                 'description' => $dimension['description']
                             ]
                         );

@@ -319,19 +319,19 @@ class InvoiceService
         return trim($description);
     }*/
 
-    public static  function CalculateEnvironment($height, $width,$quantity)
+    public   function CalculateEnvironment($height, $width,$quantity)
     {
         $result = 2*($height+$width)*$quantity/1000;
         return $result;
     }
-    public static  function CalculateArea($height, $width)
+    public   function CalculateArea($height, $width)
     {
         $result = ($height * $width / 1000000 < 0.5) ? (($height * $width / 1000000 == 0) ? 0 : 0.5) : ($height * $width / 1000000);
         return $result;
     }
-    public static  function calculateAspectRatio($height, $width)
+    public   function calculateAspectRatio($height, $width)
     {
-        $area = self::CalculateArea((float)$height,(float)$width );
+        $area = $this->CalculateArea((float)$height,(float)$width );
 
         if ($height == 0 || $width == 0) {
             return "";
