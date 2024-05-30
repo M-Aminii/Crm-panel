@@ -98,7 +98,7 @@ class InvoiceController extends Controller
 
             // تعریف توابع محاسبه قیمت بر اساس محصول
             $productFunctions = [
-                1 => 'calculatePriceSecorit',
+                1 => 'calculatePriceScorit',
                 2 => 'calculatePriceLaminate',
                 3 => 'calculatePriceDouble'
             ];

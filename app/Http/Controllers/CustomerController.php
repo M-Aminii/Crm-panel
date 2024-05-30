@@ -79,10 +79,14 @@ class CustomerController extends Controller
     public function show(ShowCustomerRequest $request)
     {
         try {
-            // جستجوی شخص با استفاده از شناسه و بارگذاری روابط
+            // جستجوی شخص با استفاده از شناسه
+            $Customer = Customer::findOrFail($request->customer);
+            // بازگشت نتیجه به عنوان پاسخ
+            return response()->json($Customer);
+          /*  // جستجوی شخص با استفاده از شناسه و بارگذاری روابط
             $customer = Customer::with(['province', 'city'])->findOrFail($request->customer);
             // بازگشت نتیجه به عنوان پاسخ با استفاده از CustomerResource
-            return new CustomerResource($customer);
+            return new CustomerResource($customer);*/
         } catch (ModelNotFoundException $exception) {
             // در صورتی که شخص پیدا نشود
             return response()->json(['message' => 'مشتری پیدا نشد'], 404);

@@ -619,7 +619,7 @@ class InvoiceService
                 }
             }
         }
-dd($finalPrice);
+
         return $finalPrice;
     }
 
