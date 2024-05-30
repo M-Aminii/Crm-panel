@@ -19,8 +19,10 @@ class CustomerResource extends JsonResource
             'status' => $this->status,
             'postal_code' => $this->postal_code,
             'address' => $this->address,
-            'province' => $this->province ,
-            'city' => $this->city ,
+            'province' => $this->province,
+            'city' => $this->city,
+            /*'province' => $this->province ? $this->province->name : null,
+            'city' => $this->city ? $this->city->name : null,*/
         ];
     }
 }

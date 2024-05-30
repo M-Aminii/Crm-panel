@@ -9,7 +9,6 @@ class Customer extends Model
 {
     use HasFactory;
 
-    protected $appends = ['province_name', 'city_name'];
 
     protected $fillable = [
         'name',
@@ -25,13 +24,16 @@ class Customer extends Model
         'province_id',
         'city_id'
     ];
-    //protected $visible = ['name', 'user_id', 'phone'];
 
     public function user()
     {
         return $this->belongsTo(User::class);
     }
-   /* public function province()
+
+    ///تبدیل ایدی استان و شهر به نام
+    /*
+    protected $appends = ['province_name', 'city_name'];
+    public function province()
     {
         return $this->belongsTo(province::class);
     }

@@ -26,18 +26,17 @@ class CustomerController extends Controller
     public function index(ListCustomerRequest $request)
     {
         $user = Auth::user();
-
         // اگر کاربر ادمین است، همه مشتریان را دریافت کن
         if ($user->hasAnyAdminRole()) {
             $query = Customer::all();
         } else {
             // در غیر این صورت، فقط مشتریان کاربر جاری را دریافت کن
-            $query = $user->customers()->select()->get();
+            $query = $user->customers()->get();
         }
         // بازگشت نتیجه به عنوان پاسخ
         return response()->json($query);
 
-      /* $user = Auth::user();
+     /*   $user = Auth::user();
 
         if ($user->hasAnyAdminRole()) {
             $customers = Customer::with(['province', 'city'])->get();
