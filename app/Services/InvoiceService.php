@@ -435,7 +435,12 @@ class InvoiceService
             0.38 => 8400000, // قیمت اضافی برای طلق 0.38
             0.76 => 10900000, // قیمت اضافی برای طلق 0.76
             1.52 => 16100000, // قیمت اضافی برای طلق 1.52
-        ]
+        ],
+
+        'laminateColor'=>[
+            'normal' => 0,
+            'hued' =>4400000,
+        ],
     ];
 
     public function calculatePriceScorit($selectedOptionsList) {
@@ -502,6 +507,10 @@ class InvoiceService
                     $typePrice = $this->options['type'][$selectedOptions['type']] * $width;
                     $finalPrice += $typePrice;
                 }
+            }
+            // محاسبه قیمت بر اساس رنگ لمینت
+            if (isset($selectedOptions['laminateColor']) && array_key_exists($selectedOptions['laminateColor'], $this->options['laminateColor'])) {
+                $finalPrice += $this->options['laminateColor'][$selectedOptions['laminateColor']];
             }
 
             // محاسبه قیمت بر اساس لمینت
@@ -610,7 +619,7 @@ class InvoiceService
                 }
             }
         }
-
+dd($finalPrice);
         return $finalPrice;
     }
 

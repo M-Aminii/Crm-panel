@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Validator;
 use LaravelDaily\Invoices\Classes\InvoiceItem;
 use LaravelDaily\Invoices\Classes\Party;
 use LaravelDaily\Invoices\Invoice;
+use PhpParser\Node\Expr\New_;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -50,6 +51,8 @@ class InvoiceController extends Controller
         $customers = $query->select($fields)->get();
         // بازگشت نتیجه به عنوان پاسخ
         return response()->json($customers);
+
+
     }
     /**
      * Store a newly created resource in storage.
@@ -77,8 +80,12 @@ class InvoiceController extends Controller
         // اعتبارسنجی داده‌های ورودی
         $validatedData = $request->all();
         try {
-        // استفاده از تراکنش برای اطمینان از صحت ذخیره‌سازی داده‌ها
         DB::transaction(function () use ($validatedData) {
+            $customer = Customer::find($validatedData['buyer']);
+
+            if ($customer->status === "Incomplete" || $customer->status === "Inactive") {
+                return response()->json(['message' => 'امکان صدور فاکتور برای این مشتری وجود ندارد'], 404);
+            }
             $lastInvoiceSerial = InvoiceService::generateNewSerial();
             // ایجاد فاکتور جدید
             $invoice = \App\Models\Invoice::create([
@@ -186,7 +193,6 @@ class InvoiceController extends Controller
         try {
             $invoice = \App\Models\Invoice::with(['user', 'customer', 'typeItems.product', 'typeItems.technicalItems', 'typeItems.dimensionItems'])
                 ->findOrFail($request->invoice);
-
             return new InvoiceResource($invoice);
 
         } catch (\Exception $e) {
@@ -198,29 +204,7 @@ class InvoiceController extends Controller
         }
     }
 
-    /*try {
-                // جستجوی شخص با استفاده از شناسه
-                $Invoice = \App\Models\Invoice::findOrFail($request->invoice);
 
-                $user = User::select('name', 'last_name','mobile')->find($Invoice->user_id);
-                $customer = Customer::select('mobile', 'name', 'national_id', 'registration_number', 'mobile', 'postal_code', 'address')->find($Invoice->customer_id);
-
-                // بازگشت نتیجه به عنوان پاسخ
-                return response()->json([
-                    'user'=> $user,
-                    'customer'=>$customer,
-                    'serial_number'=>$Invoice->serial_number,
-                    'status'=>$Invoice->status,
-                    'items'=>json_decode($Invoice->items),
-                    'updated_at'=>$Invoice->updated_at
-                    ]);
-            } catch (ModelNotFoundException $exception) {
-                // در صورتی که شخص  پیدا نشود
-                return response()->json(['message' => 'فاکتور پیدا نشد'], 404);
-            } catch (Exception $exception) {
-                // در صورتی که خطای دیگری رخ دهد
-                return response()->json(['message' => 'خطایی به وجود آمده است'], 500);
-            }*/
     /*public function download(string $id)
     {
         $InvoiceService =new InvoiceService();
@@ -347,140 +331,6 @@ class InvoiceController extends Controller
             Log::error($exception);
             return response()->json(['message' => 'خطایی به وجود آمده است'], 500);
         }
-        /*// استفاده از تراکنش برای اطمینان از صحت ویرایش داده‌ها
-        DB::transaction(function () use ($validatedData, $invoiceId) {
-            // پیدا کردن فاکتور مورد نظر
-            $invoice = \App\Models\Invoice::findOrFail($invoiceId);
-
-            // بروزرسانی اطلاعات فاکتور
-            $invoice->update([
-                'customer_id' => $validatedData['buyer'],
-                'position' => $validatedData['position'],
-                'status' => $validatedData['status'],
-            ]);
-
-            // تعریف توابع محاسبه قیمت بر اساس محصول
-            $productFunctions = [
-                1 => 'calculatePriceScorit',
-                2 => 'calculatePriceLaminate',
-                3 => 'calculatePriceDouble'
-            ];
-
-            // ایجاد یک نمونه از سرویس فاکتور
-            $invoiceService = new InvoiceService();
-
-            foreach ($validatedData['items'] as $itemIndex => $item) {
-                $productId = $item['product'];
-
-                // محاسبه قیمت بر اساس محصول
-                if (array_key_exists($productId, $productFunctions)) {
-                    $functionName = $productFunctions[$productId];
-                    if (is_array($item['description'])) {
-                        $calculatedPrice = $invoiceService->$functionName($item['description']);
-                        if ($calculatedPrice !== null) {
-                            $item['price_per_unit'] = $calculatedPrice;
-                        } else {
-                            throw new \Exception('مشکل در محاسبه قیمت محصول');
-                        }
-                    }
-                }
-
-                // ترکیب توضیحات محصول
-                if (is_array($item['description'])) {
-                    $item['description'] = $invoiceService->mergeProductStructures($item['description']);
-                }
-
-                // بروزرسانی یا ایجاد آیتم نوعی جدید
-                $typeItem = TypeItem::updateOrCreate(
-                    ['invoice_id' => $invoice->id, 'product_id' => $item['product']],
-                    ['key' => $itemIndex + 1, 'description' => $item['description'], 'price' => $item['price_per_unit'] ?? 0]
-                );
-
-                // بروزرسانی یا ایجاد آیتم‌های فنی
-                $existingTechnicalItems = DimensionItem::where('invoice_id', $invoice->id)->where('type_id', $typeItem->id)->get();
-                $newTechnicalItems = collect($item['dimensions']);
-
-                foreach ($newTechnicalItems as $dimensionIndex => $dimension) {
-                    $technicalItem = $existingTechnicalItems->firstWhere('key', $dimensionIndex + 1);
-
-                    if ($technicalItem) {
-                        $technicalItem->update([
-                            'height' => $dimension['height'],
-                            'width' => $dimension['width'],
-                            'weight'=>$dimension['weight'],
-                            'quantity' => $dimension['quantity'],
-                            'over' => $dimension['quantity'],
-                            'description' => $dimension['description']
-                        ]);
-                    } else {
-                        DimensionItem::create([
-                            'key' => $dimensionIndex + 1,
-                            'invoice_id' => $invoice->id,
-                            'type_id' => $typeItem->id,
-                            'height' => $dimension['height'],
-                            'width' => $dimension['width'],
-                            'weight'=>$dimension['weight'],
-                            'quantity' => $dimension['quantity'],
-                            'over' => $dimension['quantity'],
-                            'description' => $dimension['description']
-                        ]);
-                    }
-                }
-
-                $existingTechnicalItems->each(function ($existingTechnicalItem) use ($newTechnicalItems) {
-                    if (!$newTechnicalItems->contains('key', $existingTechnicalItem->key)) {
-                        $existingTechnicalItem->delete();
-                    }
-                });
-
-                // بروزرسانی یا ایجاد آیتم‌های ابعاد
-                $existingDimensionItems = TechnicalItem::where('invoice_id', $invoice->id)->where('type_id', $typeItem->id)->get();
-                $technicalDetails = $item['technical_details'];
-                $dimensionItem = $existingDimensionItems->first();
-
-                if ($dimensionItem) {
-                    $dimensionItem->update([
-                        'edge_type' => $technicalDetails['edge_type'],
-                        'glue_type' => $technicalDetails['glue_type'],
-                        'post_type' => $technicalDetails['post_type'],
-                        'delivery_date' => $technicalDetails['delivery_date'],
-                        'frame' => $technicalDetails['frame'],
-                        'balance' => $technicalDetails['balance'],
-                        'vault_type' => $technicalDetails['vault_type'],
-                        'part_number' => $technicalDetails['part_number'],
-                        'map_dimension' => $technicalDetails['map_dimension'],
-                        'map_view' => $technicalDetails['map_view'],
-                        'vault_number' => $technicalDetails['vault_number'],
-                        'delivery_meterage' => $technicalDetails['delivery_meterage'],
-                        'order_number' => $technicalDetails['order_number'],
-                        'usage' => $technicalDetails['usage'],
-                        'car_type' => $technicalDetails['car_type'],
-                    ]);
-                } else {
-                    DimensionItem::create([
-                        'invoice_id' => $invoice->id,
-                        'type_id' => $typeItem->id,
-                        'edge_type' => $technicalDetails['edge_type'],
-                        'glue_type' => $technicalDetails['glue_type'],
-                        'post_type' => $technicalDetails['post_type'],
-                        'delivery_date' => $technicalDetails['delivery_date'],
-                        'frame' => $technicalDetails['frame'],
-                        'balance' => $technicalDetails['balance'],
-                        'vault_type' => $technicalDetails['vault_type'],
-                        'part_number' => $technicalDetails['part_number'],
-                        'map_dimension' => $technicalDetails['map_dimension'],
-                        'map_view' => $technicalDetails['map_view'],
-                        'vault_number' => $technicalDetails['vault_number'],
-                        'delivery_meterage' => $technicalDetails['delivery_meterage'],
-                        'order_number' => $technicalDetails['order_number'],
-                        'usage' => $technicalDetails['usage'],
-                        'car_type' => $technicalDetails['car_type'],
-                    ]);
-                }
-            }
-        });
-
-        return response()->json(['message' => 'فاکتور با موفقیت ویرایش شد'], 200);*/
     }
 
     /**

@@ -32,7 +32,6 @@ class CustomerController extends Controller
         } else {
             $customers = $user->customers()->with(['province', 'city'])->get();
         }
-
         // بازگشت نتیجه به عنوان پاسخ با استفاده از CustomerResource
         return CustomerResource::collection($customers);
     }

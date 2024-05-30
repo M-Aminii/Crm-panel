@@ -29,11 +29,15 @@ class InvoicePolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user , Customer $customer): bool
+    public function create(User $user, Customer $customer): bool
     {
+        if ($customer->status === "Incomplete" || $customer->status === "Inactive") {
+            throw new \App\Exceptions\IncompleteOrInactiveCustomerException();
+        }
 
         return $user->id === $customer->user_id || $user->hasAnyAdminRole();
     }
+
 
     /**
      * Determine whether the user can update the model.
