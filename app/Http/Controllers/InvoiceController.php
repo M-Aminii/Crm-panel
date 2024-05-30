@@ -42,10 +42,15 @@ class InvoiceController extends Controller
 
         if ($user->hasAnyAdminRole()) {
             // اگر کاربر مدیر است، همه فاکتورها را دریافت کنید
-            $invoices = \App\Models\Invoice::all();
+            $invoices = \App\Models\Invoice::select('id','serial_number', 'user_id', 'customer_id', 'position', 'status')
+                ->with(['user:id,name,last_name', 'customer:id,name'])
+                ->get();
         } else {
             // اگر کاربر عادی است، فقط فاکتورهای مربوط به خودش را دریافت کنید
-            $invoices = \App\Models\Invoice::where('user_id', $user->id)->get();
+            $invoices = \App\Models\Invoice::select('id','serial_number', 'user_id', 'customer_id', 'position', 'status')
+                ->with(['user:id,name,last_name', 'customer:id,name'])
+                ->where('user_id', $user->id)
+                ->get();
         }
 
         // تبدیل داده‌ها به JSON و بازگرداندن آن‌ها
