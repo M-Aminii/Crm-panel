@@ -37,20 +37,24 @@ class InvoiceController extends Controller
      */
     public function index(ListInvoiceRequest $request)
     {
-        $user = Auth::user();
-        // انتخاب فیلدهای مورد نیاز
-        $fields = ['user_id', 'customer_id','serial_number', 'status'];
+        // بررسی کنید که آیا کاربر مدیر است
+        $user = auth()->user();
 
         if ($user->hasAnyAdminRole()) {
-            $query = \App\Models\Invoice::all($fields);
+            // اگر کاربر مدیر است، همه فاکتورها را دریافت کنید
+            $invoices = \App\Models\Invoice::select('serial_number', 'user_id', 'customer_id', 'position', 'status')
+                ->with(['user:id,name,last_name', 'customer:id,name'])
+                ->get();
         } else {
-            // در غیر این صورت، فقط مشتریان کاربر جاری را دریافت کن
-            $query = $user->customers()->select($fields)->get();
+            // اگر کاربر عادی است، فقط فاکتورهای مربوط به خودش را دریافت کنید
+            $invoices = \App\Models\Invoice::select('serial_number', 'user_id', 'customer_id', 'position', 'status')
+                ->with(['user:id,name,last_name', 'customer:id,name'])
+                ->where('user_id', $user->id)
+                ->get();
         }
-        // انجام کوئری و بازگشت نتیجه
-        $customers = $query->select($fields)->get();
-        // بازگشت نتیجه به عنوان پاسخ
-        return response()->json($customers);
+
+        // تبدیل داده‌ها به JSON و بازگرداندن آن‌ها
+        return response()->json($invoices, 200);
 
 
     }
@@ -92,7 +96,7 @@ class InvoiceController extends Controller
                 'serial_number' => $lastInvoiceSerial, // مقدار نمونه، شما می‌توانید این را تغییر دهید
                 'user_id' => auth()->id(),
                 'customer_id' => $validatedData['buyer'],
-                'position' => $validatedData['position'], // مقدار نمونه، شما می‌توانید این را تغییر دهید
+                'position' => "4554545545", // مقدار نمونه، شما می‌توانید این را تغییر دهید
                 'status' => $validatedData['status'], // مقدار نمونه، شما می‌توانید این را تغییر دهید
             ]);
 
