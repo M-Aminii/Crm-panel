@@ -16,10 +16,10 @@ class Cities extends Model
         'updated_at',
     ];
 
-    public function customers()
+    /*public function customers()
     {
         return $this->hasMany(Customer::class);
-    }
+    }*/
     public function Province()
     {
         return $this->belongsTo(Province::class);

@@ -31,7 +31,7 @@ class Customer extends Model
     {
         return $this->belongsTo(User::class);
     }
-    public function province()
+   /* public function province()
     {
         return $this->belongsTo(province::class);
     }
@@ -48,6 +48,6 @@ class Customer extends Model
     public function getCityNameAttribute()
     {
         return $this->city ? $this->city->name : null;
-    }
+    }*/
 
 }

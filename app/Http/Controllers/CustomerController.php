@@ -27,13 +27,26 @@ class CustomerController extends Controller
     {
         $user = Auth::user();
 
+        // اگر کاربر ادمین است، همه مشتریان را دریافت کن
+        if ($user->hasAnyAdminRole()) {
+            $query = Customer::all();
+        } else {
+            // در غیر این صورت، فقط مشتریان کاربر جاری را دریافت کن
+            $query = $user->customers()->select()->get();
+        }
+        // بازگشت نتیجه به عنوان پاسخ
+        return response()->json($query);
+
+      /* $user = Auth::user();
+
         if ($user->hasAnyAdminRole()) {
             $customers = Customer::with(['province', 'city'])->get();
         } else {
             $customers = $user->customers()->with(['province', 'city'])->get();
         }
+
         // بازگشت نتیجه به عنوان پاسخ با استفاده از CustomerResource
-        return CustomerResource::collection($customers);
+        return CustomerResource::collection($customers);*/
     }
 
     /**
