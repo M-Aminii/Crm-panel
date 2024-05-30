@@ -31,14 +31,14 @@ class CustomerDTO
         $this->user_id = auth('api')->id();
         $this->name = $data['name'];
         $this->national_id =$data['national_id']?? null;
-        $this->registration_number = $data['registration_number'];
+        $this->registration_number = $data['registration_number'] ?? null;
         $this->phone = $data['phone'] ?? null;
         $this->mobile =$data['mobile'] ?? null;
         $this->type = $data['type'];
-        $this->postal_code = $data['postal_code'];
-        $this->address =$data['address'];
-        $this->province_id = $data['province_id'];
-        $this->city_id = $data['city_id'];
+        $this->postal_code = $data['postal_code'] ??null;
+        $this->address =$data['address']??null;
+        $this->province_id = $data['province_id'] ??null;
+        $this->city_id = $data['city_id'] ??null;
 
     }
 

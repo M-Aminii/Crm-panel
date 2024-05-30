@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('customers', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id');
-            $table->string('name', 100)->nullable();
+            $table->string('name', 100);
             $table->string('national_id')->unique()->nullable(); // شماره اقتصادی /شناسه ملی
             $table->string('registration_number')->unique()->nullable();
             $table->string('phone')->unique()->nullable();

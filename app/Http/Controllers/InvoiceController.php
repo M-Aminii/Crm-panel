@@ -42,15 +42,10 @@ class InvoiceController extends Controller
 
         if ($user->hasAnyAdminRole()) {
             // اگر کاربر مدیر است، همه فاکتورها را دریافت کنید
-            $invoices = \App\Models\Invoice::select('serial_number', 'user_id', 'customer_id', 'position', 'status')
-                ->with(['user:id,name,last_name', 'customer:id,name'])
-                ->get();
+            $invoices = \App\Models\Invoice::all();
         } else {
             // اگر کاربر عادی است، فقط فاکتورهای مربوط به خودش را دریافت کنید
-            $invoices = \App\Models\Invoice::select('serial_number', 'user_id', 'customer_id', 'position', 'status')
-                ->with(['user:id,name,last_name', 'customer:id,name'])
-                ->where('user_id', $user->id)
-                ->get();
+            $invoices = \App\Models\Invoice::where('user_id', $user->id)->get();
         }
 
         // تبدیل داده‌ها به JSON و بازگرداندن آن‌ها
@@ -63,25 +58,7 @@ class InvoiceController extends Controller
      */
     public function store(CreateInvoiceRequest $request)
     {
-       /* $userId = auth('api')->id();
-        $buyerId = $request->input('buyer');
-        $customer = Customer::find($buyerId);
-
-        // بررسی وضعیت مشتری
-        if ($customer->status === "Incomplete" || $customer->status === "Inactive") {
-            return response()->json(['message' => 'امکان صدور فاکتور برای این مشتری وجود ندارد'], 404);
-        }
-
-        $items = $request->input('items');
-        $productFunctions = [
-            1 => 'calculatePriceSecorit',
-            2 => 'calculatePriceLaminate',
-            3 => 'calculatePriceDouble'
-        ];
-
-        $invoiceService = new InvoiceService();*/
-        // اعتبارسنجی داده‌های ورودی
-        // اعتبارسنجی داده‌های ورودی
+         // اعتبارسنجی داده‌های ورودی
         $validatedData = $request->all();
         try {
         DB::transaction(function () use ($validatedData) {
