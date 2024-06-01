@@ -18,7 +18,7 @@ class DimensionItemResource extends JsonResource
             'quantity' => $this->quantity,
             'weight' => $this->weight,
             'area' => $invoiceService->CalculateArea($this->height,$this->width),
-            'total area' => $invoiceService->CalculateArea($this->height,$this->width) * $this->quantity,
+            'total_area' => $invoiceService->CalculateArea($this->height,$this->width) * $this->quantity,
             'Environment' => $invoiceService ->CalculateEnvironment($this->height,$this->width ,$this->quantity),
             "over" =>$this->over,
             'description' => $this->description

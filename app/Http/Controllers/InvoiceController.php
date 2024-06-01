@@ -81,7 +81,9 @@ class InvoiceController extends Controller
             $productFunctions = [
                 1 => 'calculatePriceScorit',
                 2 => 'calculatePriceLaminate',
-                3 => 'calculatePriceDouble'
+                3 => 'calculatePriceDouble',
+                4 => 'calculatePriceDouble',
+                6 => 'calculatePriceDoubleLaminate'
             ];
 
             // ایجاد یک نمونه از سرویس فاکتور
@@ -227,7 +229,9 @@ class InvoiceController extends Controller
                 $productFunctions = [
                     1 => 'calculatePriceScorit',
                     2 => 'calculatePriceLaminate',
-                    3 => 'calculatePriceDouble'
+                    3 => 'calculatePriceDouble',
+                    4 => 'calculatePriceDouble',
+                    6 => 'calculatePriceDoubleLaminate'
                 ];
 
                 // ایجاد یک نمونه از سرویس فاکتور
@@ -239,6 +243,7 @@ class InvoiceController extends Controller
                     // محاسبه قیمت بر اساس محصول
                     if (array_key_exists($productId, $productFunctions)) {
                         $functionName = $productFunctions[$productId];
+
                         if (is_array($item['description'])) {
                             $calculatedPrice = $invoiceService->$functionName($item['description']);
                             if ($calculatedPrice !== null) {

@@ -34,119 +34,6 @@ class InvoiceService
         }
     }
 
-/*    public static function information($user ,$buyer ,$item )
-    {
-        $sellerData= $user;
-        // دریافت اطلاعات خریدار از ورودی کاربر
-        $buyerData = $buyer;
-
-        $client = new Party([
-            'name'          => 'Roosevelt Lloyd',
-            'phone'         => '(520) 318-9486',
-            'custom_fields' => [
-                'note'        => 'IDDQD',
-                'business id' => '365#GG',
-            ],
-        ]);
-
-        $customer = new Party([
-            'name'          => 'name',
-            'address'       => 'The Green Street 12',
-            'code'          => '#22663214',
-            'custom_fields' => [
-                'order number' => '> 654321 <',
-            ],
-        ]);
-
-        // دریافت اطلاعات آیتم‌ها از ورودی کاربر
-        $itemsDatas = $item;
-
-        // ایجاد شیء جدید از کتابخانه Laravel Invoices
-        $invoice = Invoice::make('پیش فاکتور')
-            ->series('f-s')
-            ->status(__('invoices::invoice.paid'))
-            ->sequencePadding(4)
-            ->sequence(4990)
-            ->seller($client)
-            ->buyer($customer)
-            ->serialNumberFormat('{SEQUENCE}/{SERIES}')
-            ->date(now())
-            ->dateFormat('m/d/Y')
-            ->payUntilDays(14)
-            ->currencySymbol('ریال')
-            ->currencyCode('IRR')
-            ->currencyFormat('{SYMBOL}{VALUE}')
-            ->currencyThousandsSeparator(',')
-            ->currencyDecimalPoint(',')
-            ->filename( $customer->name . '_invoice55');
-
-
-        $items = [];
-        foreach ($itemsDatas as $itemData) {
-
-            $item = InvoiceItem::make($itemData['title'])
-                ->description(self::mergeProductStructures($itemData['description']))
-                ->pricePerUnit($itemData['price_per_unit'])
-                ->quantity($itemData['quantity'])
-                ->TechnicalDetails($itemData['technical_details']);
-
-            $dimensions = [];
-            $totalQuantity = 0;
-            $totalArea = 0;
-            $totalEnvironment =0;
-
-            foreach ($itemData['dimensions'] as $key=> $data) {
-                $area = self::CalculateArea($data['height'] ,$data['width']);
-                $environment =self::CalculateEnvironment($data['height'] ,$data['width'] ,$data['quantity']);
-                $over =self::calculateAspectRatio($data['height'] ,$data['width']);
-                $total_area = $area * $data['quantity']; // محاسبه total_area
-
-                // گرد کردن مقادیر
-                $area = round($area, 3);
-                $environment = round($environment, 3);
-                $total_area = round($total_area, 3);
-
-                $dimensions[] = [
-                    'row' => $key + 1,
-                    'height' => $data['height'],
-                    'width' => $data['width'],
-                    'quantity' => $data['quantity'],
-                    'position' => $data['position'],
-                    'area' => $area,
-                    'total_area' => $total_area,
-                    'environment' => $environment,
-                    'over' => $over
-                ];
-
-                // جمع کردن مقدار quantity
-                $totalQuantity += $data['quantity'];
-                $totalArea += $total_area;
-                $totalEnvironment +=$environment;
-            }
-
-// اضافه کردن totalQuantity به آرایه dimensions
-            $result = [
-                'dimensions' => $dimensions,
-                'totalQuantity' => $totalQuantity,
-                'totalArea' => $totalArea,
-                'totalEnvironment'=>$totalEnvironment
-            ];
-
-            $item->dimensions($result);
-
-            if (!isset($itemData['description'])) {
-                dd('not ok description');
-            }
-
-            // افزودن آیتم به لیست آیتم‌ها
-            $items[] = $item;
-        }
-        // اضافه کردن تمام آیتم‌ها به فاکتور
-        $invoice->addItems($items);
-        $invoice->save('public');
-
-        return $invoice;
-    }*/
     public  function information($user, $buyer, $item)
     {
         // دریافت اطلاعات فروشنده از ورودی کاربر
@@ -259,8 +146,7 @@ class InvoiceService
         return $invoice;
     }
 
-
-    public  function mergeProductStructures($productStructures)
+    public function mergeProductStructures($productStructures)
     {
         $description = '';
 
@@ -278,58 +164,34 @@ class InvoiceService
                 $tempDescription .= $productStructure['material'] . ' ';
             }
 
-            // سپس داده‌های spacer و laminate را اضافه می‌کنیم
-            foreach ($productStructure as $key => $value) {
-                if (strpos($key, 'spacer') !== false) {
-                    $tempDescription .= "+ p.v.b $value + ";
-                } elseif (strpos($key, 'laminate') !== false) {
-                    $tempDescription .= "+ طلق $value + ";
-                }
+            // سپس داده‌های laminate را اضافه می‌کنیم
+            if (isset($productStructure['laminate'])) {
+                $tempDescription .= "+ طلق " . $productStructure['laminate'] . " + ";
+            }
+            if (isset($productStructure['spacer'])) {
+                $tempDescription .= "+ اسپیسر " . $productStructure['spacer'] . " + ";
             }
 
             // اضافه کردن توضیحات موقتی به توضیحات اصلی
             $description .= trim($tempDescription) . ' ';
         }
 
-
-        // برگرداندن توضیحات ترکیب شده
+        // حذف فاصله‌های اضافی و برگرداندن توضیحات ترکیب شده
         return trim($description);
     }
 
-/*    public static  function mergeProductStructures($productStructures)
-    {
-        $description = '';
 
-        foreach ($productStructures as $key => $value) {
-            if (strpos($key, 'spacer') !== false) {
-                // اگر کلید شامل "spacer" باشد، فقط در آن صورت
-                // فاصله‌گذار اضافی اضافه می‌شود
-                $description .= " + p.v.b $value +";
-            }elseif (strpos($key, 'laminate') !== false){
-
-                $description .= "+ طلق $value +";
-
-            } else {
-                // در غیر این صورت، اطلاعات دیگر است
-                $description .= "$value";
-            }
-        }
-
-        // برگرداندن توضیحات ترکیب شده
-        return trim($description);
-    }*/
-
-    public   function CalculateEnvironment($height, $width,$quantity)
+    public function CalculateEnvironment($height, $width,$quantity)
     {
         $result = 2*($height+$width)*$quantity/1000;
         return $result;
     }
-    public   function CalculateArea($height, $width)
+    public function CalculateArea($height, $width)
     {
         $result = ($height * $width / 1000000 < 0.5) ? (($height * $width / 1000000 == 0) ? 0 : 0.5) : ($height * $width / 1000000);
         return $result;
     }
-    public   function calculateAspectRatio($height, $width)
+    public function calculateAspectRatio($height, $width)
     {
         $area = $this->CalculateArea((float)$height,(float)$width );
 
@@ -432,9 +294,9 @@ class InvoiceService
         ],
 
         'laminate' => [
-            0.38 => 8400000, // قیمت اضافی برای طلق 0.38
-            0.76 => 10900000, // قیمت اضافی برای طلق 0.76
-            1.52 => 16100000, // قیمت اضافی برای طلق 1.52
+            '0.38' => 8400000, // قیمت اضافی برای طلق 0.38
+            '0.76' => 10900000, // قیمت اضافی برای طلق 0.76
+            '1.52' => 16100000, // قیمت اضافی برای طلق 1.52
         ],
 
         'laminateColor'=>[
@@ -557,6 +419,123 @@ class InvoiceService
         $temperedCount = 0;
         $totalThickness = 0;
 
+        // شمارنده‌های الگوهای مورد نظر
+        $typeMaterialCounts = [];
+        $spacerCounts = [];
+
+        foreach ($selectedOptionsList as $selectedOptions) {
+            if (isset($selectedOptions['material']) && $selectedOptions['material'] == 'سکوریت') {
+                $isTempered = true;
+                $temperedCount++;
+            }
+            if (isset($selectedOptions['width'])) {
+                $totalThickness += $selectedOptions['width'];
+            }
+
+            // شمارش ترکیب type و material
+            if (isset($selectedOptions['type']) && isset($selectedOptions['width']) && isset($selectedOptions['material'])) {
+                $typeMaterialKey = $selectedOptions['type'] . '-' . $selectedOptions['width'] . '-' . $selectedOptions['material'];
+                if (!isset($typeMaterialCounts[$typeMaterialKey])) {
+                    $typeMaterialCounts[$typeMaterialKey] = 0;
+                }
+                $typeMaterialCounts[$typeMaterialKey]++;
+            }
+
+            // شمارش spacer و spacerColor و adhesive
+            if (isset($selectedOptions['spacer']) && isset($selectedOptions['spacerColor']) && isset($selectedOptions['adhesive'])) {
+                $spacerKey = $selectedOptions['spacer'] . '-' . $selectedOptions['spacerColor'] . '-' . $selectedOptions['adhesive'];
+                if (!isset($spacerCounts[$spacerKey])) {
+                    $spacerCounts[$spacerKey] = 0;
+                }
+                $spacerCounts[$spacerKey]++;
+            }
+        }
+
+        $finalPrice = $isTempered ? $this->basePriceDoubleSecurit : $this->basePricDouble;
+
+        if ($temperedCount > 0) {
+            $finalPrice += $temperedCount * $this->options['material']['سکوریت'];
+        }
+
+        if ($totalThickness > 8) {
+            $extraThickness = $totalThickness - 8;
+            $finalPrice += $extraThickness * $this->Doublewidth;
+        }
+
+        foreach ($selectedOptionsList as $selectedOptions) {
+            // محاسبه قیمت بر اساس نوع شیشه و ضخامت
+            if (isset($selectedOptions['type']) && isset($selectedOptions['width'])) {
+                $type = $selectedOptions['type'];
+                $width = $selectedOptions['width'];
+                if ($selectedOptions['type'] === 'ساتینا') {
+                    // قیمت ثابت برای شیشه ساتینا
+                    $finalPrice += $this->options['type']['ساتینا'];
+                }
+                elseif (array_key_exists($type, $this->options['type'])) {
+                    $finalPrice += $width * $this->options['type'][$type];
+                }
+            }
+
+            // محاسبه قیمت بر اساس ضخامت فاصله‌دهنده
+            if (isset($selectedOptions['spacer'])) {
+                $spacer = $selectedOptions['spacer'];
+                if (array_key_exists($spacer, $this->options['spacer'])) {
+                    $finalPrice += $this->options['spacer'][$spacer];
+                } else {
+                    return "ارور"; // اگر ضخامت فاصله‌دهنده نامعتبر باشد
+                }
+            }
+
+            // محاسبه قیمت بر اساس رنگ فاصله‌دهنده
+            if (isset($selectedOptions['spacerColor'])) {
+                $spacerColor = $selectedOptions['spacerColor'];
+                $spacer = $selectedOptions['spacer'] ?? 0;
+                if (array_key_exists($spacerColor, $this->options['spacerColor'])) {
+                    $finalPrice += $spacer * $this->options['spacerColor'][$spacerColor];
+                } else {
+                    return "ارور"; // اگر رنگ فاصله‌دهنده نامعتبر باشد
+                }
+            }
+
+            // محاسبه قیمت بر اساس چسب
+            if (isset($selectedOptions['adhesive'])) {
+                $adhesive = $selectedOptions['adhesive'];
+                if (array_key_exists($adhesive, $this->options['adhesive'])) {
+                    $finalPrice += $this->options['adhesive'][$adhesive];
+                } else {
+                    return "ارور"; // اگر نوع چسب نامعتبر باشد
+                }
+            }
+        }
+
+        // بررسی تعداد تکرار الگوهای مشابه
+        $repeatedTypeMaterial = false;
+        foreach ($typeMaterialCounts as $count) {
+            if ($count >= 3) {
+                $repeatedTypeMaterial = true;
+                break;
+            }
+        }
+
+        $repeatedSpacer = false;
+        foreach ($spacerCounts as $count) {
+            if ($count >= 2) {
+                $repeatedSpacer = true;
+                break;
+            }
+        }
+
+        // اگر هر دو الگو به تعداد مشخص تکرار شدند، مبلغ اضافی 4100000 را اضافه کنید
+        if ($repeatedTypeMaterial && $repeatedSpacer) {
+            $finalPrice += 4100000;
+        }
+        return $finalPrice;
+    }
+   /* public function calculatePriceDouble($selectedOptionsList) {
+        $isTempered = false;
+        $temperedCount = 0;
+        $totalThickness = 0;
+
         foreach ($selectedOptionsList as $selectedOptions) {
             if (isset($selectedOptions['material']) && $selectedOptions['material'] == 'سکوریت') {
                 $isTempered = true;
@@ -588,6 +567,86 @@ class InvoiceService
                 }
             }
 
+            // محاسبه قیمت بر اساس ضخامت فاصله‌دهنده
+            if (isset($selectedOptions['spacer'])) {
+                $spacer = $selectedOptions['spacer'];
+                if (array_key_exists($spacer, $this->options['spacer'])) {
+                    $finalPrice += $this->options['spacer'][$spacer];
+                } else {
+                    return "ارور"; // اگر ضخامت فاصله‌دهنده نامعتبر باشد
+                }
+            }
+
+            // محاسبه قیمت بر اساس رنگ فاصله‌دهنده
+            if (isset($selectedOptions['spacerColor'])) {
+                $spacerColor = $selectedOptions['spacerColor'];
+                $spacer = $selectedOptions['spacer'] ?? 0;
+                if (array_key_exists($spacerColor, $this->options['spacerColor'])) {
+                    $finalPrice += $spacer * $this->options['spacerColor'][$spacerColor];
+                } else {
+                    return "ارور"; // اگر رنگ فاصله‌دهنده نامعتبر باشد
+                }
+            }
+
+            // محاسبه قیمت بر اساس چسب
+            if (isset($selectedOptions['adhesive'])) {
+                $adhesive = $selectedOptions['adhesive'];
+                if (array_key_exists($adhesive, $this->options['adhesive'])) {
+                    $finalPrice += $this->options['adhesive'][$adhesive];
+                } else {
+                    return "ارور"; // اگر نوع چسب نامعتبر باشد
+                }
+            }
+        }
+
+        return $finalPrice;
+    }*/
+    public function calculatePriceDoubleLaminate($selectedOptionsList) {
+        $temperedCount = 0;
+        $totalThickness = 0;
+
+        foreach ($selectedOptionsList as $selectedOptions) {
+            if (isset($selectedOptions['material']) && $selectedOptions['material'] == 'سکوریت') {
+                $temperedCount++;
+            }
+            if (isset($selectedOptions['width'])) {
+                $totalThickness += $selectedOptions['width'];
+            }
+        }
+
+        $finalPrice =  $this->basePriceDoubleSecurit ;
+
+        if ($temperedCount > 0) {
+            $finalPrice += $temperedCount * $this->options['material']['سکوریت'];
+        }
+
+        if ($totalThickness > 8) {
+            $extraThickness = $totalThickness - 8;
+            $finalPrice += $extraThickness * $this->Doublewidth;
+        }
+
+        foreach ($selectedOptionsList as $selectedOptions) {
+            // محاسبه قیمت بر اساس نوع شیشه و ضخامت
+            if (isset($selectedOptions['type']) && isset($selectedOptions['width'])) {
+                $type = $selectedOptions['type'];
+                $width = $selectedOptions['width'];
+                if ($selectedOptions['type'] === 'ساتینا') {
+                    // قیمت ثابت برای شیشه ساتینا
+                    $finalPrice += $this->options['type']['ساتینا'];
+                }
+                elseif (array_key_exists($type, $this->options['type'])) {
+                    $finalPrice += $width * $this->options['type'][$type];
+                }
+            }
+            // محاسبه قیمت بر اساس رنگ لمینت
+            if (isset($selectedOptions['laminateColor']) && array_key_exists($selectedOptions['laminateColor'], $this->options['laminateColor'])) {
+                $finalPrice += $this->options['laminateColor'][$selectedOptions['laminateColor']];
+            }
+
+            // محاسبه قیمت بر اساس لمینت
+            if (isset($selectedOptions['laminate']) && array_key_exists($selectedOptions['laminate'], $this->options['laminate'])) {
+                $finalPrice += $this->options['laminate'][$selectedOptions['laminate']];
+            }
             // محاسبه قیمت بر اساس ضخامت فاصله‌دهنده
             if (isset($selectedOptions['spacer'])) {
                 $spacer = $selectedOptions['spacer'];
