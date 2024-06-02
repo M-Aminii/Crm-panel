@@ -109,7 +109,7 @@ class InvoiceController extends Controller
                 if (is_array($item['description'])) {
                     $item['description'] = $invoiceService->mergeProductStructures($item['description']);
                 }
-
+                dd($item['price_per_unit']);
                 // ایجاد آیتم نوعی جدید
                 $typeItem = TypeItem::create([
                     'key' =>  $itemIndex + 1,

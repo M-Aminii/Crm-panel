@@ -8,6 +8,7 @@ class InvoiceResource extends JsonResource
 {
     public function toArray($request)
     {
+
         return [
             'serial_number' => $this->serial_number,
             'user' => new UserResource($this->whenLoaded('user')),
