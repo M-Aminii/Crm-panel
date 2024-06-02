@@ -109,7 +109,7 @@ class InvoiceController extends Controller
                 if (is_array($item['description'])) {
                     $item['description'] = $invoiceService->mergeProductStructures($item['description']);
                 }
-                dd($item['price_per_unit']);
+
                 // ایجاد آیتم نوعی جدید
                 $typeItem = TypeItem::create([
                     'key' =>  $itemIndex + 1,
@@ -119,22 +119,24 @@ class InvoiceController extends Controller
                     'price' => $item['price_per_unit'] ?? 0 // قیمت محاسبه شده یا مقدار نمونه
                 ]);
 
-                // ایجاد آیتم فنی جدید برای هر بعد
                 foreach ($item['dimensions'] as $dimensionIndex => $dimension) {
-
-                    DimensionItem::create([
+                    // ایجاد آیتم ابعادی جدید
+                    $dimensionItem = DimensionItem::create([
                         'key' => $dimensionIndex + 1,
                         'invoice_id' => $invoice->id,
                         'type_id' => $typeItem->id,
                         'height' => $dimension['height'],
                         'width' => $dimension['width'],
-                        'weight' =>$dimension['weight'],
+                        'weight' => $dimension['weight'],
                         'quantity' => $dimension['quantity'],
-                        'over' => $invoiceService->calculateAspectRatio( $dimension['height'] , $dimension['width']),  //TODO: اضافه کردن درصد اور
-                        'description' => $dimension['description']
+                        'over' => $invoiceService->calculateAspectRatio($dimension['height'], $dimension['width']),  //TODO: اضافه کردن درصد اور
                     ]);
-                }
 
+                    // ذخیره توضیحات مرتبط با آیتم ابعادی در جدول واسط
+                    if (isset($dimension['description_ids']) && is_array($dimension['description_ids'])) {
+                        $dimensionItem->descriptionDimensions()->sync($dimension['description_ids']);
+                    }
+                }
                 // ایجاد آیتم‌های ابعاد جدید
                 $technicalDetails = $item['technical_details'];
                 TechnicalItem::create([
@@ -174,8 +176,9 @@ class InvoiceController extends Controller
     public function show(ShowInvoiceRequest $request)
     {
         try {
-            $invoice = \App\Models\Invoice::with(['user', 'customer', 'typeItems.product', 'typeItems.technicalItems', 'typeItems.dimensionItems'])
+            $invoice = \App\Models\Invoice::with(['user', 'customer', 'typeItems.product', 'typeItems.technicalItems', 'typeItems.dimensionItems', 'typeItems.dimensionItems.descriptionDimensions'])
                 ->findOrFail($request->invoice);
+            //dd($invoice->toArray());
             return new InvoiceResource($invoice);
 
         } catch (\Exception $e) {
@@ -271,7 +274,7 @@ class InvoiceController extends Controller
 
                     // بروزرسانی یا ایجاد آیتم فنی جدید برای هر بعد
                     foreach ($item['dimensions'] as $dimensionIndex => $dimension) {
-                        DimensionItem::updateOrCreate(
+                        $dimensionItem = DimensionItem::updateOrCreate(
                             ['invoice_id' => $invoice->id, 'type_id' => $typeItem->id, 'key' => $dimensionIndex + 1],
                             [
                                 'height' => $dimension['height'],
@@ -279,9 +282,13 @@ class InvoiceController extends Controller
                                 'weight' => $dimension['weight'],
                                 'quantity' => $dimension['quantity'],
                                 'over' => $invoiceService->calculateAspectRatio( $dimension['height'] , $dimension['width']),  //TODO: اضافه کردن درصد اور
-                                'description' => $dimension['description']
                             ]
+
                         );
+                        // ذخیره توضیحات مرتبط با آیتم ابعادی در جدول واسط
+                        if (isset($dimension['description_ids']) && is_array($dimension['description_ids'])) {
+                            $dimensionItem->descriptionDimensions()->sync($dimension['description_ids']);
+                        }
                     }
 
                     // بروزرسانی یا ایجاد آیتم‌های ابعاد جدید

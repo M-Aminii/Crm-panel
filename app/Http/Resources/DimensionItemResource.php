@@ -18,11 +18,11 @@ class DimensionItemResource extends JsonResource
             'width' => $this->width,
             'quantity' => $this->quantity,
             'weight' => $this->weight,
-            'area' => $invoiceService->CalculateArea($this->height,$this->width),
-            'total_area' => $invoiceService->CalculateArea($this->height,$this->width) * $this->quantity,
-            'Environment' => $invoiceService ->CalculateEnvironment($this->height,$this->width ,$this->quantity),
+            'area' => round ($invoiceService->CalculateArea($this->height,$this->width),3),
+            'total_area' =>   round ($invoiceService->CalculateArea($this->height,$this->width) * $this->quantity,3),
+            'Environment' =>  round ($invoiceService ->CalculateEnvironment($this->height,$this->width ,$this->quantity),3),
             'over' =>$this->over,
-            'description' => $this->description
+            'descriptions' => DescriptionDimensionResource::collection($this->whenLoaded('descriptionDimensions')),
         ];
 
     }

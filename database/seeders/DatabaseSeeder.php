@@ -23,5 +23,6 @@ class DatabaseSeeder extends Seeder
         $this->call(GlassWidthTableSeeder::class);
         $this->call(GlassMaterialTableSeeder::class);
         $this->call(GlassSpacerTableSeeder::class);
+        $this->call(DescriptionDimensionTableSeeder::class);
     }
 }

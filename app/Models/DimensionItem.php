@@ -10,7 +10,7 @@ class DimensionItem extends Model
     use HasFactory;
 
     protected $fillable = [
-        'key','invoice_id', 'type_id', 'height', 'width', 'weight','quantity', 'over', 'description'
+        'key','invoice_id', 'type_id', 'height', 'width', 'weight','quantity', 'over'
     ];
 
     public function invoice()
@@ -21,6 +21,10 @@ class DimensionItem extends Model
     public function typeItem()
     {
         return $this->belongsTo(TypeItem::class, 'type_id');
+    }
+    public function descriptionDimensions()
+    {
+        return $this->belongsToMany(DescriptionDimension::class, 'dimension_description_items', 'dimension_id', 'description_id');
     }
 }
 

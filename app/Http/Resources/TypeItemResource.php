@@ -33,8 +33,8 @@ class TypeItemResource extends JsonResource
             'price' => $this->price,
             'dimensions' => DimensionItemResource::collection($this->whenLoaded('dimensionItems')),
             'total_quantity' => $this->totalQuantity,
-            'total_all_area' =>$this->totalALLArea,
-            'total-environment' => $this->totalEnvironment,
+            'total_all_area' => round ($this->totalALLArea,3),
+            'total_environment' => round ($this->totalEnvironment,3),
             'technical_details' => TechnicalItemResource::collection($this->whenLoaded('technicalItems')),
         ];
     }

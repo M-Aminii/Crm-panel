@@ -295,8 +295,8 @@ class InvoiceService
         ],
         'adhesive' => [
             'پلی سولفاید'=> 0,
-            'چسب IG' => 5300000,
-            'چسب SG' => 7200000,
+            'سیلیکون IG' => 5300000,
+            'سیلیکون SG' => 7200000,
         ],
 
         'laminate' => [
@@ -558,6 +558,25 @@ class InvoiceService
             if (isset($selectedOptions['width'])) {
                 $totalThickness += $selectedOptions['width'];
             }
+
+
+            // شمارش ترکیب type و material
+            if (isset($selectedOptions['type']) && isset($selectedOptions['width']) && isset($selectedOptions['material'])) {
+                $typeMaterialKey = $selectedOptions['type'] . '-' . $selectedOptions['width'] . '-' . $selectedOptions['material'];
+                if (!isset($typeMaterialCounts[$typeMaterialKey])) {
+                    $typeMaterialCounts[$typeMaterialKey] = 0;
+                }
+                $typeMaterialCounts[$typeMaterialKey]++;
+            }
+
+            // شمارش spacer و spacerColor و adhesive
+            if (isset($selectedOptions['spacer']) && isset($selectedOptions['spacerColor']) && isset($selectedOptions['adhesive'])) {
+                $spacerKey = $selectedOptions['spacer'] . '-' . $selectedOptions['spacerColor'] . '-' . $selectedOptions['adhesive'];
+                if (!isset($spacerCounts[$spacerKey])) {
+                    $spacerCounts[$spacerKey] = 0;
+                }
+                $spacerCounts[$spacerKey]++;
+            }
         }
 
         $finalPrice =  $this->basePriceDoubleSecurit ;
@@ -629,6 +648,28 @@ class InvoiceService
             }
         }
 
+
+        // بررسی تعداد تکرار الگوهای مشابه
+        $repeatedTypeMaterial = false;
+        foreach ($typeMaterialCounts as $count) {
+            if ($count >= 3) {
+                $repeatedTypeMaterial = true;
+                break;
+            }
+        }
+
+        $repeatedSpacer = false;
+        foreach ($spacerCounts as $count) {
+            if ($count >= 2) {
+                $repeatedSpacer = true;
+                break;
+            }
+        }
+
+        // اگر هر دو الگو به تعداد مشخص تکرار شدند، مبلغ اضافی 4100000 را اضافه کنید
+        if ($repeatedTypeMaterial && $repeatedSpacer) {
+            $finalPrice += 4100000;
+        }
         return $finalPrice;
     }
 

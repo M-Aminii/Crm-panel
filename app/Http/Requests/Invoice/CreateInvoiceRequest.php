@@ -44,7 +44,7 @@ class CreateInvoiceRequest extends FormRequest
             'items.*.dimensions.*.height' => 'required|integer',
             'items.*.dimensions.*.width' => 'required|integer',
             'items.*.dimensions.*.quantity' => 'required|integer',
-            'items.*.dimensions.*.description' => 'required|string'
+            'items.*.dimensions.*.description' => 'nullable'
         ];
     }
 }

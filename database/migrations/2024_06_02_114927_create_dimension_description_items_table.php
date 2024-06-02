@@ -11,30 +11,26 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('dimension_items', function (Blueprint $table) {
+        Schema::create('dimension_description_items', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('key');
-            $table->unsignedBigInteger('invoice_id');
-            $table->unsignedBigInteger('type_id');
-            $table->integer('height');
-            $table->integer('width');
-            $table->integer('weight');
-            $table->integer('quantity');
-            $table->integer('over');
+            $table->unsignedBigInteger('dimension_id');
+            $table->unsignedBigInteger('description_id');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
 
 
 
-            $table->foreign('invoice_id')
+            $table->foreign('dimension_id')
                 ->references('id')
-                ->on('invoices')
+                ->on('dimension_items')
                 ->onDelete('cascade');
 
-            $table->foreign('type_id')
+            $table->foreign('description_id')
                 ->references('id')
-                ->on('type_items')
+                ->on('description_dimensions')
                 ->onDelete('cascade');
+
+
 
         });
     }
@@ -44,6 +40,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('dimension_items');
+        Schema::dropIfExists('dimension_item_description');
     }
 };
