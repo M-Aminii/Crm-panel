@@ -702,15 +702,15 @@ class InvoiceController extends Controller
                     $valueAddedTax += ($valueAddedTax * $overPercentage) / 100; //قیمت کارخانه
 
                     // Calculate the value added tax (10% of price unit)
-                    $priceUnit = intval($valueAddedTax / 1.1) ;    //قیمت واحد برای شرکت
+                    $priceUnit = ($valueAddedTax /110) * 100 ;    //قیمت واحد برای شرکت
 
-                    $priceDiscounted =intval($priceUnit - ($priceUnit * 20)/100) ;  //قیمت با احتساب تخفیف
+                    $priceDiscounted = $priceUnit - ($priceUnit * 20)/100 ;  //قیمت با احتساب تخفیف
 
                     $priceDiscounted += intval($totalMeterage * $weight) * 37500;  //قیمت با احتساب تخفیف به همراه کرایه
 
-                    $priceValueAddedFinal = $priceDiscounted * 1.1; //قیمت با ارزش افزوده
+                    $priceValueAddedFinal = ($priceDiscounted * 110) /100; //قیمت با ارزش افزوده
 
-                    $totalPrice = $totalMeterage * $priceDiscounted ; // قیمت کل
+                    $totalPrice = intval($totalMeterage * $priceDiscounted) ; // قیمت کل
 
                     $names = collect($descriptionIds)->map(function ($id) use ($descriptionNames) {
                         return $descriptionNames[$id] ?? ' ';
@@ -718,7 +718,7 @@ class InvoiceController extends Controller
 
                     // Append over percentage to description if it's not zero or empty
                     if (!empty($overPercentage) && $overPercentage != 0) {
-                        $names .= ' Over: ' . $overPercentage . '%';
+                        $names .= 'درصد اور ' . $overPercentage ;
                     }
 
                     AggregatedItem::create([
