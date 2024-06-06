@@ -22,14 +22,9 @@ return new class extends Migration
             $table->string('frame')->nullable();
             $table->string('balance')->nullable();
             $table->string('vault_type')->nullable();
-            $table->string('part_number')->nullable();
             $table->string('map_dimension')->nullable();
             $table->string('map_view')->nullable();
-            $table->string('vault_number')->nullable();
-            $table->string('delivery_meterage')->nullable();
-            $table->string('order_number')->nullable();
             $table->string('usage')->nullable();
-            $table->string('car_type')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
 

@@ -654,14 +654,9 @@ class InvoiceController extends Controller
                         'frame' => $technicalDetails['frame'],
                         'balance' => $technicalDetails['balance'],
                         'vault_type' => $technicalDetails['vault_type'],
-                        'part_number' => $technicalDetails['part_number'],
                         'map_dimension' => $technicalDetails['map_dimension'],
                         'map_view' => $technicalDetails['map_view'],
-                        'vault_number' => $technicalDetails['vault_number'],
-                        'delivery_meterage' => $technicalDetails['delivery_meterage'],
-                        'order_number' => $technicalDetails['order_number'],
                         'usage' => $technicalDetails['usage'],
-                        'car_type' => $technicalDetails['car_type'],
                     ]);
                 }
 
