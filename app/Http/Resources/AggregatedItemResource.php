@@ -14,6 +14,7 @@ class AggregatedItemResource extends JsonResource
             'total_quantity' => $this->total_quantity,
             'total_weight' => $this->total_weight,
             'price_unit' => number_format($this->price_unit),
+            'price_discounted' => number_format($this->price_discounted),
             'value_added_tax' => number_format($this->value_added_tax),
             'total_price' => number_format($this->total_price) ,
             'description' => $this->description,

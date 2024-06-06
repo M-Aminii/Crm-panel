@@ -704,18 +704,18 @@ class InvoiceController extends Controller
                     $overPercentage /= $dimensions->count();
 
                     // Add the over percentage to the price unit
-                    $valueAddedTax += ($valueAddedTax * $overPercentage) / 100;
+                    $valueAddedTax += ($valueAddedTax * $overPercentage) / 100; //قیمت کارخانه
 
                     // Calculate the value added tax (10% of price unit)
-                    $priceUnit = intval($valueAddedTax / 1.1) ;
+                    $priceUnit = intval($valueAddedTax / 1.1) ;    //قیمت واحد برای شرکت
 
-                    $priceDiscounted =intval($priceUnit - ($priceUnit * 20)/100) ;
+                    $priceDiscounted =intval($priceUnit - ($priceUnit * 20)/100) ;  //قیمت با احتساب تخفیف
 
-                    $priceValueAddedFinal = $priceDiscounted * 1.1;
+                    $priceDiscounted += intval($totalMeterage * $weight) * 37500;  //قیمت با احتساب تخفیف به همراه کرایه
 
-                    $totalPrice = $totalMeterage * $priceDiscounted ;
+                    $priceValueAddedFinal = $priceDiscounted * 1.1; //قیمت با ارزش افزوده
 
-
+                    $totalPrice = $totalMeterage * $priceDiscounted ; // قیمت کل
 
                     $names = collect($descriptionIds)->map(function ($id) use ($descriptionNames) {
                         return $descriptionNames[$id] ?? ' ';
