@@ -36,5 +36,9 @@ class Invoice extends Model
     {
         return $this->hasMany(DimensionItem::class);
     }
+    public function aggregatedItems()
+    {
+        return $this->hasMany(AggregatedItem::class);
+    }
 }
 

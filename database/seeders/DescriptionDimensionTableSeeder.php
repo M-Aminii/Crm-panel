@@ -22,6 +22,7 @@ class DescriptionDimensionTableSeeder extends Seeder
         }
 
         $products = [
+           'سیلیکون IG',
            'الگویی 25',
            'اسپندرال',
         ];

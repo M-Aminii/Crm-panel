@@ -34,6 +34,39 @@ class InvoiceService
         }
     }
 
+    public function calculateWeight($description)
+    {
+        $totalWidth = 0;
+        $additionalWeight = 0;
+
+        foreach ($description as $desc) {
+            if (isset($desc['width'])) {
+                $totalWidth += $desc['width'];
+            }
+
+
+            if (isset($desc['laminate'])) {
+                switch ($desc['laminate']) {
+                    case "1.52":
+                        $additionalWeight += 2.5;
+                        break;
+                    case "0.76":
+                        $additionalWeight += 1.25;
+                        break;
+                    case "0.38":
+                        $additionalWeight += 0.625;
+                        break;
+                }
+            }
+
+            if (isset($desc['spacer'])) {
+                $additionalWeight += ($desc['spacer'] / 10) * 2.5;
+            }
+        }
+        $weight = ($totalWidth * 2.5) + $additionalWeight;
+        return $weight;
+    }
+
     public  function information($user, $buyer, $item)
     {
         // دریافت اطلاعات فروشنده از ورودی کاربر
@@ -191,11 +224,6 @@ class InvoiceService
         $result = ($height * $width / 1000000 < 0.5) ? (($height * $width / 1000000 == 0) ? 0 : 0.5) : ($height * $width / 1000000);
         return $result;
     }
-    public function CalculateTotalArea($height, $width)
-    {
-        $result = ($height * $width / 1000000 < 0.5) ? (($height * $width / 1000000 == 0) ? 0 : 0.5) : ($height * $width / 1000000);
-        return $result;
-    }
     public function calculateAspectRatio($height, $width)
     {
         $area = $this->CalculateArea((float)$height,(float)$width );
@@ -213,6 +241,7 @@ class InvoiceService
         }
 
         if (max($height,$width) > 4880 && min($height,$width) <= 2500 ){
+
             return 140 ;
         }
 
