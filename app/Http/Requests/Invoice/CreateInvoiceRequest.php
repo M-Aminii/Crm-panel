@@ -35,6 +35,15 @@ class CreateInvoiceRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'buyer' => 'required|integer|exists:customers,id',
+            'status' => 'required|string',
+            'items' => 'required|array',
+            'items.*.product' => 'required|integer|exists:products,id',
+            'items.*.description' => 'required|array',
+            'items.*.dimensions' => 'required|array',
+            'items.*.technical_details' => 'required|array',
+        ];
+       /* return [
             'buyer' => 'required|exists:customers,id',
             'items' => 'required|array',
             'items.*.product' => 'required|exists:products,id',
@@ -45,6 +54,6 @@ class CreateInvoiceRequest extends FormRequest
             'items.*.dimensions.*.width' => 'required|integer',
             'items.*.dimensions.*.quantity' => 'required|integer',
             'items.*.dimensions.*.description' => 'nullable'
-        ];
+        ];*/
     }
 }
