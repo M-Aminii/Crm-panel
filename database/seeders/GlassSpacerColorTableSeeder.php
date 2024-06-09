@@ -4,13 +4,14 @@ namespace Database\Seeders;
 
 use App\Models\GlassMaterial;
 use App\Models\GlassSpacer;
+use App\Models\GlassSpacerColor;
 use App\Models\GlassType;
 use App\Models\Product;
 use App\Models\Province;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class GlassSpacerTableSeeder extends Seeder
+class GlassSpacerColorTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -19,19 +20,18 @@ class GlassSpacerTableSeeder extends Seeder
      */
     public function run()
     {
-        if (GlassSpacer::count()) {
-            GlassSpacer::truncate();
+        if (GlassSpacerColor::count()) {
+            GlassSpacerColor::truncate();
         }
 
         $GlassSpacers = [
-            ['size' => '1/52', 'price' => 16100000],
-            ['size' => '0/76', 'price' => 10900000],
-            ['size' => '0/38', 'price' => 10900000],
+            ['name' => 'نقره ای', 'price' => 0],
+            ['name' => 'مشکی', 'price' => 150000],
         ];
 
         foreach ($GlassSpacers as $GlassSpacer) {
-            GlassSpacer::create($GlassSpacer);
+            GlassSpacerColor::create($GlassSpacer);
         }
-        $this->command->info('GlassSpacer entries added to the database');
+        $this->command->info('GlassSpacerColor entries added to the database');
     }
 }

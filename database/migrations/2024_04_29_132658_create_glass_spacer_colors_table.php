@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('glass_spacers', function (Blueprint $table) {
+        Schema::create('glass_spacer_colors', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('size');
+            $table->string('name');
             $table->integer('price');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('glass_spacer');
+        Schema::dropIfExists('glass_spacer_color');
     }
 };

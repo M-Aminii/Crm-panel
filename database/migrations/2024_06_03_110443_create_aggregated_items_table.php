@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('aggregated_items', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->integer('key');
             $table->unsignedBigInteger('invoice_id');
             $table->text('description_product');
             $table->decimal('total_area', 10, 3);

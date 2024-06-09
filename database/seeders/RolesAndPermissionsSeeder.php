@@ -60,10 +60,5 @@ class RolesAndPermissionsSeeder extends Seeder
                 $viewProduct,
             );
 
-
-
-
-
-
     }
 }

@@ -23,12 +23,12 @@ class GlassMaterialTableSeeder extends Seeder
         }
 
         $GlassMaterials = [
-           'سکوریت',
-           'خام',
+            ['name' => 'خام', 'price' => 0],
+            ['name' => 'سکوریت', 'price' => 1500000],
         ];
 
         foreach ($GlassMaterials as $GlassMaterial) {
-            GlassMaterial::create(['name' => $GlassMaterial]);
+            GlassMaterial::create( $GlassMaterial);
 
         }
         $this->command->info('add GlassMaterial to database');

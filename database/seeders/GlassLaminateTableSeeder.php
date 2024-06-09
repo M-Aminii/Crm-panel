@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\GlassLaminate;
 use App\Models\GlassMaterial;
 use App\Models\GlassSpacer;
 use App\Models\GlassType;
@@ -10,7 +11,7 @@ use App\Models\Province;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class GlassSpacerTableSeeder extends Seeder
+class GlassLaminateTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -19,19 +20,19 @@ class GlassSpacerTableSeeder extends Seeder
      */
     public function run()
     {
-        if (GlassSpacer::count()) {
-            GlassSpacer::truncate();
+        if (GlassLaminate::count()) {
+            GlassLaminate::truncate();
         }
 
-        $GlassSpacers = [
+        $GlassLaminates = [
             ['size' => '1/52', 'price' => 16100000],
             ['size' => '0/76', 'price' => 10900000],
             ['size' => '0/38', 'price' => 10900000],
         ];
 
-        foreach ($GlassSpacers as $GlassSpacer) {
-            GlassSpacer::create($GlassSpacer);
+        foreach ($GlassLaminates as $GlassLaminate) {
+            GlassLaminate::create($GlassLaminate);
         }
-        $this->command->info('GlassSpacer entries added to the database');
+        $this->command->info('GlassLaminate entries added to the database');
     }
 }

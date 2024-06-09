@@ -11,15 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('glass_final_structure', function (Blueprint $table) {
+        Schema::create('glass_spacer_glues', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('product_id');
-            $table->integer('product_number');
-            $table->text('structure_data')->nullable();
+            $table->string('name');
+            $table->integer('price');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
-
         });
     }
 
@@ -28,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('glass_final_structure');
+        Schema::dropIfExists('glass_spacer_glue');
     }
 };

@@ -10,7 +10,7 @@ class GlassWidth extends Model
     use HasFactory;
 
     protected $fillable = [
-        'size',
+        'size','price'
     ];
 
     protected $hidden = [

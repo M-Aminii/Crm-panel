@@ -5,13 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class GlassLaminate extends Model
+class GlassSpacerGlue extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'size',
-        'price'
+        'name','price'
 
     ];
     protected $hidden = [

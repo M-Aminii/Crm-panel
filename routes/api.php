@@ -68,7 +68,20 @@ Route::group(["middleware" => ['role:super-admin',"auth:api"],'prefix' => 'Admin
     });
 });
 
+// روت‌های مختص به system-admin
+Route::group(['middleware' => ['role:system-admin', 'auth:api'], 'prefix' => 'SystemAdmin'], function () {
+    Route::group(['prefix' => '/user'], function () {
+        Route::post('/', [UserController::class, 'store']);
+        Route::patch('/{id}', [UserController::class, 'update']);
+    });
+});
 
+// روت‌های مختص به member
+Route::group(['middleware' => ['role:member', 'auth:api'], 'prefix' => 'Member'], function () {
+    Route::group(['prefix' => '/product'], function () {
+        Route::get('/list', [ProductController::class, 'index']);
+    });
+});
 /*Route::group(["middleware" => ['role:member',"auth:api"],'prefix' => 'Admin'], function () {
 
     Route::group(['prefix' => '/customer'], function () {

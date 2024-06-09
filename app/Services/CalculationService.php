@@ -186,6 +186,7 @@ class CalculationService
             if (isset($selectedOptions['material']) && $selectedOptions['material'] == 'سکوریت') {
                 $temperedCount++;
             }
+
             if ($temperedCount > 0) {
                 $finalPrice += $temperedCount * $this->options['material']['سکوریت'];
             }
@@ -211,6 +212,7 @@ class CalculationService
                     $finalPrice += $typePrice;
                 }
             }
+
             // محاسبه قیمت بر اساس رنگ لمینت
             if (isset($selectedOptions['laminateColor']) && array_key_exists($selectedOptions['laminateColor'], $this->options['laminateColor'])) {
                 $finalPrice += $this->options['laminateColor'][$selectedOptions['laminateColor']];

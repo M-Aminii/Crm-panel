@@ -21,16 +21,17 @@ class DescriptionDimensionTableSeeder extends Seeder
             DescriptionDimension::truncate();
         }
 
-        $products = [
-           'سیلیکون IG',
-           'الگویی 25',
-           'اسپندرال',
+        $DescriptionDimensions = [
+            ['name' => 'سیلیکون IG','percent'=> null,'price' => 5300000],
+            ['name' => 'الگویی 25','percent'=> 25,'price' => null],
+            ['name' => 'اسپندرال','percent'=> null,'price' => 9100000],
+
         ];
 
-        foreach ($products as $product) {
-            DescriptionDimension::create(['name' => $product]);
+        foreach ($DescriptionDimensions as $DescriptionDimension) {
+            DescriptionDimension::create($DescriptionDimension);
 
         }
-        $this->command->info('add Product to database');
+        $this->command->info('add DescriptionDimension to database');
     }
 }

@@ -22,18 +22,17 @@ class GlassTypeTableSeeder extends Seeder
         }
 
         $GlassTypes = [
-           'سوپر کلیر',
-           'دودی',
-           'برنز',
-           'رفلکس نقره ای',
-           'رفلکس طلایی',
-           'ساتینا',
-           'آینه',
-           'سانرژی',
+            ['name' => 'سوپر کلیر', 'price' => 0],
+            ['name' => 'دودی', 'price' => 650000],
+            ['name' => 'برنز', 'price' => 400000],
+            ['name' => 'رفلکس طلایی', 'price' => 350000],
+            ['name' => 'رفلکس نقره ای', 'price' => 350000],
+            ['name' => 'ساتینا', 'price' => 1300000],
+            ['name' => 'ساتینا(زبرا)', 'price' => 2450000],
         ];
 
         foreach ($GlassTypes as $GlassType) {
-            GlassType::create(['name' => $GlassType]);
+            GlassType::create($GlassType);
 
         }
         $this->command->info('add GlassTypes to database');

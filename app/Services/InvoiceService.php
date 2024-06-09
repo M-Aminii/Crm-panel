@@ -204,7 +204,7 @@ class InvoiceService
             ]);
         }
     }*/
-    public static function processItems($invoice, $items)
+ /*   public static function processItems($invoice, $items)
     {
         $invoiceService = new InvoiceService();
         $dimensionGroups = collect();
@@ -260,7 +260,7 @@ class InvoiceService
         ];
 
         if (isset($productFunctions[$item['product']]) && is_array($item['description'])) {
-            $functionName = $productFunctions[$item['product']];
+            $functionName = $productFunctions[$item['product']];;
             $calculatedPrice = $CalculationService->$functionName($item['description']);
             if ($calculatedPrice !== null) {
                 $item['price_per_unit'] = $calculatedPrice;
@@ -366,8 +366,10 @@ class InvoiceService
 
             $valueAddedTax += ($valueAddedTax * $overPercentage) / 100;
             $priceUnit = ($valueAddedTax / 110) * 100;
+
             $priceDiscounted = ($priceUnit / 120) * 100;
             $priceDiscounted += intval($totalMeterage * $weight) * 37500;
+
             $priceValueAddedFinal = ($priceDiscounted * 110) / 100;
 
             $totalPrice = intval($totalMeterage * $priceValueAddedFinal);
@@ -394,7 +396,207 @@ class InvoiceService
                 'value_added_tax' => $priceValueAddedFinal,
             ]);
         }
+    }*/
+
+    public static function processItems($invoice, $items)
+    {
+        $invoiceService = new InvoiceService();
+        $dimensionGroups = collect();
+
+        foreach ($items as $itemIndex => $item) {
+            $item = $invoiceService->calculateItemPrice($item);
+            $weight = $invoiceService->calculateWeight($item['description']);
+
+            // افزودن شرط بررسی adhesive و تغییر آن در صورت لزوم
+            foreach ($item['description'] as &$desc) {
+                if (isset($desc['adhesive']) && $desc['adhesive'] == 'پلی سولفاید') {
+                    foreach ($item['dimensions'] as $dimensionIndex => &$dimension) {
+                        $area = round($invoiceService->CalculateArea($dimension['height'], $dimension['width']), 3);
+                        $totalWeight = $weight * $area;
+
+                        if ($totalWeight >= 250) {
+                            $desc['adhesive'] = 'سیلیکون IG';
+                            if (!isset($dimension['description_ids'])) {
+                                $dimension['description_ids'] = [];
+                            }
+                            if (!in_array(1, $dimension['description_ids'])) {
+                                $dimension['description_ids'][] = 1; // افزودن ID توضیحات
+                            }
+                        }
+                    }
+                }
+            }
+
+            $typeItem = TypeItem::updateOrCreate([
+                'invoice_id' => $invoice->id,
+                'product_id' => $item['product'],
+            ], [
+                'description' => $invoiceService->mergeProductStructures($item['description']),
+                'price' => $item['price_per_unit'] ?? 0,
+                'key' => $itemIndex + 1  // اضافه کردن مقدار key
+            ]);
+
+            $invoiceService->processDimensions($invoice->id, $typeItem, $item, $weight);
+            $invoiceService->updateOrCreateTechnicalItem($invoice->id, $typeItem, $item['technical_details']);
+        }
     }
+
+    public function calculateItemPrice($item)
+    {
+        $CalculationService = new CalculationService();
+
+        $productFunctions = [
+            1 => 'calculatePriceScorit',
+            2 => 'calculatePriceLaminate',
+            3 => 'calculatePriceDouble',
+            4 => 'calculatePriceDouble',
+            6 => 'calculatePriceDoubleLaminate'
+        ];
+
+        if (isset($productFunctions[$item['product']]) && is_array($item['description'])) {
+            $functionName = $productFunctions[$item['product']];
+            $calculatedPrice = $CalculationService->$functionName($item['description']);
+            if ($calculatedPrice !== null) {
+                $item['price_per_unit'] = $calculatedPrice;
+            } else {
+                throw new \Exception('مشکل در محاسبه قیمت محصول');
+            }
+        }
+
+        return $item;
+    }
+
+    public function processDimensions($invoiceId, $typeItem, $item, $weight)
+    {
+        $invoiceService = new InvoiceService();
+        $dimensionGroups = collect();
+
+        foreach ($item['dimensions'] as $dimensionIndex => $dimension) {
+            $area = round($invoiceService->CalculateArea($dimension['height'], $dimension['width']), 3);
+
+            $dimensionItem = DimensionItem::updateOrCreate(
+                ['invoice_id' => $invoiceId, 'type_id' => $typeItem->id, 'key' => $dimensionIndex + 1],
+                [
+                    'height' => $dimension['height'],
+                    'width' => $dimension['width'],
+                    'weight' => $weight * $area,
+                    'quantity' => $dimension['quantity'],
+                    'over' => $invoiceService->calculateAspectRatio($dimension['height'], $dimension['width']),
+                ]
+            );
+
+            if (isset($dimension['description_ids']) && is_array($dimension['description_ids'])) {
+                $dimensionItem->descriptionDimensions()->sync($dimension['description_ids']);
+            }
+
+            $descriptionKey = collect($dimension['description_ids'])->sort()->implode('-');
+            if (!$dimensionGroups->has($descriptionKey)) {
+                $dimensionGroups->put($descriptionKey, collect());
+            }
+            $dimensionGroups->get($descriptionKey)->push($dimensionItem);
+        }
+
+        $this->createOrUpdateAggregatedItems($invoiceId, $typeItem, $dimensionGroups, $item, $weight);
+    }
+
+    public function updateOrCreateTechnicalItem($invoiceId, $typeItem, $technicalDetails)
+    {
+        TechnicalItem::updateOrCreate(
+            ['invoice_id' => $invoiceId, 'type_id' => $typeItem->id],
+            [
+                'edge_type' => $technicalDetails['edge_type'],
+                'glue_type' => $technicalDetails['glue_type'],
+                'post_type' => $technicalDetails['post_type'],
+                'delivery_date' => $technicalDetails['delivery_date'],
+                'frame' => $technicalDetails['frame'],
+                'balance' => $technicalDetails['balance'],
+                'vault_type' => $technicalDetails['vault_type'],
+                'map_dimension' => $technicalDetails['map_dimension'],
+                'map_view' => $technicalDetails['map_view'],
+                'usage' => $technicalDetails['usage'],
+            ]
+        );
+    }
+
+    public function createOrUpdateAggregatedItems($invoiceId, $typeItem, $dimensionGroups, $item, $weight)
+    {
+        $invoiceService = new InvoiceService();
+        $descriptionNames = [];
+        $index = 1; // شمارنده برای کلید
+
+        foreach ($dimensionGroups as $descriptionKey => $dimensions) {
+            $totalArea = $dimensions->sum(function ($dimension) use ($invoiceService) {
+                return round($invoiceService->CalculateArea($dimension->height, $dimension->width), 3);
+            });
+
+            $totalQuantity = $dimensions->sum('quantity');
+            $totalMeterage = $dimensions->sum(function ($dimension) use ($invoiceService) {
+                $area = round($invoiceService->CalculateArea($dimension->height, $dimension->width), 3);
+                return $area * $dimension->quantity;
+            });
+
+            $basePrice = $item['price_per_unit'];
+
+            $descriptionIds = explode('-', $descriptionKey);
+
+            $valueAddedTax = $basePrice;
+            $overPercentage = 0;
+
+            foreach ($descriptionIds as $id) {
+                $description = DescriptionDimension::find($id);
+                if ($description) {
+                    $descriptionNames[$id] = $description->name;
+                    if ($description->price) {
+                        $valueAddedTax += $description->price;
+                    } elseif ($description->percent) {
+                        $valueAddedTax += ($basePrice * $description->percent) / 100;
+                    }
+                }
+            }
+
+            foreach ($dimensions as $dimension) {
+                $overPercentage += $dimension->over;
+            }
+            $overPercentage /= $dimensions->count();
+
+            $valueAddedTax += ($valueAddedTax * $overPercentage) / 100;
+            $priceUnit = ($valueAddedTax / 110) * 100;
+            $priceDiscounted = ($priceUnit / 120) * 100;
+            $priceDiscounted += intval($totalMeterage * $weight) * 37500;
+            $priceValueAddedFinal = ($priceDiscounted * 110) / 100;
+
+            $totalPrice = intval($totalMeterage * $priceValueAddedFinal);
+
+            $names = collect($descriptionIds)->map(function ($id) use ($descriptionNames) {
+                return $descriptionNames[$id] ?? ' ';
+            })->implode(', ');
+
+            if (!empty($overPercentage) && $overPercentage != 0) {
+                $names .= '   درصد اور ' . $overPercentage;
+            }
+
+            // استفاده از updateOrCreate با استفاده از key
+            AggregatedItem::updateOrCreate([
+                'invoice_id' => $invoiceId,
+                'key' => $index // استفاده از شمارنده به عنوان key
+            ], [
+                'description_product' => $typeItem->description,
+                'description' => $names,
+                'total_area' => $totalMeterage,
+                'total_quantity' => $totalQuantity,
+                'total_weight' => $totalMeterage * $weight,
+                'price_unit' => $priceUnit,
+                'price_discounted' => $priceDiscounted,
+                'total_price' => $totalPrice,
+                'value_added_tax' => $priceValueAddedFinal,
+            ]);
+
+            $index++; // افزایش شمارنده برای استفاده در کلید بعدی
+        }
+    }
+
+
+
 
 
 

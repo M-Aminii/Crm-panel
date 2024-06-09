@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('glass_widths', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('size');
+            $table->decimal('size');
+            $table->integer('price');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });

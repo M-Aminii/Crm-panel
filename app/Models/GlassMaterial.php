@@ -12,6 +12,7 @@ class GlassMaterial extends Model
     protected $fillable = [
         'name',
         'english_name',
+        'price'
     ];
 
     protected $hidden = [

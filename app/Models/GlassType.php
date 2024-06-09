@@ -12,6 +12,7 @@ class GlassType extends Model
     protected $fillable = [
         'name',
         'english_name',
+        'price'
     ];
 
     protected $hidden = [

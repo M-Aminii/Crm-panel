@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('glass_spacers', function (Blueprint $table) {
+        Schema::create('glass_laminate_colors', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('size');
+            $table->string('name')->nullable();
+            $table->string('english_name', 100)->nullable();
             $table->integer('price');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('glass_spacer');
+        Schema::dropIfExists('glass_laminate_color');
     }
 };
