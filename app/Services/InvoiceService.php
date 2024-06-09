@@ -562,7 +562,7 @@ class InvoiceService
             $valueAddedTax += ($valueAddedTax * $overPercentage) / 100;
             $priceUnit = ($valueAddedTax / 110) * 100;
             $priceDiscounted = ($priceUnit / 120) * 100;
-            $priceDiscounted += intval($totalMeterage * $weight) * 37500;
+            $priceDiscounted += intval( $weight * 37500) ;
             $priceValueAddedFinal = ($priceDiscounted * 110) / 100;
 
             $totalPrice = intval($totalMeterage * $priceValueAddedFinal);
