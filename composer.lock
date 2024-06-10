@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b44a2dd4157f9137d3630d7d92b26c0e",
+    "content-hash": "7879d1dfbbd9d5f95eff3bab5b9ccb29",
     "packages": [
         {
             "name": "barryvdh/laravel-dompdf",
@@ -3241,6 +3241,113 @@
                 }
             ],
             "time": "2023-11-12T21:59:55+00:00"
+        },
+        {
+            "name": "pishran/laravel-persian-string",
+            "version": "v1.6.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/pishran/laravel-persian-string.git",
+                "reference": "5ac9b89a2a12c193c61ddb14cc0ab838c43d3167"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/pishran/laravel-persian-string/zipball/5ac9b89a2a12c193c61ddb14cc0ab838c43d3167",
+                "reference": "5ac9b89a2a12c193c61ddb14cc0ab838c43d3167",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "^5.6|^5.7|^5.8|^6.0|^7.0|^8.0|^9.0|^10.0|^11.0",
+                "php": "^7.2|^8.0",
+                "pishran/persian-string": "^1.1"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Pishran\\LaravelPersianString\\ServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Pishran\\LaravelPersianString\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Farid Aghili",
+                    "email": "farid@pishranit.ir",
+                    "homepage": "https://www.faridaghili.ir",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Convert Arabic/English/etc numbers and characters to Persian numbers and characters in Laravel models.",
+            "homepage": "https://github.com/pishran/laravel-persian-string",
+            "keywords": [
+                "laravel",
+                "persian",
+                "string"
+            ],
+            "support": {
+                "issues": "https://github.com/pishran/laravel-persian-string/issues",
+                "source": "https://github.com/pishran/laravel-persian-string/tree/v1.6.2"
+            },
+            "time": "2024-03-27T07:31:39+00:00"
+        },
+        {
+            "name": "pishran/persian-string",
+            "version": "v1.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/pishran/persian-string.git",
+                "reference": "3638b20323587d33e2af9d3c0b1c0e9b7a75e1ab"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/pishran/persian-string/zipball/3638b20323587d33e2af9d3c0b1c0e9b7a75e1ab",
+                "reference": "3638b20323587d33e2af9d3c0b1c0e9b7a75e1ab",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.2|^8.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^7.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Pishran\\PersianString\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Farid Aghili",
+                    "email": "farid@pishranit.ir",
+                    "homepage": "https://www.faridaghili.ir",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Convert Arabic/English/etc numbers and characters to Persian numbers and characters.",
+            "homepage": "https://github.com/pishran/persian-string",
+            "keywords": [
+                "persian",
+                "string"
+            ],
+            "support": {
+                "issues": "https://github.com/pishran/persian-string/issues",
+                "source": "https://github.com/pishran/persian-string/tree/v1.2.1"
+            },
+            "time": "2023-01-10T16:55:43+00:00"
         },
         {
             "name": "psr/clock",

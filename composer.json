@@ -13,6 +13,7 @@
         "laravel/tinker": "^2.8",
         "laraveldaily/laravel-invoices": "3.*",
         "mpdf/mpdf": "^8.2",
+        "pishran/laravel-persian-string": "^1.6",
         "spatie/laravel-enum": "^3.0",
         "spatie/laravel-permission": "^6.4",
         "tecnickcom/tcpdf": "^6.7",

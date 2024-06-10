@@ -77,7 +77,9 @@ class InvoiceController extends Controller
                     'status' => $validatedData['status'],
                 ]);
 
-                InvoiceService::processItems($invoice, $validatedData['items']);
+                $AmountPayable = InvoiceService::processItems($invoice, $validatedData['items']);
+
+                $invoice->update(['amount_payable' => $AmountPayable]);
             });
 
             return response()->json(['message' => 'فاکتور با موفقیت ایجاد شد'], 201);
@@ -456,7 +458,10 @@ class InvoiceController extends Controller
                 $invoice->update([
                     'status' => $validatedData['status'],
                 ]);
-                InvoiceService::processItems($invoice, $validatedData['items']);
+
+                $AmountPayable = InvoiceService::processItems($invoice, $validatedData['items']);
+
+                $invoice->update(['amount_payable' => $AmountPayable]);
             });
 
             return response()->json(['message' => 'فاکتور با موفقیت به‌روزرسانی شد'], 200);
