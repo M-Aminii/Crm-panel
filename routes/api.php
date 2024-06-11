@@ -41,7 +41,7 @@ Route::get('/provinces/{id}/cities', function ($id) {
     return response()->json($cities);
 });
 
-Route::group(["middleware" => ['role:super-admin',"auth:api"],'prefix' => 'Admin'], function () {
+/*Route::group(["middleware" => ['role:super-admin',"auth:api"],'prefix' => 'Admin'], function () {
 
     Route::group(['prefix' => '/user'], function () {
         Route::post('/',[UserController::class ,'store']);
@@ -66,22 +66,34 @@ Route::group(["middleware" => ['role:super-admin',"auth:api"],'prefix' => 'Admin
         Route::patch('/{invoice}',[InvoiceController::class ,'update']);
         Route::delete('/{invoice}',[InvoiceController::class ,'destroy']);
     });
-});
+});*/
 
-// روت‌های مختص به system-admin
-Route::group(['middleware' => ['role:system-admin', 'auth:api'], 'prefix' => 'SystemAdmin'], function () {
+
+Route::group(['middleware' => ['auth:api'], 'prefix' => 'Admin'], function () {
     Route::group(['prefix' => '/user'], function () {
-        Route::post('/', [UserController::class, 'store']);
-        Route::patch('/{id}', [UserController::class, 'update']);
+        Route::post('/', [UserController::class, 'store'])->middleware('permission:manage users');
+        Route::get('/list', [UserController::class, 'index'])->middleware('permission:view users');
+        Route::get('/{id}', [UserController::class, 'show'])->middleware('permission:view users');
+        Route::patch('/{id}', [UserController::class, 'update'])->middleware('permission:manage users');
+    });
+
+    Route::group(['prefix' => '/customer'], function () {
+        Route::post('/', [CustomerController::class, 'store'])->middleware('permission:manage customers');
+        Route::get('/list', [CustomerController::class, 'index'])->middleware('permission:view customers');
+        Route::get('/{customer}', [CustomerController::class, 'show'])->middleware('permission:view customers');
+        Route::patch('/{customer}', [CustomerController::class, 'update'])->middleware('permission:manage customers');
+    });
+
+    Route::group(['prefix' => '/invoice'], function () {
+        Route::post('/', [InvoiceController::class, 'store'])->middleware('permission:manage invoices');
+        Route::get('/', [InvoiceController::class, 'index'])->middleware('permission:view invoices');
+        Route::get('/{invoice}', [InvoiceController::class, 'show'])->middleware('permission:view invoices');
+        Route::patch('/{invoice}', [InvoiceController::class, 'update'])->middleware('permission:manage invoices');
+        Route::delete('/{invoice}', [InvoiceController::class, 'destroy'])->middleware('permission:manage invoices');
     });
 });
 
-// روت‌های مختص به member
-Route::group(['middleware' => ['role:member', 'auth:api'], 'prefix' => 'Member'], function () {
-    Route::group(['prefix' => '/product'], function () {
-        Route::get('/list', [ProductController::class, 'index']);
-    });
-});
+
 /*Route::group(["middleware" => ['role:member',"auth:api"],'prefix' => 'Admin'], function () {
 
     Route::group(['prefix' => '/customer'], function () {

@@ -38,9 +38,27 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
+
     public function me()
     {
-        return response()->json(auth()->user());
+        $user = Auth::user();
+        $roles = $user->roles->pluck('name');
+
+        return response()->json([
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'last_name' => $user->last_name,
+                'mobile' =>$user->mobile,
+                'email' => $user->email,
+                'username' => $user->username,
+                'status' => $user->status,
+                'gender' => $user->gender,
+                'avatar' => $user->avatar,
+                'about_me' => $user->about_me,
+            ],
+            'roles' => $roles
+        ]);
     }
 
     /**

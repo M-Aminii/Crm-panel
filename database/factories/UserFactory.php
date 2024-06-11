@@ -25,10 +25,10 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'mobile' => '09'.$this->faker->randomNumber(4) . $this->faker->randomNumber(5),
+            'mobile' => '09157015018',
             'email'=>$this->faker->unique()->safeEmail,
-            'name'=>$this->faker->name,
-            'last_name'=>$this->faker->lastName,
+            'name'=>'مصطفی',
+            'last_name'=>'امینی',
             'username'=>$this->faker->userName,
             'password'=> '$2y$12$4JBC3Xk1oH3B9mMOpj5K1.Zb24LLbyN/7JDUuBLSKRv4YsprDkwIa', // M123456
             'avatar'=> null,

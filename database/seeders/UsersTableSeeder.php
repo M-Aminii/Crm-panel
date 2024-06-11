@@ -20,20 +20,6 @@ class UsersTableSeeder extends Seeder
             ->each(function ($user) {
                 $user->assignRole('super-admin');
             });
-
-        User::factory()
-            ->count(2)
-            ->create()
-            ->each(function ($user) {
-                $user->assignRole('system-admin');
-            });
-
-        User::factory()
-            ->count(10)
-            ->create()
-            ->each(function ($user) {
-                $user->assignRole('member');
-            });
     }
 }
 
