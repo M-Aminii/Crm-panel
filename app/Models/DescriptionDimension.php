@@ -18,5 +18,4 @@ class DescriptionDimension extends Model
         return $this->belongsToMany(DimensionItem::class, 'dimension_description_items', 'description_id', 'dimension_id');
     }
 
-
 }

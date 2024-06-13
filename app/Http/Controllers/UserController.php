@@ -93,7 +93,7 @@ class UserController extends Controller
             return response()->json($user);
         } catch (ModelNotFoundException $exception) {
             // در صورتی که کاربر پیدا نشود، یک استثنا پرتاب شود
-            return response()->json(['message' => 'User not found'], 404);
+            return response(['message' => 'کاربر مورد نظر یافت نشد'], 404);
         } catch (Exception $exception) {
             // در صورتی که خطای دیگری رخ دهد، خطای دیفالت بازگردانده می‌شود
             return response()->json(['message' => 'خطایی به وجود آمده است'], 500);

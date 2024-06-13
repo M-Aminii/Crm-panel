@@ -16,7 +16,10 @@ return new class extends Migration
             $table->integer('key');
             $table->unsignedBigInteger('invoice_id');
             $table->unsignedBigInteger('product_id');
+            $table->unsignedBigInteger('product_section_id')->nullable();
             $table->string('description');
+            $table->json('description_json');
+            $table->string('image_path')->nullable();
             $table->decimal('price', 11, 0);
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
@@ -31,6 +34,11 @@ return new class extends Migration
             $table->foreign('product_id')
                 ->references('id')
                 ->on('products')
+                ->onDelete('cascade');
+
+            $table->foreign('product_section_id')
+                ->references('id')
+                ->on('product_sections')
                 ->onDelete('cascade');
         });
     }

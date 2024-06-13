@@ -63,7 +63,17 @@ class CustomerController extends Controller
             } else {
                 $customer->status = 'incomplete';
             }
-            Customer::create((array) $customer);
+            $newCustomer = Customer::create((array) $customer);
+
+            // اضافه کردن نقش به مشتری
+            $newCustomer->assignCustomerRole(13);
+
+            /*if ($request->has('roles')) {
+                foreach ($request->input('roles') as $roleId) {
+                    $newCustomer->assignCustomerRole($roleId);
+                }
+            }*/
+
             DB::commit();
             return response(['message' => 'مشخصات مشتری ثبت شد'], 201);
         } catch (Exception $exception) {
@@ -103,8 +113,10 @@ class CustomerController extends Controller
     {
         try {
             DB::beginTransaction();
-            // یافتن کاربر
+
+            // یافتن مشتری
             $customer = Customer::findOrFail($request->customer);
+
             // پر کردن فیلدهای داده‌ای با استفاده از DTO
             $customer->fill($request->validated());
 
@@ -115,10 +127,23 @@ class CustomerController extends Controller
             } else {
                 $customer->status = 'incomplete';
             }
+
             // چک کردن تغییرات
             if ($customer->isDirty()) {
                 // اگر داده‌ها تغییر کرده بودند، آنها را ذخیره کنید
                 $customer->save();
+
+                // بروزرسانی نقش‌های مشتری
+                /*if ($request->has('roles')) {
+                    // حذف نقش‌های فعلی
+                    $customer->customerRoles()->detach();
+
+                    // اضافه کردن نقش‌های جدید
+                    foreach ($request->input('roles') as $roleId) {
+                        $customer->assignCustomerRole($roleId);
+                    }
+                }*/
+
                 DB::commit();
                 return response()->json(['message' => 'اطلاعات مشتری با موفقیت بروزرسانی شد'], 200);
             } else {
@@ -135,6 +160,7 @@ class CustomerController extends Controller
             return response(['message' => 'خطایی به وجود آمده است'], 500);
         }
     }
+
 
 
     /**

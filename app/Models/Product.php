@@ -9,9 +9,10 @@ class Product extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'name',
-        'english_name',
-    ];
+    protected $fillable = ['name', 'english_name', 'image_path'];
 
+    public function sections()
+    {
+        return $this->hasMany(ProductSection::class);
+    }
 }

@@ -30,6 +30,35 @@ class Customer extends Model
         return $this->belongsTo(User::class);
     }
 
+    // تابع برای تعریف ارتباط با مدل CustomerRole
+    public function customerRoles()
+    {
+        return $this->belongsToMany(CustomerRole::class, 'customer_has_role', 'customer_id', 'role_id');
+    }
+
+    // تابع برای تخصیص نقش به مشتری
+    public function assignCustomerRole($roleId)
+    {
+        $role = CustomerRole::find($roleId);
+        if ($role) {
+            $this->customerRoles()->attach($roleId);
+        } else {
+            // مدیریت خطا در صورت عدم وجود نقش
+            throw new \Exception("Role not found");
+        }
+    }
+
+    // تابع برای حذف نقش از مشتری
+    public function removeCustomerRole($roleId)
+    {
+        $role = CustomerRole::find($roleId);
+        if ($role) {
+            $this->customerRoles()->detach($roleId);
+        } else {
+            // مدیریت خطا در صورت عدم وجود نقش
+            throw new \Exception("Role not found");
+        }
+    }
     ///تبدیل ایدی استان و شهر به نام
     /*
     protected $appends = ['province_name', 'city_name'];

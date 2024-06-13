@@ -106,6 +106,10 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasAnyRole(['super-admin','system-admin']);
     }
 
+    public function userDiscount()
+    {
+        return $this->hasOne(UserDiscount::class);
+    }
 
     // Rest omitted for brevity
 

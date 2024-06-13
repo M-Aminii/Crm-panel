@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call(UsersTableSeeder::class);
         $this->call(ProvincesTableSeeder::class);
         $this->call(CityTableSeeder::class);
-        $this->call(ProductTableSeeder::class);
+        $this->call(ProductsTableSeeder::class);
         $this->call(GlassTypeTableSeeder::class);
         $this->call(GlassWidthTableSeeder::class);
         $this->call(GlassMaterialTableSeeder::class);
@@ -28,5 +28,6 @@ class DatabaseSeeder extends Seeder
         $this->call(GlassLaminateTableSeeder::class);
         $this->call(GlassLaminateColorTableSeeder::class);
         $this->call(DescriptionDimensionTableSeeder::class);
+        $this->call(CustomerRoleSeeder::class);
     }
 }

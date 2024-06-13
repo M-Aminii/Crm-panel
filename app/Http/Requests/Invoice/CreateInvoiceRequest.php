@@ -39,9 +39,11 @@ class CreateInvoiceRequest extends FormRequest
             'status' => 'required|string',
             'items' => 'required|array',
             'items.*.product' => 'required|integer|exists:products,id',
+            'items.*.product_section' => 'nullable|integer|exists:product_sections,id',
             'items.*.description' => 'required|array',
             'items.*.dimensions' => 'required|array',
             'items.*.technical_details' => 'required|array',
+            'discount' => 'required|integer|min:0|max:20', // افزودن فیلد تخفیف و اعتبارسنجی آن
         ];
        /* return [
             'buyer' => 'required|exists:customers,id',

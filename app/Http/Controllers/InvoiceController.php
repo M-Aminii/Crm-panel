@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\InvalidDiscountException;
 use App\Helpers\Benchmark;
 use App\Http\Requests\Customer\ShowCustomerRequest;
 use App\Http\Requests\Invoice\CreateInvoiceRequest;
@@ -82,16 +83,20 @@ class InvoiceController extends Controller
                     'status' => $validatedData['status'],
                 ]);
 
-                $AmountPayable = InvoiceService::processItems($invoice, $validatedData['items']);
+                $AmountPayable = InvoiceService::processItems($invoice, $validatedData['items'],$validatedData['discount']);
 
                 $invoice->update(['amount_payable' => $AmountPayable]);
             });
 
             return response()->json(['message' => 'فاکتور با موفقیت ایجاد شد'], 201);
+        } catch (\App\Exceptions\InvalidDiscountException $exception) {
+            DB::rollBack();
+            Log::error($exception);
+            return response()->json(['message' => $exception->getMessage()], $exception->getCode());
         } catch (\Exception $exception) {
             DB::rollBack();
             Log::error($exception);
-            return response(['message' => 'خطایی به وجود آمده است'], 500);
+            return response()->json(['message' => 'خطایی به وجود آمده است'], 500);
         }
     }
 

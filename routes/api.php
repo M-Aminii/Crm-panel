@@ -2,13 +2,16 @@
 
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DescriptionDimensionController;
 use App\Http\Controllers\Glass\LayerController;
 use App\Http\Controllers\GlassFinalStructureController;
 use App\Http\Controllers\IndividualCustomerController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserDiscountController;
 use App\Models\Province;
+use App\Models\UserDiscount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -90,6 +93,23 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'Admin'], function () {
         Route::get('/{invoice}', [InvoiceController::class, 'show'])->middleware('permission:view invoices');
         Route::patch('/{invoice}', [InvoiceController::class, 'update'])->middleware('permission:manage invoices');
         Route::delete('/{invoice}', [InvoiceController::class, 'destroy'])->middleware('permission:manage invoices');
+    });
+
+
+    Route::group(['prefix' => '/description_dimension'], function () {
+        Route::post('/', [DescriptionDimensionController::class, 'store'])->middleware('permission:manage description_dimension');
+        Route::get('/', [DescriptionDimensionController::class, 'index'])->middleware('permission:view description_dimension');
+        Route::get('/{id}', [DescriptionDimensionController::class, 'show'])->middleware('permission:view description_dimension');
+        Route::patch('/{id}', [DescriptionDimensionController::class, 'update'])->middleware('permission:manage description_dimension');
+        Route::delete('/{id}', [DescriptionDimensionController::class, 'destroy'])->middleware('permission:manage description_dimension');
+    });
+
+    Route::group(['prefix' => '/user_discount'], function () {
+        Route::post('/', [UserDiscountController::class, 'store']);
+        Route::get('/', [UserDiscountController::class, 'index'])->middleware('permission:view user_discount');
+        Route::get('/{id}', [UserDiscountController::class, 'show'])->middleware('permission:view user_discount');
+        Route::patch('/{id}', [UserDiscountController::class, 'update'])->middleware('permission:manage user_discount');
+        Route::delete('/{id}', [UserDiscountController::class, 'destroy'])->middleware('permission:manage user_discount');
     });
 });
 
