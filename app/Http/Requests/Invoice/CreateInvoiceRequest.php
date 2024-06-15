@@ -45,17 +45,6 @@ class CreateInvoiceRequest extends FormRequest
             'items.*.technical_details' => 'required|array',
             'discount' => 'required|integer|min:0|max:20', // افزودن فیلد تخفیف و اعتبارسنجی آن
         ];
-       /* return [
-            'buyer' => 'required|exists:customers,id',
-            'items' => 'required|array',
-            'items.*.product' => 'required|exists:products,id',
-            'items.*.description' => 'required|array',
-            'items.*.technical_details' => 'required|array',
-            'items.*.dimensions' => 'required|array',
-            'items.*.dimensions.*.height' => 'required|integer',
-            'items.*.dimensions.*.width' => 'required|integer',
-            'items.*.dimensions.*.quantity' => 'required|integer',
-            'items.*.dimensions.*.description' => 'nullable'
-        ];*/
+
     }
 }

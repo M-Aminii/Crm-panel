@@ -71,7 +71,7 @@ class InvoiceService
     }*/
     public static function processItems($invoice, $items ,$discount)
     {
-
+        $DescriptionService = new DescriptionService;
         $invoiceService = new InvoiceService();
         $globalKeyIndex = 1; // شمارنده سراسری برای کلیدها
         $totalPayableAmount = 0; // متغیر برای نگهداری مجموع مبالغ
@@ -99,6 +99,9 @@ class InvoiceService
                 }
             }
 
+            $description_json = json_encode($item['description']);
+            $convertDescriptions = $DescriptionService->convertDescriptions($item['description']);
+
             // دریافت تصویر محصول و زیرشاخه محصول
             $product = Product::find($item['product']); // فرض می‌کنیم مدل محصول داریم که آدرس تصویر را ذخیره می‌کند
             $productSection = isset($item['product_section']) ? ProductSection::find($item['product_section']) : null;
@@ -112,8 +115,8 @@ class InvoiceService
             [
                     'product_id' => $item['product'],
                     'product_section_id' => $item['product_section'] ?? null,
-                    'description_json'=> json_encode($item['description']),
-                    'description' => $invoiceService->mergeProductStructures($item['description']),
+                    'description_json'=> $description_json,
+                    'description' => $invoiceService->mergeProductStructures($convertDescriptions),
                     'price' => $item['price_per_unit'] ?? 0,
                     'image_path' => $productImagePath, // اضافه کردن تصویر محصول یا زیرشاخه محصول
             ]);
@@ -130,6 +133,8 @@ class InvoiceService
 
     public function calculateItemPrice($item)
     {
+        $DescriptionService = new DescriptionService;
+
         $CalculationService = new CalculationService();
 
         $productFunctions = [
@@ -141,8 +146,9 @@ class InvoiceService
         ];
 
         if (isset($productFunctions[$item['product']]) && is_array($item['description'])) {
+            $convertDescriptions = $DescriptionService->convertDescriptions($item['description']);
             $functionName = $productFunctions[$item['product']];
-            $calculatedPrice = $CalculationService->$functionName($item['description']);
+            $calculatedPrice = $CalculationService->$functionName($convertDescriptions);
             if ($calculatedPrice !== null) {
                 $item['price_per_unit'] = $calculatedPrice;
             } else {
@@ -261,7 +267,10 @@ class InvoiceService
             }
 
             $priceDiscounted = ($priceUnit / 100) * (100 - $discount);
+
             $priceDiscounted += intval($weight * 37500);
+
+
             $priceValueAddedFinal = ($priceDiscounted * 110) / 100;
 
             $totalPrice = intval($totalMeterage * $priceValueAddedFinal);
@@ -276,8 +285,6 @@ class InvoiceService
             if (!empty($overPercentage) && $overPercentage != 0) {
                 $names .= '   درصد اور ' . $overPercentage;
             }
-
-            $words = NumberToWordsHelper::convertNumberToWords($totalPrice);
 
             // استفاده از updateOrCreate با استفاده از globalKeyIndex
             AggregatedItem::updateOrCreate([

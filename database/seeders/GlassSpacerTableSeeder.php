@@ -24,9 +24,17 @@ class GlassSpacerTableSeeder extends Seeder
         }
 
         $GlassSpacers = [
-            ['size' => '1/52', 'price' => 16100000],
-            ['size' => '0/76', 'price' => 10900000],
-            ['size' => '0/38', 'price' => 10900000],
+            ['size' => 10, 'price' => 0],
+            ['size' => 12, 'price' => 0],
+            ['size' => 14, 'price' => 300000],
+            ['size' => 16, 'price' => 600000],
+            ['size' => 18, 'price' => 800000],
+            ['size' => 20, 'price' => 1100000],
+            ['size' => 22, 'price' => 1400000],
+            ['size' => 24, 'price' => 1700000],
+            ['size' => 26, 'price' => 2000000],
+            ['size' => 28, 'price' => 2300000],
+
         ];
 
         foreach ($GlassSpacers as $GlassSpacer) {

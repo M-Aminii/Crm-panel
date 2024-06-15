@@ -129,9 +129,9 @@ class CalculationService
         ],
 
         'laminate' => [
-            '0.38' => 8400000, // قیمت اضافی برای طلق 0.38
-            '0.76' => 10900000, // قیمت اضافی برای طلق 0.76
-            '1.52' => 16100000, // قیمت اضافی برای طلق 1.52
+            '0/38' => 8400000, // قیمت اضافی برای طلق 0.38
+            '0/76' => 10900000, // قیمت اضافی برای طلق 0.76
+            '1/52' => 16100000, // قیمت اضافی برای طلق 1.52
         ],
 
         'laminateColor'=>[
@@ -187,9 +187,11 @@ class CalculationService
                 $temperedCount++;
             }
 
+
             if ($temperedCount > 0) {
                 $finalPrice += $temperedCount * $this->options['material']['سکوریت'];
             }
+
 
             // محاسبه قیمت بر اساس ضخامت
             if (isset($selectedOptions['width'])) {
@@ -222,7 +224,9 @@ class CalculationService
             if (isset($selectedOptions['laminate']) && array_key_exists($selectedOptions['laminate'], $this->options['laminate'])) {
                 $finalPrice += $this->options['laminate'][$selectedOptions['laminate']];
             }
+
             $totalFinalPrice += $finalPrice;
+
         }
 
         // محاسبه تعداد تکرار هر دسته و افزودن 20% به قیمت نهایی برای هر تکرار اضافی

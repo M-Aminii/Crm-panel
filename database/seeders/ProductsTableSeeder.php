@@ -30,7 +30,7 @@ class ProductsTableSeeder extends Seeder
             // اگر محصولی دارای بخش‌هایی باشد، آنها را نیز اضافه کنید
             if ($product->name == 'لمینت سفارشی') {
                 $sections = [
-                    ['name' => 'دو لایه', 'image_path' => 'product_images/laminet_2.jpg'],
+                    ['name' => 'دو لایه', 'image_path' => 'image/product_images/laminet_2.jpg'],
                     ['name' => 'سه لایه', 'image_path' => 'path_to_section_image2.jpg'],
                     ['name' => 'چهار لایه', 'image_path' => 'path_to_section_image3.jpg'],
                     ['name' => 'پنج لایه', 'image_path' => 'path_to_section_image2.jpg'],

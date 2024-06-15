@@ -105,7 +105,7 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'Admin'], function () {
     });
 
     Route::group(['prefix' => '/user_discount'], function () {
-        Route::post('/', [UserDiscountController::class, 'store']);
+        Route::post('/', [UserDiscountController::class, 'store'])->middleware('permission:manage user_discount');
         Route::get('/', [UserDiscountController::class, 'index'])->middleware('permission:view user_discount');
         Route::get('/{id}', [UserDiscountController::class, 'show'])->middleware('permission:view user_discount');
         Route::patch('/{id}', [UserDiscountController::class, 'update'])->middleware('permission:manage user_discount');

@@ -25,9 +25,9 @@ class GlassLaminateTableSeeder extends Seeder
         }
 
         $GlassLaminates = [
-            ['size' => '1/52', 'price' => 16100000],
+            ['size' => '0/38', 'price' => 8400000],
             ['size' => '0/76', 'price' => 10900000],
-            ['size' => '0/38', 'price' => 10900000],
+            ['size' => '1/52', 'price' => 16100000],
         ];
 
         foreach ($GlassLaminates as $GlassLaminate) {

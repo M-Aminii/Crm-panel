@@ -10,7 +10,8 @@ class GlassLaminateColor extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name',        'english_name',
+        'name',
+        'english_name',
         'price'
 
     ];
