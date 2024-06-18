@@ -79,6 +79,7 @@ class InvoiceService
         foreach ($items as $itemIndex => $item) {
             $description_json = json_encode($item['description']);
             $convertDescriptions = $DescriptionService->convertDescriptions($item['description']);
+            //dd($convertDescriptions);
             $item = $invoiceService->calculateItemPrice($item);
             $weight = $invoiceService->calculateWeight($convertDescriptions);
 
@@ -141,7 +142,7 @@ class InvoiceService
             2 => 'calculatePriceLaminate',
             3 => 'calculatePriceDouble',
             4 => 'calculatePriceDouble',
-            6 => 'calculatePriceDoubleLaminate'
+            5 => 'calculatePriceDoubleLaminate'
         ];
 
         if (isset($productFunctions[$item['product']]) && is_array($item['description'])) {

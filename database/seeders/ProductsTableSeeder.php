@@ -16,7 +16,6 @@ class ProductsTableSeeder extends Seeder
             ['name' => 'لمینت سفارشی', 'image_path' => 'path_to_image2.jpg'],
             ['name' => 'دوجداره سفارشی', 'image_path' => 'path_to_image3.jpg'],
             ['name' => 'سه جداره سفارشی', 'image_path' => 'path_to_image4.jpg'],
-            ['name' => 'چهار جداره سفارشی', 'image_path' => 'path_to_image5.jpg'],
             ['name' => 'دوجداره لمینت سفارشی', 'image_path' => 'path_to_image6.jpg'],
         ];
 

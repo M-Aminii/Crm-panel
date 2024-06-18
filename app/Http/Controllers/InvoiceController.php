@@ -260,6 +260,7 @@ class InvoiceController extends Controller
     {
         // اعتبارسنجی داده‌های ورودی
         $validatedData = $request->all();
+
         $invoiceId = $request->invoice;
 
         try {
@@ -269,7 +270,7 @@ class InvoiceController extends Controller
                     'status' => $validatedData['status'],
                 ]);
 
-                $AmountPayable = InvoiceService::processItems($invoice, $validatedData['items']);
+                $AmountPayable = InvoiceService::processItems($invoice, $validatedData['items'],$validatedData['discount'],$validatedData['deliveryOption']);
 
                 $invoice->update(['amount_payable' => $AmountPayable]);
             });
