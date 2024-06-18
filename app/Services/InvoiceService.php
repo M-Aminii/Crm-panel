@@ -69,7 +69,7 @@ class InvoiceService
 
         return $totalPayableAmount; // بازگرداندن مجموع مبالغ
     }*/
-    public static function processItems($invoice, $items, $discount, $deliveryOption)
+    public static function processItems($invoice, $items, $discount, $delivery)
     {
         $DescriptionService = new DescriptionService;
         $invoiceService = new InvoiceService();
@@ -122,7 +122,7 @@ class InvoiceService
             ]);
 
 
-            $totalPayableAmount += $invoiceService->processDimensions($invoice->id, $typeItem, $item, $weight, $globalKeyIndex, $discount, $deliveryOption);
+            $totalPayableAmount += $invoiceService->processDimensions($invoice->id, $typeItem, $item, $weight, $globalKeyIndex, $discount, $delivery);
             $invoiceService->updateOrCreateTechnicalItem($invoice->id, $typeItem, $item['technical_details']);
         }
 
@@ -160,7 +160,7 @@ class InvoiceService
         return $item;
     }
 
-    public function processDimensions($invoiceId, $typeItem, $item, $weight, &$globalKeyIndex, $discount, $deliveryOption)
+    public function processDimensions($invoiceId, $typeItem, $item, $weight, &$globalKeyIndex, $discount, $delivery)
     {
         $invoiceService = new InvoiceService();
         $dimensionGroups = collect();
@@ -192,7 +192,7 @@ class InvoiceService
             $globalKeyIndex++; // افزایش شمارنده کلید برای هر بعد جدید
         }
 
-        $totalPayableAmount = $this->createOrUpdateAggregatedItems($invoiceId, $typeItem, $dimensionGroups, $item, $weight, $globalKeyIndex, $discount, $deliveryOption);
+        $totalPayableAmount = $this->createOrUpdateAggregatedItems($invoiceId, $typeItem, $dimensionGroups, $item, $weight, $globalKeyIndex, $discount, $delivery);
 
         return $totalPayableAmount;
     }
@@ -216,7 +216,7 @@ class InvoiceService
         );
     }
 
-    public function createOrUpdateAggregatedItems($invoiceId, $typeItem, $dimensionGroups, $item, $weight, &$globalKeyIndex, $discount, $deliveryOption)
+    public function createOrUpdateAggregatedItems($invoiceId, $typeItem, $dimensionGroups, $item, $weight, &$globalKeyIndex, $discount, $delivery)
     {
         $invoiceService = new InvoiceService();
         $totalPayableAmount = 0; // متغیر برای نگهداری مجموع مبالغ
@@ -269,7 +269,7 @@ class InvoiceService
 
             $priceDiscounted = ($priceUnit / 100) * (100 - $discount);
 
-            if ($deliveryOption === 1) {
+            if ($delivery === 1) {
                 $priceDiscounted += intval($weight * 37500); // افزودن کرایه بار فقط در صورت انتخاب گزینه حمل و نقل
             }
 
