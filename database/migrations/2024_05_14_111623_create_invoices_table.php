@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\InvoiceDelivery;
 use App\Enums\InvoiceStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -19,6 +20,8 @@ return new class extends Migration
             $table->unsignedBigInteger('customer_id');
             $table->string('position', 100);
             $table->enum('status', InvoiceStatus::toArray());
+            $table->enum('delivery',InvoiceDelivery::toArray());
+            $table->integer('discount');
             $table->integer('amount_payable')->nullable();    // خالی میخوره به این دلیل که در اخر سر برای اپدیت این اضافه میشه
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();

@@ -16,6 +16,8 @@ class InvoiceResource extends JsonResource
             'customer' => new CustomerResource($this->whenLoaded('customer')),
             'position' => $this->position,
             'status' => $this->status,
+            'discount' => $this->discount,
+            'delivery' => $this->getDeliveryCode($this->delivery),
             'updated_at' => $this->updated_at,
             'items' => TypeItemResource::collection($this->whenLoaded('typeItems')),
             'aggregated_items' => AggregatedItemResource::collection($this->whenLoaded('aggregatedItems')),
@@ -24,5 +26,16 @@ class InvoiceResource extends JsonResource
 
         ];
     }
+    private function getDeliveryCode($delivery)
+    {
+        switch ($delivery) {
+            case 'location':
+                return 1;
+            case 'factory':
+                return 2;
+            default:
+                return null; // یا هر مقداری که در صورت ناشناخته بودن `delivery` مدنظر شماست
+        }
+        }
 }
 

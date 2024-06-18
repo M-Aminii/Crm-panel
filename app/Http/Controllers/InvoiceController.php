@@ -82,6 +82,8 @@ class InvoiceController extends Controller
                     'customer_id' => $validatedData['buyer'],
                     'position' => random_int(1000, 9999),
                     'status' => $validatedData['status'],
+                    'discount' => $validatedData['discount'],
+                    'delivery' => $validatedData['deliveryOption'],
                 ]);
 
                 $AmountPayable = InvoiceService::processItems($invoice, $validatedData['items'],$validatedData['discount'],$validatedData['deliveryOption']);

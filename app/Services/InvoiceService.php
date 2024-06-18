@@ -258,7 +258,7 @@ class InvoiceService
             $overPercentage /= $dimensions->count();
 
             $valueAddedTax += ($valueAddedTax * $overPercentage) / 100;
-            $priceUnit = ($valueAddedTax / 110) * 100;
+            $priceUnit = intval(($valueAddedTax / 110) * 100);
 
             $user = auth()->user();
             $userMaxDiscount = $user->userDiscount->max_discount ?? 10;
