@@ -72,6 +72,7 @@ class InvoiceController extends Controller
     public function store(CreateInvoiceRequest $request)
     {
         $validatedData = $request->validated();
+
         try {
             DB::transaction(function () use ($validatedData) {
                 $lastInvoiceSerial = InvoiceService::generateNewSerial();
@@ -83,7 +84,7 @@ class InvoiceController extends Controller
                     'status' => $validatedData['status'],
                 ]);
 
-                $AmountPayable = InvoiceService::processItems($invoice, $validatedData['items'],$validatedData['discount']);
+                $AmountPayable = InvoiceService::processItems($invoice, $validatedData['items'],$validatedData['discount'],$validatedData['deliveryOption']);
 
                 $invoice->update(['amount_payable' => $AmountPayable]);
             });

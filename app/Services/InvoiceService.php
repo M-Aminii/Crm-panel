@@ -69,7 +69,7 @@ class InvoiceService
 
         return $totalPayableAmount; // بازگرداندن مجموع مبالغ
     }*/
-    public static function processItems($invoice, $items ,$discount)
+    public static function processItems($invoice, $items, $discount, $deliveryOption)
     {
         $DescriptionService = new DescriptionService;
         $invoiceService = new InvoiceService();
@@ -77,8 +77,10 @@ class InvoiceService
         $totalPayableAmount = 0; // متغیر برای نگهداری مجموع مبالغ
 
         foreach ($items as $itemIndex => $item) {
+            $description_json = json_encode($item['description']);
+            $convertDescriptions = $DescriptionService->convertDescriptions($item['description']);
             $item = $invoiceService->calculateItemPrice($item);
-            $weight = $invoiceService->calculateWeight($item['description']);
+            $weight = $invoiceService->calculateWeight($convertDescriptions);
 
             foreach ($item['description'] as &$desc) {
                 if (isset($desc['adhesive']) && $desc['adhesive'] == 'پلی سولفاید') {
@@ -98,9 +100,6 @@ class InvoiceService
                     }
                 }
             }
-
-            $description_json = json_encode($item['description']);
-            $convertDescriptions = $DescriptionService->convertDescriptions($item['description']);
 
             // دریافت تصویر محصول و زیرشاخه محصول
             $product = Product::find($item['product']); // فرض می‌کنیم مدل محصول داریم که آدرس تصویر را ذخیره می‌کند
@@ -122,7 +121,7 @@ class InvoiceService
             ]);
 
 
-            $totalPayableAmount += $invoiceService->processDimensions($invoice->id, $typeItem, $item, $weight, $globalKeyIndex ,$discount);
+            $totalPayableAmount += $invoiceService->processDimensions($invoice->id, $typeItem, $item, $weight, $globalKeyIndex, $discount, $deliveryOption);
             $invoiceService->updateOrCreateTechnicalItem($invoice->id, $typeItem, $item['technical_details']);
         }
 
@@ -149,8 +148,9 @@ class InvoiceService
             $convertDescriptions = $DescriptionService->convertDescriptions($item['description']);
             $functionName = $productFunctions[$item['product']];
             $calculatedPrice = $CalculationService->$functionName($convertDescriptions);
+
             if ($calculatedPrice !== null) {
-                $item['price_per_unit'] = $calculatedPrice;
+                $item['price_per_unit'] = intval($calculatedPrice);
             } else {
                 throw new \Exception('مشکل در محاسبه قیمت محصول');
             }
@@ -159,7 +159,7 @@ class InvoiceService
         return $item;
     }
 
-    public function processDimensions($invoiceId, $typeItem, $item, $weight, &$globalKeyIndex ,$discount)
+    public function processDimensions($invoiceId, $typeItem, $item, $weight, &$globalKeyIndex, $discount, $deliveryOption)
     {
         $invoiceService = new InvoiceService();
         $dimensionGroups = collect();
@@ -191,7 +191,7 @@ class InvoiceService
             $globalKeyIndex++; // افزایش شمارنده کلید برای هر بعد جدید
         }
 
-        $totalPayableAmount = $this->createOrUpdateAggregatedItems($invoiceId, $typeItem, $dimensionGroups, $item, $weight, $globalKeyIndex ,$discount);
+        $totalPayableAmount = $this->createOrUpdateAggregatedItems($invoiceId, $typeItem, $dimensionGroups, $item, $weight, $globalKeyIndex, $discount, $deliveryOption);
 
         return $totalPayableAmount;
     }
@@ -215,7 +215,7 @@ class InvoiceService
         );
     }
 
-    public function createOrUpdateAggregatedItems($invoiceId, $typeItem, $dimensionGroups, $item, $weight, &$globalKeyIndex ,$discount)
+    public function createOrUpdateAggregatedItems($invoiceId, $typeItem, $dimensionGroups, $item, $weight, &$globalKeyIndex, $discount, $deliveryOption)
     {
         $invoiceService = new InvoiceService();
         $totalPayableAmount = 0; // متغیر برای نگهداری مجموع مبالغ
@@ -268,8 +268,9 @@ class InvoiceService
 
             $priceDiscounted = ($priceUnit / 100) * (100 - $discount);
 
-            $priceDiscounted += intval($weight * 37500);
-
+            if ($deliveryOption === 1) {
+                $priceDiscounted += intval($weight * 37500); // افزودن کرایه بار فقط در صورت انتخاب گزینه حمل و نقل
+            }
 
             $priceValueAddedFinal = ($priceDiscounted * 110) / 100;
 

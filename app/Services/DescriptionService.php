@@ -34,7 +34,8 @@ class DescriptionService
                 $glassWidth = GlassWidth::find($description['width']);
                 if ($glassWidth) {
                     $width = $glassWidth->size;
-                    $description['width'] = rtrim(rtrim($width, '0'), '.');
+                    $width = rtrim(rtrim($width, '0'), '.');
+                    $description['width'] = is_numeric($width) && floor($width) == $width ? intval($width) : floatval($width);
                 }
             }
             if (isset($description['material']) && is_numeric($description['material'])) {
