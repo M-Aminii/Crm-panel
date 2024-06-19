@@ -82,17 +82,17 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'Admin'], function () {
 
     Route::group(['prefix' => '/customer'], function () {
         Route::post('/', [CustomerController::class, 'store'])->middleware('permission:manage customers');
-        Route::get('/list', [CustomerController::class, 'index'])->middleware('permission:view customers');
-        Route::get('/{customer}', [CustomerController::class, 'show'])->middleware('permission:view customers');
-        Route::patch('/{customer}', [CustomerController::class, 'update'])->middleware('permission:manage customers');
+        Route::get('/list', [CustomerController::class, 'index'])->middleware(['permission:view customers', 'check.customers']);
+        Route::get('/{customer}', [CustomerController::class, 'show'])->middleware(['permission:view customers', 'check.customers']);
+        Route::patch('/{customer}', [CustomerController::class, 'update'])->middleware(['permission:manage customers', 'check.customers']);
     });
 
     Route::group(['prefix' => '/invoice'], function () {
         Route::post('/', [InvoiceController::class, 'store'])->middleware('permission:manage invoices');
-        Route::get('/', [InvoiceController::class, 'index'])->middleware('permission:view invoices');
-        Route::get('/{invoice}', [InvoiceController::class, 'show'])->middleware('permission:view invoices');
-        Route::patch('/{invoice}', [InvoiceController::class, 'update'])->middleware('permission:manage invoices');
-        Route::delete('/{invoice}', [InvoiceController::class, 'destroy'])->middleware('permission:manage invoices');
+        Route::get('/', [InvoiceController::class, 'index'])->middleware('permission:view invoices','check.invoices');
+        Route::get('/{invoice}', [InvoiceController::class, 'show'])->middleware('permission:view invoices','check.invoices');
+        Route::patch('/{invoice}', [InvoiceController::class, 'update'])->middleware('permission:manage invoices', 'check.invoices');
+        Route::delete('/{invoice}', [InvoiceController::class, 'destroy'])->middleware('permission:manage invoices' ,'check.invoices');
     });
 
 

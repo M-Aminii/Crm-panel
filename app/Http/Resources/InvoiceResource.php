@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use App\Helpers\NumberToWordsHelper;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Morilog\Jalali\Jalalian;
 
 class InvoiceResource extends JsonResource
 {
@@ -18,7 +19,7 @@ class InvoiceResource extends JsonResource
             'status' => $this->status,
             'discount' => $this->discount,
             'delivery' => $this->getDeliveryCode($this->delivery),
-            'updated_at' => $this->updated_at,
+            'updated_at' => Jalalian::fromCarbon($this->updated_at)->format('Y/m/d'),
             'items' => TypeItemResource::collection($this->whenLoaded('typeItems')),
             'aggregated_items' => AggregatedItemResource::collection($this->whenLoaded('aggregatedItems')),
             'amount_payable' => number_format($this->amount_payable),

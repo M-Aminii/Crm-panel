@@ -103,7 +103,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function hasAnyAdminRole(): bool
     {
-        return $this->hasAnyRole(['super-admin','system-admin']);
+        return $this->hasAnyRole(['super-admin','sales-manager']);
     }
 
     public function userDiscount()

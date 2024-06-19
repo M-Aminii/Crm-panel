@@ -272,7 +272,7 @@ class InvoiceController extends Controller
                     'status' => $validatedData['status'],
                 ]);
 
-                $AmountPayable = InvoiceService::processItems($invoice, $validatedData['items'],$validatedData['discount'],$validatedData['deliveryOption']);
+                $AmountPayable = InvoiceService::processItems($invoice, $validatedData['items'],$validatedData['discount'],$validatedData['delivery']);
 
                 $invoice->update(['amount_payable' => $AmountPayable]);
             });
