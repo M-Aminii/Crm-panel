@@ -29,6 +29,7 @@ class TypeItemResource extends JsonResource
         return [
             'key' =>$this->key,
             'product' => new ProductResource($this->whenLoaded('product')),
+            'product_section' => new ProductSectionResource($this->whenLoaded('productSection')),
             'description' => $this->description,
             'description_json' => json_decode($this->description_json),
             'price' => $this->price,

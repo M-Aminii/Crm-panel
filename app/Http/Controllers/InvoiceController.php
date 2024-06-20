@@ -110,7 +110,7 @@ class InvoiceController extends Controller
     public function show(ShowInvoiceRequest $request)
     {
         try {
-            $invoice = \App\Models\Invoice::with(['user', 'customer', 'typeItems.product', 'typeItems.technicalItems', 'typeItems.dimensionItems', 'typeItems.dimensionItems.descriptionDimensions' ,'aggregatedItems'])
+            $invoice = \App\Models\Invoice::with(['user', 'customer', 'typeItems.product','typeItems.productSection', 'typeItems.technicalItems', 'typeItems.dimensionItems', 'typeItems.dimensionItems.descriptionDimensions' ,'aggregatedItems'])
                 ->findOrFail($request->invoice);
             return new InvoiceResource($invoice);
 

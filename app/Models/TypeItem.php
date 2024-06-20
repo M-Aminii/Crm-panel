@@ -22,6 +22,10 @@ class TypeItem extends Model
     {
         return $this->belongsTo(Product::class);
     }
+    public function productSection()
+    {
+        return $this->belongsTo(ProductSection::class);
+    }
 
     public function technicalItems()
     {
@@ -32,8 +36,5 @@ class TypeItem extends Model
     {
         return $this->hasMany(DimensionItem::class, 'type_id');
     }
-    public function productSection()
-    {
-        return $this->belongsTo(ProductSection::class);
-    }
+
 }
