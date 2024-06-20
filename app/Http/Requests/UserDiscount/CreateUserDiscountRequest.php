@@ -7,6 +7,7 @@ use App\Enums\UserStatus;
 use App\Rules\MobileRule;
 use App\Rules\PasswordRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class CreateUserDiscountRequest extends FormRequest
 {
@@ -26,8 +27,15 @@ class CreateUserDiscountRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => 'required|exists:users,id|unique:users,id',
+            'user_id' => ['required', Rule::unique('user_discounts', 'user_id')],
             'max_discount' => 'required|integer|min:0|max:20',
+            'payment_terms' => 'required',
+        ];
+    }
+    public function messages()
+    {
+        return [
+            'user_id.unique' => 'برای این کاربر از قبل تنظیمات فاکتور مشخص شده است .',
         ];
     }
 }
