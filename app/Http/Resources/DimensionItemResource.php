@@ -22,6 +22,7 @@ class DimensionItemResource extends JsonResource
             'total_area' =>   round ($invoiceService->CalculateArea($this->height,$this->width) * $this->quantity,3),
             'Environment' =>  round ($invoiceService ->CalculateEnvironment($this->height,$this->width ,$this->quantity),3),
             'over' =>$this->over,
+            'position' =>$this->position,
             'descriptions' => DescriptionDimensionResource::collection($this->whenLoaded('descriptionDimensions')),
         ];
 

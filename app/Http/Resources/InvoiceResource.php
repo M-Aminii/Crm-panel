@@ -15,7 +15,7 @@ class InvoiceResource extends JsonResource
             'serial_number' => $this->serial_number,
             'user' => new UserResource($this->whenLoaded('user')),
             'customer' => new CustomerResource($this->whenLoaded('customer')),
-            'position' => $this->position,
+            'description' => $this->description,
             'status' => $this->status,
             'discount' => $this->discount,
             'delivery' => $this->getDeliveryCode($this->delivery),
