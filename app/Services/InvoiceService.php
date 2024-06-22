@@ -3,6 +3,7 @@
 namespace App\Services;
 
 
+use App\Exceptions\DimensionException;
 use App\Exceptions\InvalidDiscountException;
 use App\Exceptions\NotFoundPageException;
 use App\Helpers\NumberToWordsHelper;
@@ -79,7 +80,6 @@ class InvoiceService
         foreach ($items as $itemIndex => $item) {
             $description_json = json_encode($item['description']);
             $convertDescriptions = $DescriptionService->convertDescriptions($item['description']);
-            //dd($convertDescriptions);
             $item = $invoiceService->calculateItemPrice($item);
             $weight = $invoiceService->calculateWeight($convertDescriptions);
 
@@ -102,33 +102,32 @@ class InvoiceService
                 }
             }
 
-            // دریافت تصویر محصول و زیرشاخه محصول
-            $product = Product::find($item['product']); // فرض می‌کنیم مدل محصول داریم که آدرس تصویر را ذخیره می‌کند
+            $product = Product::find($item['product']);
             $productSection = isset($item['product_section']) ? ProductSection::find($item['product_section']) : null;
 
             $productImagePath = $productSection ? $productSection->image_path : ($product ? $product->image_path : null);
 
             $typeItem = TypeItem::updateOrCreate([
                 'invoice_id' => $invoice->id,
-                'key' => $itemIndex + 1, // اضافه کردن مقدار key
+                'key' => $itemIndex + 1,
             ],
-            [
+                [
                     'product_id' => $item['product'],
                     'product_section_id' => $item['product_section'] ?? null,
-                    'description_json'=> $description_json,
+                    'description_json' => $description_json,
                     'description' => $invoiceService->mergeProductStructures($convertDescriptions),
                     'price' => $item['price_per_unit'] ?? 0,
-                    'image_path' => $productImagePath, // اضافه کردن تصویر محصول یا زیرشاخه محصول
-            ]);
+                    'image_path' => $productImagePath,
+                ]);
+
+            $totalPayableAmount += $invoiceService->processDimensions($invoice->id, $typeItem, $item, $weight, $globalKeyIndex, $discount, $delivery, $itemIndex);
 
 
-            $totalPayableAmount += $invoiceService->processDimensions($invoice->id, $typeItem, $item, $weight, $globalKeyIndex, $discount, $delivery);
             $invoiceService->updateOrCreateTechnicalItem($invoice->id, $typeItem, $item['technical_details']);
         }
 
-        return $totalPayableAmount; // بازگرداندن مجموع مبالغ
+        return $totalPayableAmount;
     }
-
 
 
     public function calculateItemPrice($item)
@@ -160,13 +159,19 @@ class InvoiceService
         return $item;
     }
 
-    public function processDimensions($invoiceId, $typeItem, $item, $weight, &$globalKeyIndex, $discount, $delivery)
+
+    public function processDimensions($invoiceId, $typeItem, $item, $weight, &$globalKeyIndex, $discount, $delivery, $itemIndex)
     {
         $invoiceService = new InvoiceService();
         $dimensionGroups = collect();
 
         foreach ($item['dimensions'] as $dimensionIndex => $dimension) {
-            $area = round($invoiceService->CalculateArea($dimension['height'], $dimension['width']), 3);
+            try {
+                $area = round($invoiceService->CalculateArea($dimension['height'], $dimension['width']), 3);
+                $over = $invoiceService->calculateAspectRatio($dimension['height'], $dimension['width'], $itemIndex + 1, $dimensionIndex + 1);
+            } catch (DimensionException $e) {
+                throw new DimensionException($itemIndex + 1, $dimensionIndex + 1, $e->getMessage());
+            }
 
             $dimensionItem = DimensionItem::updateOrCreate(
                 ['invoice_id' => $invoiceId, 'type_id' => $typeItem->id, 'key' => $globalKeyIndex],
@@ -175,8 +180,8 @@ class InvoiceService
                     'width' => $dimension['width'],
                     'weight' => $weight * $area,
                     'quantity' => $dimension['quantity'],
-                    'over' => $invoiceService->calculateAspectRatio($dimension['height'], $dimension['width']),
-                    'position' =>  $dimension['position'] === null ? random_int(1000, 9999) : $dimension['position'],
+                    'over' => $over,
+                    'position' => $dimension['position'] === null ? random_int(1000, 9999) : $dimension['position'],
                 ]
             );
 
@@ -190,13 +195,14 @@ class InvoiceService
             }
             $dimensionGroups->get($descriptionKey)->push($dimensionItem);
 
-            $globalKeyIndex++; // افزایش شمارنده کلید برای هر بعد جدید
+            $globalKeyIndex++;
         }
 
         $totalPayableAmount = $this->createOrUpdateAggregatedItems($invoiceId, $typeItem, $dimensionGroups, $item, $weight, $globalKeyIndex, $discount, $delivery);
 
         return $totalPayableAmount;
     }
+
 
     public function updateOrCreateTechnicalItem($invoiceId, $typeItem, $technicalDetails)
     {
@@ -336,7 +342,44 @@ class InvoiceService
 
 
 
+    /*    public function processDimensions($invoiceId, $typeItem, $item, $weight, &$globalKeyIndex, $discount, $delivery)
+        {
+            $invoiceService = new InvoiceService();
+            $dimensionGroups = collect();
 
+            foreach ($item['dimensions'] as $dimensionIndex => $dimension) {
+                $area = round($invoiceService->CalculateArea($dimension['height'], $dimension['width']), 3);
+                $over =  $invoiceService->calculateAspectRatio($dimension['height'], $dimension['width']);
+
+                $dimensionItem = DimensionItem::updateOrCreate(
+                    ['invoice_id' => $invoiceId, 'type_id' => $typeItem->id, 'key' => $globalKeyIndex],
+                    [
+                        'height' => $dimension['height'],
+                        'width' => $dimension['width'],
+                        'weight' => $weight * $area,
+                        'quantity' => $dimension['quantity'],
+                        'over' => $over,
+                        'position' =>  $dimension['position'] === null ? random_int(1000, 9999) : $dimension['position'],
+                    ]
+                );
+
+                if (isset($dimension['description_ids']) && is_array($dimension['description_ids'])) {
+                    $dimensionItem->descriptionDimensions()->sync($dimension['description_ids']);
+                }
+
+                $descriptionKey = collect($dimension['description_ids'])->sort()->implode('-');
+                if (!$dimensionGroups->has($descriptionKey)) {
+                    $dimensionGroups->put($descriptionKey, collect());
+                }
+                $dimensionGroups->get($descriptionKey)->push($dimensionItem);
+
+                $globalKeyIndex++; // افزایش شمارنده کلید برای هر بعد جدید
+            }
+
+            $totalPayableAmount = $this->createOrUpdateAggregatedItems($invoiceId, $typeItem, $dimensionGroups, $item, $weight, $globalKeyIndex, $discount, $delivery);
+
+            return $totalPayableAmount;
+        }*/
 
 
 
@@ -560,7 +603,7 @@ class InvoiceService
         $result = ($height * $width / 1000000 < 0.5) ? (($height * $width / 1000000 == 0) ? 0 : 0.5) : ($height * $width / 1000000);
         return $result;
     }
-    public function calculateAspectRatio($height, $width)
+   /* public function calculateAspectRatio($height, $width)
     {
         $area = $this->CalculateArea((float)$height,(float)$width );
 
@@ -606,7 +649,58 @@ class InvoiceService
         }
 
         return "";
+    }*/
+    public function calculateAspectRatio($height, $width, $productIndex, $dimensionIndex)
+    {
+
+        $height = (float)$height;
+        $width = (float)$width;
+        $area = $this->CalculateArea($height, $width);
+
+        if ($height == 0 || $width == 0) {
+            return "";
+        }
+
+        if (min($height, $width) > 3210) {
+            throw new \App\Exceptions\DimensionException($productIndex, $dimensionIndex);
+        }
+
+        if (max($height, $width) > 4880 && min($height, $width) < 3211 && min($height, $width) > 2500) {
+            return 140;
+        }
+
+        if (max($height, $width) > 4880 && min($height, $width) <= 2500) {
+            return 140;
+        }
+
+        if (max($height, $width) > 4500 && min($height, $width) < 3211 && min($height, $width) >= 2500) {
+            return 75;
+        }
+
+        if (max($height, $width) > 4500 && min($height, $width) <= 2500) {
+            return 75;
+        }
+
+        if (min($height, $width) > 2440 && min($height, $width) >= 2500) {
+            return 35;
+        }
+
+        if (max($height, $width) > 3660 || (min($height, $width) > 2440 && min($height, $width) <= 2500)) {
+            return 20;
+        }
+
+        if (max($height, $width) <= 3660 && min($height, $width) <= 2440 && $area > 6 && $area <= 8.9304) {
+            return 15;
+        }
+
+        if (max($height, $width) <= 3660 && min($height, $width) <= 2440 && $area <= 6) {
+            return 0;
+        }
+
+        return "";
     }
+
+
 
 
 

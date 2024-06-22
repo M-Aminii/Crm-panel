@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\DimensionException;
 use App\Exceptions\InvalidDiscountException;
 use App\Helpers\Benchmark;
 use App\Http\Requests\Customer\ShowCustomerRequest;
@@ -45,12 +46,12 @@ class InvoiceController extends Controller
 
         if ($user->hasAnyAdminRole()) {
             // اگر کاربر مدیر است، همه فاکتورها را دریافت کنید
-            $invoices = \App\Models\Invoice::select('id','serial_number', 'user_id', 'customer_id', 'position', 'status')
+            $invoices = \App\Models\Invoice::select('id','serial_number', 'user_id', 'customer_id', 'description', 'status')
                 ->with(['user:id,name,last_name', 'customer:id,name'])
                 ->get();
         } else {
             // اگر کاربر عادی است، فقط فاکتورهای مربوط به خودش را دریافت کنید
-            $invoices = \App\Models\Invoice::select('id','serial_number', 'user_id', 'customer_id', 'position', 'status')
+            $invoices = \App\Models\Invoice::select('id','serial_number', 'user_id', 'customer_id', 'description', 'status')
                 ->with(['user:id,name,last_name', 'customer:id,name'])
                 ->where('user_id', $user->id)
                 ->get();
@@ -74,34 +75,44 @@ class InvoiceController extends Controller
         $validatedData = $request->validated();
 
         try {
-            DB::transaction(function () use ($validatedData) {
-                $lastInvoiceSerial = InvoiceService::generateNewSerial();
-                $invoice = \App\Models\Invoice::create([
-                    'serial_number' => $lastInvoiceSerial,
-                    'user_id' => auth()->id(),
-                    'customer_id' => $validatedData['buyer'],
-                    'description' => random_int(1000, 9999), //TODO: در این مکان توضیحات برای فاکتور زده میشه ولیدیشن ها درست شود
-                    'status' => $validatedData['status'],
-                    'discount' => $validatedData['discount'],
-                    'delivery' => $validatedData['delivery'],
-                ]);
+            DB::beginTransaction();
 
-                $AmountPayable = InvoiceService::processItems($invoice, $validatedData['items'],$validatedData['discount'],$validatedData['delivery']);
+            $lastInvoiceSerial = InvoiceService::generateNewSerial();
+            $invoice = \App\Models\Invoice::create([
+                'serial_number' => $lastInvoiceSerial,
+                'user_id' => auth()->id(),
+                'customer_id' => $validatedData['buyer'],
+                'description' => random_int(1000, 9999), //TODO: در این مکان توضیحات برای فاکتور زده میشه ولیدیشن ها درست شود
+                'status' => $validatedData['status'],
+                'discount' => $validatedData['discount'],
+                'delivery' => $validatedData['delivery'],
+            ]);
 
-                $invoice->update(['amount_payable' => $AmountPayable]);
-            });
+            $AmountPayable = InvoiceService::processItems($invoice, $validatedData['items'], $validatedData['discount'], $validatedData['delivery']);
+
+            $invoice->update(['amount_payable' => $AmountPayable]);
+
+            DB::commit();
 
             return response()->json(['message' => 'فاکتور با موفقیت ایجاد شد'], 201);
-        } catch (\App\Exceptions\InvalidDiscountException $exception) {
+        } catch (InvalidDiscountException $exception) {
             DB::rollBack();
             Log::error($exception);
-            return response()->json(['message' => $exception->getMessage()], $exception->getCode());
+            return response()->json(['message' => $exception->getMessage()], 422);
+        } catch (DimensionException $exception) {
+            DB::rollBack();
+            Log::error($exception);
+            $message = $exception->getMessage() . " ساختار شماره {$exception->getProductIndex()} ردیف  {$exception->getDimensionIndex()} وجود ندارد  " ;
+            return response()->json(['message' => $message], 422);
         } catch (\Exception $exception) {
             DB::rollBack();
             Log::error($exception);
-            return response()->json(['message' => 'خطایی به وجود آمده است'], 500);
+            return response()->json(['message' => 'خطایی به وجود آمده است: ' . $exception->getMessage()], 500);
         }
     }
+
+
+
 
 
     /**
