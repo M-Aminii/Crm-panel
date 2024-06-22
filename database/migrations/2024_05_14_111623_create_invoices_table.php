@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('serial_number', 100);
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('customer_id');
-            $table->string('position', 100);
+            $table->string('description', 100);
             $table->enum('status', InvoiceStatus::toArray());
             $table->enum('delivery',InvoiceDelivery::toArray());
             $table->integer('discount');

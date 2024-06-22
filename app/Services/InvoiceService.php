@@ -176,6 +176,7 @@ class InvoiceService
                     'weight' => $weight * $area,
                     'quantity' => $dimension['quantity'],
                     'over' => $invoiceService->calculateAspectRatio($dimension['height'], $dimension['width']),
+                    'position' =>  $dimension['position'] === null ? random_int(1000, 9999) : $dimension['position'],
                 ]
             );
 

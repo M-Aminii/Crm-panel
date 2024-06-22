@@ -21,6 +21,7 @@ return new class extends Migration
             $table->integer('weight');
             $table->integer('quantity');
             $table->integer('over');
+            $table->string('position', 100);
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
 

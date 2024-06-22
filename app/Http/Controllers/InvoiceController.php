@@ -80,7 +80,7 @@ class InvoiceController extends Controller
                     'serial_number' => $lastInvoiceSerial,
                     'user_id' => auth()->id(),
                     'customer_id' => $validatedData['buyer'],
-                    'position' => random_int(1000, 9999),
+                    'description' => random_int(1000, 9999), //TODO: در این مکان توضیحات برای فاکتور زده میشه ولیدیشن ها درست شود
                     'status' => $validatedData['status'],
                     'discount' => $validatedData['discount'],
                     'delivery' => $validatedData['delivery'],

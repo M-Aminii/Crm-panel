@@ -10,7 +10,7 @@ class DimensionItem extends Model
     use HasFactory;
 
     protected $fillable = [
-        'key','invoice_id', 'type_id', 'height', 'width', 'weight','quantity', 'over'
+        'key','invoice_id', 'type_id', 'height', 'width', 'weight','quantity', 'over','position'
     ];
 
     public function invoice()
