@@ -277,24 +277,34 @@ class InvoiceController extends Controller
         $invoiceId = $request->invoice;
 
         try {
-            DB::transaction(function () use ($invoiceId,$validatedData) {
+            DB::transaction(function () use ($invoiceId, $validatedData) {
                 $invoice = \App\Models\Invoice::findOrFail($invoiceId);
                 $invoice->update([
                     'status' => $validatedData['status'],
                 ]);
 
-                $AmountPayable = InvoiceService::processItems($invoice, $validatedData['items'],$validatedData['discount'],$validatedData['delivery']);
+                $amountPayable = InvoiceService::processItems($invoice, $validatedData['items'], $validatedData['discount'], $validatedData['delivery']);
 
-                $invoice->update(['amount_payable' => $AmountPayable]);
+                $invoice->update(['amount_payable' => $amountPayable]);
             });
 
             return response()->json(['message' => 'فاکتور با موفقیت به‌روزرسانی شد'], 200);
+        } catch (InvalidDiscountException $exception) {
+            DB::rollBack();
+            Log::error($exception);
+            return response()->json(['message' => $exception->getMessage()], 422);
+        } catch (DimensionException $exception) {
+            DB::rollBack();
+            Log::error($exception);
+            $message = $exception->getMessage() . " ساختار شماره {$exception->getProductIndex()} ردیف  {$exception->getDimensionIndex()} وجود ندارد  " ;
+            return response()->json(['message' => $message], 422);
         } catch (\Exception $exception) {
             DB::rollBack();
             Log::error($exception);
-            return response(['message' => 'خطایی به وجود آمده است'], 500);
+            return response()->json(['message' => 'خطایی به وجود آمده است: ' . $exception->getMessage()], 500);
         }
     }
+
     /**
      * Remove the specified resource from storage.
      */

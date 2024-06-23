@@ -29,15 +29,16 @@ class CreateCustomerRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:100'],
-            'national_id' => ['nullable', 'string', 'max:11','unique:customers,national_id'],
-            'registration_number' => ['nullable', 'string' ,'max:4','unique:customers,registration_number'],
-            'phone' => ['required_without:mobile','unique:customers,phone'],
-            'mobile' => ['required_without:phone', new MobileRule,'unique:customers,mobile' ],
+            'national_id' => ['nullable', 'integer', 'max:11', 'unique:customers,national_id'],
+            'registration_number' => ['nullable', 'integer' ,'max:4', 'unique:customers,registration_number'],
+            'phone' => ['nullable', 'integer', 'max:15', 'required_without:mobile', 'unique:customers,phone'],
+            'mobile' => ['nullable', 'integer', 'max:15', 'required_without:phone', new MobileRule, 'unique:customers,mobile'],
             'type' => 'required|in:' . implode(',', CustomerType::toValues()),
-            'postal_code' => ['nullable', 'string', 'max:10','unique:customers,postal_code'],
+            'postal_code' => ['nullable', 'integer', 'max:10', 'unique:customers,postal_code'],
             'address' => ['nullable', 'string'],
             'province_id' => ['nullable', 'exists:provinces,id'],
-            'city_id' => ['nullable','exists:cities,id'],
+            'city_id' => ['nullable', 'exists:cities,id'],
         ];
     }
+
 }

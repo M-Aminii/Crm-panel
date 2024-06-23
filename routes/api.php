@@ -3,6 +3,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DescriptionDimensionController;
+use App\Http\Controllers\EitaaController;
 use App\Http\Controllers\Glass\LayerController;
 use App\Http\Controllers\GlassFinalStructureController;
 use App\Http\Controllers\IndividualCustomerController;
@@ -44,6 +45,9 @@ Route::get('/provinces/{id}/cities', function ($id) {
     return response()->json($cities);
 });
 
+Route::post('/send-message', [EitaaController::class, 'sendMessage']);
+Route::post('/send-file', [EitaaController::class, 'sendFile']);
+Route::get('/get-me', [EitaaController::class, 'getMe']);
 /*Route::group(["middleware" => ['role:super-admin',"auth:api"],'prefix' => 'Admin'], function () {
 
     Route::group(['prefix' => '/user'], function () {

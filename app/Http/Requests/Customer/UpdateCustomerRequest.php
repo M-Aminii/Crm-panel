@@ -39,17 +39,16 @@ class UpdateCustomerRequest extends FormRequest
     {
         return [
             'name' => ['nullable', 'string', 'max:100'],
-            'national_id' => ['nullable', 'string', 'max:11'],
-            'registration_number' => ['nullable', 'string' ,'max:4'],
-            'phone' => ['nullable_without:mobile'],
-            'mobile' => ['nullable_without:phone', new MobileRule ],
+            'national_id' => ['nullable', 'integer', 'max:11'],
+            'registration_number' => ['nullable', 'integer' ,'max:4'],
+            'phone' => ['nullable', 'integer', 'max:15', 'required_without:mobile'],
+            'mobile' => ['nullable', 'integer', 'max:15', 'required_without:phone', new MobileRule],
             'type' => 'nullable|in:' . implode(',', CustomerType::toValues()),
             'status' => 'nullable|in:' . implode(',', CustomerStatus::toValues()),
-            'postal_code' => ['nullable', 'string', 'max:10'],
+            'postal_code' => ['nullable', 'integer', 'max:10'],
             'address' => ['nullable', 'string'],
             'province_id' => ['nullable', 'exists:provinces,id'],
-            'city_id' => ['nullable','exists:cities,id'],
-
+            'city_id' => ['nullable', 'exists:cities,id'],
         ];
     }
 }
