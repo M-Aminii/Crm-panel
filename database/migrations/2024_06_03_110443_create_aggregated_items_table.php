@@ -22,7 +22,7 @@ return new class extends Migration
             $table->integer('price_unit');
             $table->integer('price_discounted');
             $table->integer('value_added_tax');
-            $table->integer('total_price');
+            $table->bigInteger('total_price');
             $table->text('description')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();

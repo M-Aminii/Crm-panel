@@ -22,7 +22,7 @@ return new class extends Migration
             $table->enum('status', InvoiceStatus::toArray());
             $table->enum('delivery',InvoiceDelivery::toArray());
             $table->integer('discount');
-            $table->integer('amount_payable')->nullable();    // خالی میخوره به این دلیل که در اخر سر برای اپدیت این اضافه میشه
+            $table->bigInteger('amount_payable')->nullable();    // خالی میخوره به این دلیل که در اخر سر برای اپدیت این اضافه میشه
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
 

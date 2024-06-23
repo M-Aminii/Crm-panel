@@ -47,5 +47,6 @@ class CreateInvoiceRequest extends FormRequest
             'delivery' => 'required|integer', // افزودن فیلد تخفیف و اعتبارسنجی آن
         ];
 
+
     }
 }
