@@ -40,5 +40,16 @@ class Invoice extends Model
     {
         return $this->hasMany(AggregatedItem::class);
     }
+
+    public function scopeFormal($query)
+    {
+        return $query->where('status', 'formal');
+    }
+
+    // تعریف اسکوپ برای فاکتورهای informal
+    public function scopeInformal($query)
+    {
+        return $query->where('status', 'informal');
+    }
 }
 

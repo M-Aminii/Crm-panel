@@ -93,7 +93,7 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'Admin'], function () {
 
     Route::group(['prefix' => '/invoice'], function () {
         Route::post('/', [InvoiceController::class, 'store'])->middleware('permission:manage invoices');
-        Route::get('/', [InvoiceController::class, 'index'])->middleware('permission:view invoices','check.invoices');
+        Route::get('/list/{status}', [InvoiceController::class, 'index'])->middleware('permission:view invoices','check.invoices');
         Route::get('/{invoice}', [InvoiceController::class, 'show'])->middleware('permission:view invoices','check.invoices');
         Route::patch('/{invoice}', [InvoiceController::class, 'update'])->middleware('permission:manage invoices', 'check.invoices');
         Route::delete('/{invoice}', [InvoiceController::class, 'destroy'])->middleware('permission:manage invoices' ,'check.invoices');

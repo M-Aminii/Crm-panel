@@ -39,28 +39,39 @@ class InvoiceController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(ListInvoiceRequest $request)
+    public function index(ListInvoiceRequest $request ,$status)
     {
-        // بررسی کنید که آیا کاربر مدیر است
         $user = auth()->user();
+        // تعریف وضعیت‌های معتبر
+        $validStatuses = ['formal', 'informal'];
 
-        if ($user->hasAnyAdminRole()) {
-            // اگر کاربر مدیر است، همه فاکتورها را دریافت کنید
-            $invoices = \App\Models\Invoice::select('id','serial_number', 'user_id', 'customer_id', 'description', 'status')
-                ->with(['user:id,name,last_name', 'customer:id,name'])
-                ->get();
-        } else {
-            // اگر کاربر عادی است، فقط فاکتورهای مربوط به خودش را دریافت کنید
-            $invoices = \App\Models\Invoice::select('id','serial_number', 'user_id', 'customer_id', 'description', 'status')
-                ->with(['user:id,name,last_name', 'customer:id,name'])
-                ->where('user_id', $user->id)
-                ->get();
+        // بررسی معتبر بودن وضعیت
+        if (!in_array($status, $validStatuses)) {
+            return response()->json(['error' => 'Invalid status provided'], 400);
         }
 
-        // تبدیل داده‌ها به JSON و بازگرداندن آن‌ها
+        // ایجاد کوئری اصلی برای دریافت فاکتورها
+        $query = \App\Models\Invoice::select('id', 'serial_number', 'user_id', 'customer_id', 'description', 'status')
+            ->with(['user:id,name,last_name', 'customer:id,name']);
+
+        // اگر کاربر مدیر نیست، فاکتورها را بر اساس user_id فیلتر کنید
+        if (!$user->hasAnyAdminRole()) {
+            $query->where('user_id', $user->id);
+        }
+
+        // استفاده از اسکوپ برای فیلتر کردن بر اساس وضعیت
+        if ($status) {
+            if ($status === 'formal') {
+                $query->formal();
+            } elseif ($status === 'informal') {
+                $query->informal();
+            }
+        }
+
+        // اجرای کوئری و دریافت نتایج
+        $invoices = $query->get();
+
         return response()->json($invoices, 200);
-
-
     }
 
 
