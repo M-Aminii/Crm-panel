@@ -12,11 +12,11 @@ class ProductsTableSeeder extends Seeder
     {
         // تعریف محصولات اصلی به همراه تصویر
         $products = [
-            ['name' => 'سکوریت سفارشی', 'image_path' => 'path_to_image1.jpg'],
-            ['name' => 'لمینت سفارشی', 'image_path' => 'path_to_image2.jpg'],
-            ['name' => 'دوجداره سفارشی', 'image_path' => 'path_to_image3.jpg'],
-            ['name' => 'سه جداره سفارشی', 'image_path' => 'path_to_image4.jpg'],
-            ['name' => 'دوجداره لمینت سفارشی', 'image_path' => 'path_to_image6.jpg'],
+            ['name' => 'سکوریت سفارشی', 'image_path' => 'image/product_images/scorit.png'],
+            ['name' => 'لمینت سفارشی', 'image_path' => ''],
+            ['name' => 'دوجداره سفارشی', 'image_path' => 'image/product_images/j-2.png'],
+            ['name' => 'سه جداره سفارشی', 'image_path' => 'image/product_images/j-3.png'],
+            ['name' => 'دوجداره لمینت سفارشی', 'image_path' => ''],
         ];
 
         // ایجاد محصولات اصلی در دیتابیس
@@ -29,12 +29,12 @@ class ProductsTableSeeder extends Seeder
             // اگر محصولی دارای بخش‌هایی باشد، آنها را نیز اضافه کنید
             if ($product->name == 'لمینت سفارشی') {
                 $sections = [
-                    ['name' => 'دو لایه', 'image_path' => 'image/product_images/laminet_2.jpg'],
-                    ['name' => 'سه لایه', 'image_path' => 'path_to_section_image2.jpg'],
-                    ['name' => 'چهار لایه', 'image_path' => 'path_to_section_image3.jpg'],
-                    ['name' => 'پنج لایه', 'image_path' => 'path_to_section_image2.jpg'],
-                    ['name' => 'شش لایه', 'image_path' => 'path_to_section_image3.jpg'],
-                    ['name' => 'هفت لایه', 'image_path' => 'path_to_section_image3.jpg'],
+                    ['name' => 'دو لایه', 'image_path' => 'image/product_images/laminet_2.png'],
+                    ['name' => 'سه لایه', 'image_path' => 'image/product_images/laminet_3.png'],
+                    ['name' => 'چهار لایه', 'image_path' => 'image/product_images/laminet_4.png'],
+                    ['name' => 'پنج لایه', 'image_path' => 'image/product_images/laminet_5.png'],
+                    ['name' => 'شش لایه', 'image_path' => 'image/product_images/laminet_6.png'],
+                    ['name' => 'هفت لایه', 'image_path' => 'image/product_images/laminet_7.png'],
                 ];
                 foreach ($sections as $sectionData) {
                     ProductSection::create([
@@ -45,8 +45,8 @@ class ProductsTableSeeder extends Seeder
                 }
             } elseif ($product->name == 'دوجداره لمینت سفارشی') {
                 $sections = [
-                    ['name' => 'یک لایه لمینت', 'image_path' => 'path_to_section_image4.jpg'],
-                    ['name' => 'دو لایه لمینت', 'image_path' => 'path_to_section_image5.jpg'],
+                    ['name' => 'یک لایه لمینت', 'image_path' => 'image/product_images/laminet_doj.png'],
+                    ['name' => 'دو لایه لمینت', 'image_path' => 'image/product_images/laminet_doj_2.png'],
                 ];
                 foreach ($sections as $sectionData) {
                     ProductSection::create([
