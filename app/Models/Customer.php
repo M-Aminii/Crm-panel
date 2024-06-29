@@ -60,7 +60,7 @@ class Customer extends Model
         }
     }
     ///تبدیل ایدی استان و شهر به نام
-    /*
+
     protected $appends = ['province_name', 'city_name'];
     public function province()
     {
@@ -79,6 +79,6 @@ class Customer extends Model
     public function getCityNameAttribute()
     {
         return $this->city ? $this->city->name : null;
-    }*/
+    }
 
 }
