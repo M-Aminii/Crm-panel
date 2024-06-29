@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Province extends Model
 {
     use HasFactory;
+    protected $table = 'provinces';
 
     protected $fillable = ['name'];
 
@@ -16,7 +17,7 @@ class Province extends Model
         'updated_at',
     ];
 
-     /*  public function customers()
+   /*    public function customers()
     {
         return $this->hasMany(Customer::class);
     }*/
