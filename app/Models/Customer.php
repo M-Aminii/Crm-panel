@@ -61,7 +61,7 @@ class Customer extends Model
     }
     ///تبدیل ایدی استان و شهر به نام
 
-    protected $appends = ['province_name', 'city_name'];
+/*    protected $appends = ['province_name', 'city_name'];*/
     public function province()
     {
         return $this->belongsTo(province::class);
@@ -70,7 +70,7 @@ class Customer extends Model
     {
         return $this->belongsTo(Cities::class);
     }
-
+/*
     public function getProvinceNameAttribute()
     {
         return $this->province ? $this->province->name : null;
@@ -79,6 +79,6 @@ class Customer extends Model
     public function getCityNameAttribute()
     {
         return $this->city ? $this->city->name : null;
-    }
+    }*/
 
 }
