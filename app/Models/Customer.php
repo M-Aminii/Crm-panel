@@ -62,10 +62,10 @@ class Customer extends Model
     ///تبدیل ایدی استان و شهر به نام
 
 /*    protected $appends = ['province_name', 'city_name'];*/
-    public function province()
+   /* public function province()
     {
         return $this->belongsTo(province::class);
-    }
+    }*/
     public function city()
     {
         return $this->belongsTo(Cities::class);

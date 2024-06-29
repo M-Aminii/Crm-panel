@@ -94,7 +94,8 @@ class CustomerController extends Controller
             // بازگشت نتیجه به عنوان پاسخ
             return response()->json($Customer);*/
                // جستجوی شخص با استفاده از شناسه و بارگذاری روابط
-               $customer = Customer::with(['province', 'city'])->findOrFail($request->customer);
+               $customer = Customer::with(['city'])->findOrFail($request->customer);
+
                // بازگشت نتیجه به عنوان پاسخ با استفاده از CustomerResource
                return new CustomerResource($customer);
         } catch (ModelNotFoundException $exception) {
