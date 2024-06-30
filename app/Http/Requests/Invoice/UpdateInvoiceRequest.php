@@ -27,15 +27,16 @@ class UpdateInvoiceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => 'required|string',
+            'status' => 'nullable|string',
             'pre_payment' => 'nullable|numeric',
             'before_delivery' => 'nullable|numeric',
             'cheque' => 'nullable|numeric',
-            'items' => 'required|array',
-            'items.*.product' => 'required|integer|exists:products,id',
-            'items.*.description' => 'required|array',
-            'items.*.dimensions' => 'required|array',
-            'items.*.technical_details' => 'required|array',
+            'description'=> 'nullable|string',
+            'items' => 'nullable|array',
+            'items.*.product' => 'nullable|integer|exists:products,id',
+            'items.*.description' => 'nullable|array',
+            'items.*.dimensions' => 'nullable|array',
+            'items.*.technical_details' => 'nullable|array',
         ];
     }
 }

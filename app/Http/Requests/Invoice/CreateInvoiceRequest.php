@@ -45,6 +45,7 @@ class CreateInvoiceRequest extends FormRequest
             'items.*.technical_details' => 'required|array',
             'discount' => 'required|integer|min:0|max:20', // افزودن فیلد تخفیف و اعتبارسنجی آن
             'delivery' => 'required|integer', // افزودن فیلد تخفیف و اعتبارسنجی آن
+            'description'=> 'required|string',
         ];
 
 

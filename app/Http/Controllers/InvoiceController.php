@@ -292,6 +292,7 @@ class InvoiceController extends Controller
     {
         // اعتبارسنجی داده‌های ورودی
         $validatedData = $request->all();
+        //dd($validatedData);
 
         $invoiceId = $id;
 
@@ -303,7 +304,7 @@ class InvoiceController extends Controller
 
                 // به‌روزرسانی وضعیت و سه مقدار جدید
                 $invoice->update([
-                    'status' => $validatedData['status'],
+                    'status' => $validatedData['status'] ?? $invoice->discount,
                     'discount' => $validatedData['discount'] ?? $invoice->discount,
                     'delivery' => $validatedData['delivery'] ?? $invoice->delivery,
                     'description' => $validatedData['description'] ?? $invoice->description,
@@ -312,8 +313,12 @@ class InvoiceController extends Controller
                     'cheque' => $validatedData['cheque'] ?? $invoice->cheque,
                 ]);
 
-                $amountPayable = InvoiceService::processItems($invoice, $validatedData['items'], $validatedData['discount'], $validatedData['delivery']);
-                $invoice->update(['amount_payable' => $amountPayable]);
+                if (isset($validatedData['items'], $validatedData['discount'], $validatedData['delivery'])){
+                    $amountPayable = InvoiceService::processItems($invoice, $validatedData['items'], $validatedData['discount'], $validatedData['delivery']);
+                    $invoice->update(['amount_payable' => $amountPayable]);
+                }
+
+
             });
 
             return response()->json(['message' => 'فاکتور با موفقیت به‌روزرسانی شد'], 200);
