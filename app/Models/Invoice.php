@@ -9,7 +9,10 @@ class Invoice extends Model
     use HasFactory;
 
     protected $fillable = [
-        'serial_number', 'user_id', 'customer_id', 'description', 'status','delivery','discount','amount_payable'
+        'serial_number', 'user_id', 'customer_id',
+        'description', 'status','delivery','discount',
+        'pre_payment','before_delivery',
+        'cheque','amount_payable'
     ];
 
     public function user()

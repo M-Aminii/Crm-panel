@@ -22,6 +22,7 @@ use App\Models\User;
 use App\Services\InvoiceService;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -36,6 +37,13 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class InvoiceController extends Controller
 {
+
+    protected $invoiceService;
+
+    public function __construct(InvoiceService $invoiceService)
+    {
+        $this->invoiceService = $invoiceService;
+    }
     /**
      * Display a listing of the resource.
      */
@@ -93,7 +101,7 @@ class InvoiceController extends Controller
                 'serial_number' => $lastInvoiceSerial,
                 'user_id' => auth()->id(),
                 'customer_id' => $validatedData['buyer'],
-                'description' => random_int(1000, 9999), //TODO: در این مکان توضیحات برای فاکتور زده میشه ولیدیشن ها درست شود
+                'description' => $validatedData['description'], //TODO: در این مکان توضیحات برای فاکتور زده میشه ولیدیشن ها درست شود
                 'status' => $validatedData['status'],
                 'discount' => $validatedData['discount'],
                 'delivery' => $validatedData['delivery'],
@@ -285,6 +293,57 @@ class InvoiceController extends Controller
         // اعتبارسنجی داده‌های ورودی
         $validatedData = $request->all();
 
+        $invoiceId = $id;
+
+        try {
+            DB::transaction(function () use ($invoiceId, $validatedData) {
+                $invoice = \App\Models\Invoice::findOrFail($invoiceId);
+
+                $this->invoiceService->validateInvoiceUpdate($invoice, $validatedData);
+
+                // به‌روزرسانی وضعیت و سه مقدار جدید
+                $invoice->update([
+                    'status' => $validatedData['status'],
+                    'discount' => $validatedData['discount'] ?? $invoice->discount,
+                    'delivery' => $validatedData['delivery'] ?? $invoice->delivery,
+                    'description' => $validatedData['description'] ?? $invoice->description,
+                    'pre_payment' => $validatedData['pre_payment'] ?? $invoice->pre_payment,
+                    'before_delivery' => $validatedData['before_delivery'] ?? $invoice->before_delivery,
+                    'cheque' => $validatedData['cheque'] ?? $invoice->cheque,
+                ]);
+
+                $amountPayable = InvoiceService::processItems($invoice, $validatedData['items'], $validatedData['discount'], $validatedData['delivery']);
+                $invoice->update(['amount_payable' => $amountPayable]);
+            });
+
+            return response()->json(['message' => 'فاکتور با موفقیت به‌روزرسانی شد'], 200);
+        } catch (InvalidDiscountException $exception) {
+            DB::rollBack();
+            Log::error($exception);
+            return response()->json(['message' => $exception->getMessage()], 422);
+        } catch (DimensionException $exception) {
+            DB::rollBack();
+            Log::error($exception);
+            $message = $exception->getMessage() . " ساختار شماره {$exception->getProductIndex()} ردیف  {$exception->getDimensionIndex()} وجود ندارد  " ;
+            return response()->json(['message' => $message], 422);
+        } catch (HttpResponseException $exception) {
+            DB::rollBack();
+            throw $exception;
+        } catch (\Exception $exception) {
+            DB::rollBack();
+            Log::error($exception);
+            return response()->json(['message' => 'خطایی به وجود آمده است: ' . $exception->getMessage()], 500);
+        }
+    }
+
+
+
+
+    /*public function update(UpdateInvoiceRequest $request, string $id)
+    {
+        // اعتبارسنجی داده‌های ورودی
+        $validatedData = $request->all();
+
         $invoiceId = $request->invoice;
 
         try {
@@ -293,12 +352,9 @@ class InvoiceController extends Controller
                 $invoice->update([
                     'status' => $validatedData['status'],
                 ]);
-
                 $amountPayable = InvoiceService::processItems($invoice, $validatedData['items'], $validatedData['discount'], $validatedData['delivery']);
-
                 $invoice->update(['amount_payable' => $amountPayable]);
             });
-
             return response()->json(['message' => 'فاکتور با موفقیت به‌روزرسانی شد'], 200);
         } catch (InvalidDiscountException $exception) {
             DB::rollBack();
@@ -314,7 +370,7 @@ class InvoiceController extends Controller
             Log::error($exception);
             return response()->json(['message' => 'خطایی به وجود آمده است: ' . $exception->getMessage()], 500);
         }
-    }
+    }*/
 
     /**
      * Remove the specified resource from storage.

@@ -15,6 +15,7 @@ use App\Models\DimensionItem;
 use App\Models\TechnicalItem;
 use App\Models\AggregatedItem;
 use App\Models\DescriptionDimension;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -318,14 +319,53 @@ class InvoiceService
         return $totalPayableAmount;
     }
 
+    public static function generateNewSerial(): string
+    {
+        try {
+            // جستجو برای یافتن آخرین سریال
+            $latestSerial = \App\Models\Invoice::orderBy('created_at', 'desc')->value('serial_number');
+            // اگر سریال وجود داشت، 4 رقم به آن اضافه کنید
+            if ($latestSerial) {
+                $newSerialNumber = 'f-s'.((int) substr($latestSerial, 3) + 4);
+                return $newSerialNumber;
+            } else {
+                // اگر سریال وجود نداشت، سریال اولیه را برگردانید
+                return 'f-s186524';
+            }
+        } catch (\Exception $e) {
+            // لاگ کردن خطا
+            Log::error('خطا در پردازش سریال: ' . $e->getMessage());
+            // برگرداندن سریال پیش‌فرض در صورت بروز خطا
+            return 'f-s186524';
+        }
+    }
 
 
 
 
 
 
+   //validateInvoice
+    public function validateInvoiceUpdate($invoice, $validatedData)
+    {
+        // بررسی تغییر وضعیت از informal به formal
+        if ($invoice->status === 'informal' && $validatedData['status'] === 'formal') {
+            // بررسی مقداردهی فیلدها
+            if (!isset($validatedData['pre_payment']) || !isset($validatedData['before_delivery']) || !isset($validatedData['cheque'])) {
+                throw new HttpResponseException(response()->json([
+                    'message' => 'برای تغییر وضعیت به رسمی ، فیلدهای پیش پرداخت ، قبل از تحویل و چک باید مقداردهی شوند.'
+                ], 422));
+            }
 
-
+            // بررسی وضعیت مشتری
+            $customer = $invoice->customer;
+            if ($customer->status === 'Incomplete' || $customer->status === 'Inactive') {
+                throw new HttpResponseException(response()->json([
+                    'message' => 'وضعیت مشتری اجازه تغییر وضعیت فاکتور به رسمی را نمی‌دهد.'
+                ], 422));
+            }
+        }
+    }
 
 
 
@@ -392,26 +432,7 @@ class InvoiceService
 
 
 
-    public static function generateNewSerial(): string
-    {
-        try {
-            // جستجو برای یافتن آخرین سریال
-            $latestSerial = \App\Models\Invoice::orderBy('created_at', 'desc')->value('serial_number');
-            // اگر سریال وجود داشت، 4 رقم به آن اضافه کنید
-            if ($latestSerial) {
-                $newSerialNumber = 'f-s'.((int) substr($latestSerial, 3) + 4);
-                return $newSerialNumber;
-            } else {
-                // اگر سریال وجود نداشت، سریال اولیه را برگردانید
-                return 'f-s186524';
-            }
-        } catch (\Exception $e) {
-            // لاگ کردن خطا
-            Log::error('خطا در پردازش سریال: ' . $e->getMessage());
-            // برگرداندن سریال پیش‌فرض در صورت بروز خطا
-            return 'f-s186524';
-        }
-    }
+
 
     public function calculateWeight($description)
     {

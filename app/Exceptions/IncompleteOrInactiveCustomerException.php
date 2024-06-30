@@ -8,6 +8,6 @@ class IncompleteOrInactiveCustomerException extends Exception
 {
     public function render($request)
     {
-        return response()->json(['message' => 'امکان صدور فاکتور برای این مشتری وجود ندارد'], 403);
+        return response()->json(['message' => 'امکان صدور فاکتور برای این مشتری وجود ندارد'], 422);
     }
 }

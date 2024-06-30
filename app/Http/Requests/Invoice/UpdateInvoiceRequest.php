@@ -28,6 +28,9 @@ class UpdateInvoiceRequest extends FormRequest
     {
         return [
             'status' => 'required|string',
+            'pre_payment' => 'nullable|numeric',
+            'before_delivery' => 'nullable|numeric',
+            'cheque' => 'nullable|numeric',
             'items' => 'required|array',
             'items.*.product' => 'required|integer|exists:products,id',
             'items.*.description' => 'required|array',

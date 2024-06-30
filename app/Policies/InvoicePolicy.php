@@ -31,7 +31,7 @@ class InvoicePolicy
      */
     public function create(User $user, Customer $customer): bool
     {
-        if ($customer->status === "Incomplete" || $customer->status === "Inactive") {
+        if ( $customer->status === "Inactive") {
             throw new \App\Exceptions\IncompleteOrInactiveCustomerException();
         }
 
