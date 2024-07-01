@@ -230,7 +230,23 @@ class InvoiceService
         $totalPayableAmount = 0; // متغیر برای نگهداری مجموع مبالغ
         $descriptionNames = [];
 
+        // ابتدا گروه‌بندی بر اساس descriptionIds و over
+        $groupedDimensions = collect();
+
         foreach ($dimensionGroups as $descriptionKey => $dimensions) {
+            foreach ($dimensions as $dimension) {
+                $descriptionIds = explode('-', $descriptionKey);
+                $overPercentage = round($dimension->over, 2);
+                $groupKey = implode('-', $descriptionIds) . '-over-' . $overPercentage;
+
+                if (!$groupedDimensions->has($groupKey)) {
+                    $groupedDimensions->put($groupKey, collect());
+                }
+                $groupedDimensions->get($groupKey)->push($dimension);
+            }
+        }
+
+        foreach ($groupedDimensions as $groupKey => $dimensions) {
             $totalArea = $dimensions->sum(function ($dimension) use ($invoiceService) {
                 return round($invoiceService->CalculateArea($dimension->height, $dimension->width), 3);
             });
@@ -243,10 +259,12 @@ class InvoiceService
 
             $basePrice = $item['price_per_unit'];
 
-            $descriptionIds = explode('-', $descriptionKey);
+            // استخراج descriptionIds و overPercentage از groupKey
+            list($descriptionIdsKey, $overPercentage) = explode('-over-', $groupKey);
+            $descriptionIds = explode('-', $descriptionIdsKey);
+            $overPercentage = floatval($overPercentage);
 
             $valueAddedTax = $basePrice;
-            $overPercentage = 0;
 
             foreach ($descriptionIds as $id) {
                 $description = DescriptionDimension::find($id);
@@ -260,11 +278,6 @@ class InvoiceService
                 }
             }
 
-            foreach ($dimensions as $dimension) {
-                $overPercentage += $dimension->over;
-            }
-            $overPercentage /= $dimensions->count();
-
             $valueAddedTax += ($valueAddedTax * $overPercentage) / 100;
             $priceUnit = intval(($valueAddedTax / 110) * 100);
 
@@ -272,7 +285,7 @@ class InvoiceService
             $userMaxDiscount = $user->userDiscount->max_discount ?? 10;
 
             if ($discount > $userMaxDiscount) {
-               throw new InvalidDiscountException();
+                throw new InvalidDiscountException();
             }
 
             $priceDiscounted = ($priceUnit / 100) * (100 - $discount);
@@ -318,6 +331,103 @@ class InvoiceService
         // بازگرداندن مجموع مبالغ
         return $totalPayableAmount;
     }
+
+/*    public function createOrUpdateAggregatedItems($invoiceId, $typeItem, $dimensionGroups, $item, $weight, &$globalKeyIndex, $discount, $delivery)
+        {
+            $invoiceService = new InvoiceService();
+            $totalPayableAmount = 0; // متغیر برای نگهداری مجموع مبالغ
+            $descriptionNames = [];
+
+            foreach ($dimensionGroups as $descriptionKey => $dimensions) {
+
+                $totalArea = $dimensions->sum(function ($dimension) use ($invoiceService) {
+                    return round($invoiceService->CalculateArea($dimension->height, $dimension->width), 3);
+                });
+
+                $totalQuantity = $dimensions->sum('quantity');
+                $totalMeterage = $dimensions->sum(function ($dimension) use ($invoiceService) {
+                    $area = round($invoiceService->CalculateArea($dimension->height, $dimension->width), 3);
+                    return $area * $dimension->quantity;
+                });
+
+                $basePrice = $item['price_per_unit'];
+
+                $descriptionIds = explode('-', $descriptionKey);
+
+                $valueAddedTax = $basePrice;
+                $overPercentage = 0;
+
+                foreach ($descriptionIds as $id) {
+                    $description = DescriptionDimension::find($id);
+                    if ($description) {
+                        $descriptionNames[$id] = $description->name;
+                        if ($description->price) {
+                            $valueAddedTax += $description->price;
+                        } elseif ($description->percent) {
+                            $valueAddedTax += ($basePrice * $description->percent) / 100;
+                        }
+                    }
+                }
+
+                foreach ($dimensions as $dimension) {
+                    $overPercentage += $dimension->over;
+                }
+
+                //$overPercentage /= $dimensions->count();
+
+                $valueAddedTax += ($valueAddedTax * $overPercentage) / 100;
+                $priceUnit = intval(($valueAddedTax / 110) * 100);
+
+                $user = auth()->user();
+                $userMaxDiscount = $user->userDiscount->max_discount ?? 10;
+
+                if ($discount > $userMaxDiscount) {
+                   throw new InvalidDiscountException();
+                }
+
+                $priceDiscounted = ($priceUnit / 100) * (100 - $discount);
+
+                if ($delivery === 1) {
+                    $priceDiscounted += intval($weight * 37500); // افزودن کرایه بار فقط در صورت انتخاب گزینه حمل و نقل
+                }
+
+                $priceValueAddedFinal = ($priceDiscounted * 110) / 100;
+
+                $totalPrice = intval($totalMeterage * $priceValueAddedFinal);
+
+                // اضافه کردن مبلغ کل آیتم به مجموع قابل پرداخت
+                $totalPayableAmount += $totalPrice;
+
+                $names = collect($descriptionIds)->map(function ($id) use ($descriptionNames) {
+                    return $descriptionNames[$id] ?? ' ';
+                })->implode(', ');
+
+                if (!empty($overPercentage) && $overPercentage != 0) {
+                    $names .= '   درصد اور ' . $overPercentage;
+                }
+
+                // استفاده از updateOrCreate با استفاده از globalKeyIndex
+                AggregatedItem::updateOrCreate([
+                    'invoice_id' => $invoiceId,
+                    'key' => $globalKeyIndex // استفاده از شمارنده سراسری به عنوان key
+                ], [
+                    'description_product' => $typeItem->description,
+                    'description' => $names,
+                    'total_area' => $totalMeterage,
+                    'total_quantity' => $totalQuantity,
+                    'total_weight' => $totalMeterage * $weight,
+                    'price_unit' => $priceUnit,
+                    'price_discounted' => $priceDiscounted,
+                    'value_added_tax' => $priceValueAddedFinal,
+                    'total_price' => $totalPrice,
+                ]);
+
+                $globalKeyIndex++; // افزایش شمارنده سراسری برای استفاده در کلید بعدی
+            }
+
+            // بازگرداندن مجموع مبالغ
+            return $totalPayableAmount;
+        }*/
 
     public static function generateNewSerial(): string
     {
