@@ -15,8 +15,9 @@ return new class extends Migration
         Schema::create('user_discounts', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->integer('max_discount'); // حداکثر تخفیف مجاز
-            $table->enum('payment_terms',UserDiscountPayment::toArray()); // حداکثر تخفیف مجاز
+            $table->integer('max_discount')->nullable(); // حداکثر تخفیف مجاز
+            $table->enum('payment_terms',UserDiscountPayment::toArray())->nullable();
+            $table->integer('min_pre_payment')->default(30)->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });

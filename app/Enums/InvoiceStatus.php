@@ -10,22 +10,22 @@ use Spatie\Enum\Laravel\Enum;
  */
 final class InvoiceStatus extends Enum
 {
-    const Status_InFormal = 'informal';
-    const Status_Formal = 'formal';
+    const InFormal = 'informal';
+    const Formal = 'formal';
 
     protected static function values(): array
     {
         return [
-            'informal' => self::Status_InFormal,
-            'formal' => self::Status_Formal,
+            'informal' => self::InFormal,
+            'formal' => self::Formal,
         ];
     }
 
     protected static function labels(): array
     {
         return [
-            self::Status_InFormal => 'informal',
-            self::Status_Formal => 'formal',
+            self::InFormal => 'informal',
+            self::Formal => 'formal',
         ];
     }
 }

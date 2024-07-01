@@ -5,27 +5,27 @@ namespace App\Enums;
 use Spatie\Enum\Laravel\Enum;
 
 /**
- * @method static self yes()
- * @method static self no()
+ * @method static self cash()
+ * @method static self cheque()
  */
 final class UserDiscountPayment extends Enum
 {
-    const YES = 'yes';
-    const NO = 'no';
+    const CASH = 'cash';
+    const CHEQUE = 'cheque';
 
     protected static function values(): array
     {
         return [
-            'yes' => self::YES,
-            'no' => self::NO,
+            'cash' => self::CASH,
+            'cheque' => self::CHEQUE,
         ];
     }
 
     protected static function labels(): array
     {
         return [
-            self::YES => 'yes',
-            self::NO => 'no',
+            self::CASH => 'cash',
+            self::CHEQUE => 'cheque',
         ];
     }
 }

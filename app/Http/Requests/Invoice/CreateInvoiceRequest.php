@@ -36,7 +36,6 @@ class CreateInvoiceRequest extends FormRequest
     {
         return [
             'buyer' => 'required|integer|exists:customers,id',
-            'status' => 'required|string',
             'items' => 'required|array',
             'items.*.product' => 'required|integer|exists:products,id',
             'items.*.product_section' => 'nullable|integer|exists:product_sections,id',

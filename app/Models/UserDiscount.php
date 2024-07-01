@@ -9,7 +9,7 @@ class UserDiscount extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'max_discount','payment_terms'];
+    protected $fillable = ['user_id', 'max_discount','payment_terms','min_pre_payment'];
 
     public function user()
     {

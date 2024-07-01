@@ -55,11 +55,11 @@ class InvoiceController extends Controller
 
         // بررسی معتبر بودن وضعیت
         if (!in_array($status, $validStatuses)) {
-            return response()->json(['error' => 'Invalid status provided'], 400);
+            return response()->json(['error' => 'وضعیت وارد شده نامعتبر است'], 400);
         }
 
         // ایجاد کوئری اصلی برای دریافت فاکتورها
-        $query = \App\Models\Invoice::select('id', 'serial_number', 'user_id', 'customer_id', 'description', 'status')
+        $query = \App\Models\Invoice::select('id', 'serial_number', 'user_id', 'customer_id', 'description', 'status','pre_payment','before_delivery','cheque')
             ->with(['user:id,name,last_name', 'customer:id,name']);
 
         // اگر کاربر مدیر نیست، فاکتورها را بر اساس user_id فیلتر کنید
@@ -102,7 +102,7 @@ class InvoiceController extends Controller
                 'user_id' => auth()->id(),
                 'customer_id' => $validatedData['buyer'],
                 'description' => $validatedData['description'], //TODO: در این مکان توضیحات برای فاکتور زده میشه ولیدیشن ها درست شود
-                'status' => $validatedData['status'],
+                'status' => "informal",
                 'discount' => $validatedData['discount'],
                 'delivery' => $validatedData['delivery'],
             ]);
