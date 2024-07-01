@@ -47,7 +47,7 @@ class InvoiceController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(ListInvoiceRequest $request ,$status)
+    public function index(ListInvoiceRequest $request, $status)
     {
         $user = auth()->user();
         // تعریف وضعیت‌های معتبر
@@ -59,12 +59,13 @@ class InvoiceController extends Controller
         }
 
         // ایجاد کوئری اصلی برای دریافت فاکتورها
-        $query = \App\Models\Invoice::select('id', 'serial_number', 'user_id', 'customer_id', 'description', 'status','pre_payment','before_delivery','cheque')
+        $query = \App\Models\Invoice::select('invoices.id', 'invoices.serial_number', 'invoices.user_id', 'invoices.customer_id', 'invoices.description', 'invoices.status', 'invoices.pre_payment', 'invoices.before_delivery', 'invoices.cheque', 'user_discounts.payment_terms')
+            ->join('user_discounts', 'invoices.user_id', '=', 'user_discounts.user_id')
             ->with(['user:id,name,last_name', 'customer:id,name']);
 
         // اگر کاربر مدیر نیست، فاکتورها را بر اساس user_id فیلتر کنید
         if (!$user->hasAnyAdminRole()) {
-            $query->where('user_id', $user->id);
+            $query->where('invoices.user_id', $user->id);
         }
 
         // استفاده از اسکوپ برای فیلتر کردن بر اساس وضعیت
@@ -79,8 +80,11 @@ class InvoiceController extends Controller
         // اجرای کوئری و دریافت نتایج
         $invoices = $query->get();
 
+
         return response()->json($invoices, 200);
     }
+
+
 
 
 
