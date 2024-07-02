@@ -54,5 +54,9 @@ class Invoice extends Model
     {
         return $query->where('status', 'informal');
     }
+    public function userDiscount()
+    {
+        return $this->hasOne(UserDiscount::class, 'user_id', 'user_id');
+    }
 }
 

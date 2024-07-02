@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\InvoiceStatus;
+use App\Enums\UserDiscountPayment;
 use App\Exceptions\DimensionException;
 use App\Exceptions\InvalidDiscountException;
 use App\Helpers\Benchmark;
@@ -47,11 +49,11 @@ class InvoiceController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(ListInvoiceRequest $request, $status)
+/*    public function index(ListInvoiceRequest $request, $status)
     {
         $user = auth()->user();
         // تعریف وضعیت‌های معتبر
-        $validStatuses = ['formal', 'informal'];
+        $validStatuses = [InvoiceStatus::Formal, InvoiceStatus::InFormal];
 
         // بررسی معتبر بودن وضعیت
         if (!in_array($status, $validStatuses)) {
@@ -70,9 +72,9 @@ class InvoiceController extends Controller
 
         // استفاده از اسکوپ برای فیلتر کردن بر اساس وضعیت
         if ($status) {
-            if ($status === 'formal') {
+            if ($status === InvoiceStatus::Formal) {
                 $query->formal();
-            } elseif ($status === 'informal') {
+            } elseif ($status === InvoiceStatus::InFormal) {
                 $query->informal();
             }
         }
@@ -82,8 +84,50 @@ class InvoiceController extends Controller
 
 
         return response()->json($invoices, 200);
-    }
+    }*/
 
+    public function index(ListInvoiceRequest $request, $status)
+    {
+        $user = auth()->user();
+        // تعریف وضعیت‌های معتبر
+        $validStatuses = [InvoiceStatus::Formal, InvoiceStatus::InFormal];
+
+        // بررسی معتبر بودن وضعیت
+        if (!in_array($status, $validStatuses)) {
+            return response()->json(['error' => 'وضعیت وارد شده نامعتبر است'], 400);
+        }
+
+        // ایجاد کوئری اصلی برای دریافت فاکتورها
+        $query = \App\Models\Invoice::select('id', 'serial_number', 'user_id', 'customer_id', 'description', 'status', 'pre_payment', 'before_delivery', 'cheque'
+        )->with(['user:id,name,last_name', 'customer:id,name']);
+
+        // اگر کاربر مدیر نیست، فاکتورها را بر اساس user_id فیلتر کنید
+        if (!$user->hasAnyAdminRole()) {
+            $query->where('user_id', $user->id);
+        }
+
+        // استفاده از اسکوپ برای فیلتر کردن بر اساس وضعیت
+        if ($status) {
+            if ($status === InvoiceStatus::Formal) {
+                $query->formal();
+            } elseif ($status === InvoiceStatus::InFormal) {
+                $query->informal();
+            }
+        }
+
+        // اجرای کوئری و دریافت نتایج
+        $invoices = $query->get();
+
+        // دریافت اطلاعات تخفیف‌ها
+        $userDiscounts = \App\Models\UserDiscount::whereIn('user_id', $invoices->pluck('user_id'))->get()->keyBy('user_id');
+
+        // ترکیب دستی نتایج
+        $invoices->each(function ($invoice) use ($userDiscounts) {
+            $invoice->payment_terms = optional($userDiscounts->get($invoice->user_id))->payment_terms ?? UserDiscountPayment::CASH;
+        });
+
+        return response()->json($invoices, 200);
+    }
 
 
 
@@ -106,7 +150,7 @@ class InvoiceController extends Controller
                 'user_id' => auth()->id(),
                 'customer_id' => $validatedData['buyer'],
                 'description' => $validatedData['description'], //TODO: در این مکان توضیحات برای فاکتور زده میشه ولیدیشن ها درست شود
-                'status' => "informal",
+                'status' => InvoiceStatus::InFormal,
                 'discount' => $validatedData['discount'],
                 'delivery' => $validatedData['delivery'],
             ]);
