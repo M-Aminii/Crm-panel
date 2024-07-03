@@ -4,6 +4,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DescriptionDimensionController;
 use App\Http\Controllers\EitaaController;
+use App\Http\Controllers\FinalOrderController;
 use App\Http\Controllers\Glass\LayerController;
 use App\Http\Controllers\GlassFinalStructureController;
 use App\Http\Controllers\IndividualCustomerController;
@@ -115,6 +116,15 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'Admin'], function () {
         Route::patch('/{id}', [UserDiscountController::class, 'update'])->middleware('permission:manage user_discount');
         Route::delete('/{id}', [UserDiscountController::class, 'destroy'])->middleware('permission:manage user_discount');
     });
+
+    Route::group(['prefix' => '/final_order'], function () {
+        //Route::post('/', [UserDiscountController::class, 'store'])->middleware('permission:manage user_discount');
+        Route::get('/', [FinalOrderController::class, 'index'])->middleware('permission:view final_order');
+        //Route::get('/{id}', [UserDiscountController::class, 'show'])->middleware('permission:view user_discount');
+        //Route::patch('/{id}', [UserDiscountController::class, 'update'])->middleware('permission:manage user_discount');
+        //Route::delete('/{id}', [UserDiscountController::class, 'destroy'])->middleware('permission:manage user_discount');
+    });
+
 });
 
 

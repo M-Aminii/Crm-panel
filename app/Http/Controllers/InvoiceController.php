@@ -17,6 +17,7 @@ use App\Models\AggregatedItem;
 use App\Models\Customer;
 use App\Models\DescriptionDimension;
 use App\Models\DimensionItem;
+use App\Models\FinalOrder;
 use App\Models\Product;
 use App\Models\TechnicalItem;
 use App\Models\TypeItem;
@@ -46,46 +47,11 @@ class InvoiceController extends Controller
     {
         $this->invoiceService = $invoiceService;
     }
+
+
     /**
      * Display a listing of the resource.
      */
-/*    public function index(ListInvoiceRequest $request, $status)
-    {
-        $user = auth()->user();
-        // تعریف وضعیت‌های معتبر
-        $validStatuses = [InvoiceStatus::Formal, InvoiceStatus::InFormal];
-
-        // بررسی معتبر بودن وضعیت
-        if (!in_array($status, $validStatuses)) {
-            return response()->json(['error' => 'وضعیت وارد شده نامعتبر است'], 400);
-        }
-
-        // ایجاد کوئری اصلی برای دریافت فاکتورها
-        $query = \App\Models\Invoice::select('invoices.id', 'invoices.serial_number', 'invoices.user_id', 'invoices.customer_id', 'invoices.description', 'invoices.status', 'invoices.pre_payment', 'invoices.before_delivery', 'invoices.cheque', 'user_discounts.payment_terms')
-            ->join('user_discounts', 'invoices.user_id', '=', 'user_discounts.user_id')
-            ->with(['user:id,name,last_name', 'customer:id,name']);
-
-        // اگر کاربر مدیر نیست، فاکتورها را بر اساس user_id فیلتر کنید
-        if (!$user->hasAnyAdminRole()) {
-            $query->where('invoices.user_id', $user->id);
-        }
-
-        // استفاده از اسکوپ برای فیلتر کردن بر اساس وضعیت
-        if ($status) {
-            if ($status === InvoiceStatus::Formal) {
-                $query->formal();
-            } elseif ($status === InvoiceStatus::InFormal) {
-                $query->informal();
-            }
-        }
-
-        // اجرای کوئری و دریافت نتایج
-        $invoices = $query->get();
-
-
-        return response()->json($invoices, 200);
-    }*/
-
     public function index(ListInvoiceRequest $request, $status)
     {
         $user = auth()->user();
@@ -128,10 +94,6 @@ class InvoiceController extends Controller
 
         return response()->json($invoices, 200);
     }
-
-
-
-
 
 
     /**
@@ -180,8 +142,6 @@ class InvoiceController extends Controller
 
 
 
-
-
     /**
      * Display the specified resource.
      */
@@ -222,8 +182,6 @@ class InvoiceController extends Controller
     /**
      * Update the specified resource in storage.
      */
-
-
     public function update(UpdateInvoiceRequest $request, string $id)
     {
         // اعتبارسنجی داده‌های ورودی
@@ -277,6 +235,52 @@ class InvoiceController extends Controller
     }
 
 
+   /* public function changeStatus(Request $request, $id)
+    {
+        // اعتبارسنجی داده‌های ورودی
+        $validatedData = $request->validate([
+            'status' => 'required|in:formal,informal',
+        ]);
+
+        $status = $validatedData['status'];
+
+        try {
+            DB::transaction(function () use ($id, $status) {
+                $invoice = Invoice::findOrFail($id);
+                $originalStatus = $invoice->status;
+
+                // بروزرسانی وضعیت فاکتور
+                $invoice->update(['status' => $status]);
+
+                if ($status === 'formal' && $originalStatus !== 'formal') {
+                    // اگر وضعیت به رسمی تغییر کرد
+                    $technicalItem = $invoice->technicalItem;
+                    FinalOrder::updateOrCreate(
+                        ['invoice_id' => $invoice->id],
+                        [
+                            'user_id' => $invoice->user_id,
+                            'customer_id' => $invoice->customer_id,
+                            'serial_number' => $invoice->serial_number,
+                            'delivery_date' => $technicalItem->delivery_date, // فرض بر این که تکنیکال آیتِم موجود است
+                            'informal_invoice_date' => $invoice->getOriginal('updated_at'),
+                            'formal_invoice_date' => $invoice->updated_at,
+                            'delivery_time' => 25, // یا مقدار محاسبه شده براساس نیاز شما
+                            'pre_payment' => $invoice->pre_payment,
+                            'before_delivery' => $invoice->before_delivery,
+                            'cheque' => $invoice->cheque
+                        ]
+                    );
+                } elseif ($status === 'informal' && $originalStatus === 'formal') {
+                    // اگر وضعیت به غیر رسمی تغییر کرد
+                    FinalOrder::where('invoice_id', $invoice->id)->delete();
+                }
+            });
+
+            return response()->json(['message' => 'وضعیت فاکتور با موفقیت به‌روزرسانی شد'], 200);
+        } catch (\Exception $exception) {
+            return response()->json(['message' => 'خطایی به وجود آمده است: ' . $exception->getMessage()], 500);
+        }
+    }*/
 
     /**
      * Remove the specified resource from storage.
