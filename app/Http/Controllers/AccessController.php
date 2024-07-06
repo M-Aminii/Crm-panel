@@ -11,7 +11,8 @@ class AccessController extends Controller
 {
     public function index()
     {
-        $userDiscounts = Access::all();
+        $userDiscounts = Access::with('user:id,name,last_name,mobile')->get(['id', 'user_id']);
+
         return response()->json($userDiscounts);
     }
 
@@ -23,27 +24,26 @@ class AccessController extends Controller
         return response()->json(['message' => 'دسترسی برای کاربر با موفقیت اعمال شد'], 201);
     }
 
-    public function show($userid)
+    public function show($id)
     {
-        $user = Access::where('user_id', $userid)->first();
-        $userDiscount = Access::findOrFail($user->id);
-        return response()->json($userDiscount);
+        $UserAccess = Access::findOrFail($id);
+        return response()->json($UserAccess);
     }
 
-    public function update(UpdateAccessRequest $request, $userid)
+    public function update(UpdateAccessRequest $request, $id)
     {
-        $user = Access::where('user_id', $userid)->first();
-        $userDiscount = Access::findOrFail($user->id);
 
-        $userDiscount->update($request->validated());
+        $UserAccess = Access::findOrFail($id);
 
-        return response()->json($userDiscount);
+        $UserAccess->update($request->validated());
+
+        return response()->json($UserAccess);
     }
 
-    public function destroy($userid)
+    public function destroy($id)
     {
-        $user = Access::where('user_id', $userid)->first();
-        $userDiscount = Access::findOrFail($user->id);
+
+        $userDiscount = Access::findOrFail($id);
         $userDiscount->delete();
 
         return response()->json(['message' => 'دسترسی کاربر با موفقیت به حالت پیش فرض تغییر کرد']);
