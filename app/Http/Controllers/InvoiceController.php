@@ -89,7 +89,10 @@ class InvoiceController extends Controller
 
         // ترکیب دستی نتایج
         $invoices->each(function ($invoice) use ($userDiscounts) {
-            $invoice->payment_terms = optional($userDiscounts->get($invoice->user_id))->payment_terms ?? AccessPayment::CASH;
+            $access = $userDiscounts->get($invoice->user_id);
+            $invoice->max_discount = optional($access)->max_discount ?? 0;
+            $invoice->payment_terms = optional($access)->payment_terms ?? AccessPayment::CASH;
+            $invoice->min_pre_payment = optional($access)->min_pre_payment ?? 30;
         });
 
         return response()->json($invoices, 200);

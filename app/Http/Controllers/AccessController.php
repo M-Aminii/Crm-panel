@@ -11,7 +11,7 @@ class AccessController extends Controller
 {
     public function index()
     {
-        $userDiscounts = Access::with('user:id,name,last_name,mobile')->get(['id', 'user_id']);
+        $userDiscounts = Access::with('user:id,name,last_name,mobile','user.roles:id,name')->get(['id', 'user_id']);
 
         return response()->json($userDiscounts);
     }

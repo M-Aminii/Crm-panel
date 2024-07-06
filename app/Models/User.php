@@ -106,7 +106,7 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasAnyRole(['super-admin','sales-manager']);
     }
 
-    public function userDiscount()
+    public function access()
     {
         return $this->hasOne(Access::class);
     }
@@ -131,11 +131,6 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
-    }
-
-    public function access()
-    {
-        return $this->hasOne(Access::class);
     }
 }
 
