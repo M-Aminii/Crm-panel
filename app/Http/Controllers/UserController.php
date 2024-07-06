@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\DTO\UserDTO;
 use App\Enums\UserStatus;
+use App\Events\UserCreated;
 use App\Http\Requests\User\CreateUserRequest;
 use App\Http\Requests\User\UpdateInvoiceRequest;
 use App\Http\Requests\User\UpdateUserRequest;
@@ -60,16 +61,20 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    //TODO:اضافه کردن ایونت برای زمانی که یک تصویر برای کاربر اضافه میشه
 
     public function store(CreateUserRequest $request)
     {
-        //TODO:اضافه کردن ایونت برای زمانی که یک تصویر برای کاربر اضافه میشه
         try {
             DB::beginTransaction();
             $userDTO = new UserDTO($request->validated());
             $user = User::create((array) $userDTO);
             $role = Role::findById($request->role);
             $user->assignRole($role);
+
+            // فراخوانی ایونت پس از ایجاد کاربر
+            event(new UserCreated($user));
+
             DB::commit();
 
             return response(['message' => 'مشخصات فردی ثبت شد'], 201);

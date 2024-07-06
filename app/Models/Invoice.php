@@ -56,7 +56,7 @@ class Invoice extends Model
     }
     public function userDiscount()
     {
-        return $this->hasOne(UserDiscount::class, 'user_id', 'user_id');
+        return $this->hasOne(Access::class, 'user_id', 'user_id');
     }
 }
 

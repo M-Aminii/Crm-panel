@@ -19,11 +19,11 @@ return new class extends Migration
             $table->string('glue_type')->nullable();
             $table->string('post_type')->nullable();
             $table->string('delivery_date')->nullable();
-            $table->string('frame')->nullable();
-            $table->string('balance')->nullable();
+            $table->boolean('frame')->nullable();
+            $table->boolean('balance')->nullable();
             $table->string('vault_type')->nullable();
-            $table->string('map_dimension')->nullable();
-            $table->string('map_view')->nullable();
+            $table->boolean('map_dimension')->nullable();
+            $table->boolean('map_view')->nullable();
             $table->string('usage')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();

@@ -26,7 +26,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage customers', 'view customers',
             'manage invoices', 'view invoices',
             'manage description_dimension', 'view description_dimension',
-            'manage user_discount', 'view user_discount',
+            'manage access', 'view access',
             'manage final_order', 'view final_order',
         ];
 
@@ -37,7 +37,7 @@ class RolesAndPermissionsSeeder extends Seeder
         // Roles
         $roles = [
             'super-admin' => Permission::all(),
-            'sales-manager' => ['manage customers', 'view customers','manage invoices', 'view invoices'],
+            'sales-manager' => ['manage customers', 'view customers','manage invoices', 'view invoices','manage access', 'view access','manage final_order', 'view final_order'],
             'financial-manager' => ['view invoices'],
             'executive-manager' => ['view users', 'view customers', 'view invoices'],
             'sales-expert' => ['manage customers', 'view customers','manage invoices', 'view invoices'],

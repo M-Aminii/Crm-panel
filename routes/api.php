@@ -11,9 +11,9 @@ use App\Http\Controllers\IndividualCustomerController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\UserDiscountController;
+use App\Http\Controllers\AccessController;
 use App\Models\Province;
-use App\Models\UserDiscount;
+use App\Models\Access;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -109,12 +109,12 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'Admin'], function () {
         Route::delete('/{id}', [DescriptionDimensionController::class, 'destroy'])->middleware('permission:manage description_dimension');
     });
 
-    Route::group(['prefix' => '/user_discount'], function () {
-        Route::post('/', [UserDiscountController::class, 'store'])->middleware('permission:manage user_discount');
-        Route::get('/', [UserDiscountController::class, 'index'])->middleware('permission:view user_discount');
-        Route::get('/{id}', [UserDiscountController::class, 'show'])->middleware('permission:view user_discount');
-        Route::patch('/{id}', [UserDiscountController::class, 'update'])->middleware('permission:manage user_discount');
-        Route::delete('/{id}', [UserDiscountController::class, 'destroy'])->middleware('permission:manage user_discount');
+    Route::group(['prefix' => '/access'], function () {
+        Route::post('/', [AccessController::class, 'store'])->middleware('permission:manage access');
+        Route::get('/', [AccessController::class, 'index'])->middleware('permission:view access');
+        Route::get('/{id}', [AccessController::class, 'show'])->middleware('permission:view access');
+        Route::patch('/{id}', [AccessController::class, 'update'])->middleware('permission:manage access');
+        Route::delete('/{id}', [AccessController::class, 'destroy'])->middleware('permission:manage access');
     });
 
     Route::group(['prefix' => '/final_order'], function () {

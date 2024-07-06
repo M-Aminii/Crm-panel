@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\InvoiceStatus;
-use App\Enums\UserDiscountPayment;
+use App\Enums\AccessPayment;
 use App\Exceptions\DimensionException;
 use App\Exceptions\InvalidDiscountException;
 use App\Helpers\Benchmark;
@@ -85,11 +85,11 @@ class InvoiceController extends Controller
         $invoices = $query->get();
 
         // دریافت اطلاعات تخفیف‌ها
-        $userDiscounts = \App\Models\UserDiscount::whereIn('user_id', $invoices->pluck('user_id'))->get()->keyBy('user_id');
+        $userDiscounts = \App\Models\Access::whereIn('user_id', $invoices->pluck('user_id'))->get()->keyBy('user_id');
 
         // ترکیب دستی نتایج
         $invoices->each(function ($invoice) use ($userDiscounts) {
-            $invoice->payment_terms = optional($userDiscounts->get($invoice->user_id))->payment_terms ?? UserDiscountPayment::CASH;
+            $invoice->payment_terms = optional($userDiscounts->get($invoice->user_id))->payment_terms ?? AccessPayment::CASH;
         });
 
         return response()->json($invoices, 200);

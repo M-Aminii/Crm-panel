@@ -5,7 +5,7 @@ namespace App\Services;
 
 use App\Enums\CustomerStatus;
 use App\Enums\InvoiceStatus;
-use App\Enums\UserDiscountPayment;
+use App\Enums\AccessPayment;
 use App\Exceptions\DimensionException;
 use App\Exceptions\InvalidDiscountException;
 use App\Exceptions\NotFoundPageException;
@@ -18,7 +18,7 @@ use App\Models\DimensionItem;
 use App\Models\TechnicalItem;
 use App\Models\AggregatedItem;
 use App\Models\DescriptionDimension;
-use App\Models\UserDiscount;
+use App\Models\Access;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -480,9 +480,9 @@ class InvoiceService
             }
 
             // بررسی وضعیت payment_terms کاربر
-            $userDiscount = UserDiscount::where('user_id', $invoice->user_id)->first();
-            $userPaymentTerms = $userDiscount->payment_terms ?? UserDiscountPayment::CASH;
-            if ($userPaymentTerms === UserDiscountPayment::CASH) {
+            $userDiscount = Access::where('user_id', $invoice->user_id)->first();
+            $userPaymentTerms = $userDiscount->payment_terms ?? AccessPayment::CASH;
+            if ($userPaymentTerms === AccessPayment::CASH) {
                 // اگر کاربر فقط نقدی باشد، اجازه تعیین چک ندهد
                 if (isset($validatedData['cheque'])) {
                     throw new HttpResponseException(response()->json([

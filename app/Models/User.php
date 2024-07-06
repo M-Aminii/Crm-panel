@@ -108,7 +108,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function userDiscount()
     {
-        return $this->hasOne(UserDiscount::class);
+        return $this->hasOne(Access::class);
     }
 
     // Rest omitted for brevity

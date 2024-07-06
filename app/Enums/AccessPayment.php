@@ -8,7 +8,7 @@ use Spatie\Enum\Laravel\Enum;
  * @method static self cash()
  * @method static self cheque()
  */
-final class UserDiscountPayment extends Enum
+final class AccessPayment extends Enum
 {
     const CASH = 'cash';
     const CHEQUE = 'cheque';

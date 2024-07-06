@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\UserDiscount;
+namespace App\Http\Requests\Access;
 
 use App\Enums\UserGender;
 use App\Enums\UserStatus;
@@ -9,7 +9,7 @@ use App\Rules\PasswordRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class UpdateUserDiscountRequest extends FormRequest
+class CreateAccessRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,7 +27,16 @@ class UpdateUserDiscountRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'user_id' => ['required', Rule::unique('access', 'user_id')],
             'max_discount' => 'required|integer|min:0|max:20',
+            'payment_terms' => 'required',
+            'min_pre_payment'=>'nullable|integer|min:0|max:100'
+        ];
+    }
+    public function messages()
+    {
+        return [
+            'user_id.unique' => 'برای این کاربر از قبل تنظیمات فاکتور مشخص شده است .',
         ];
     }
 }

@@ -24,6 +24,7 @@ class GlassSpacerTableSeeder extends Seeder
         }
 
         $GlassSpacers = [
+            ['size' => 8 , 'price' => 0],
             ['size' => 10, 'price' => 0],
             ['size' => 12, 'price' => 0],
             ['size' => 14, 'price' => 300000],
