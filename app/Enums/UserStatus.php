@@ -24,8 +24,8 @@ final class UserStatus extends Enum
     protected static function labels(): array
     {
         return [
-            self::ACTIVE => 'Active',
-            self::INACTIVE => 'Inactive',
+            self::ACTIVE => 'active',
+            self::INACTIVE => 'inactive',
         ];
     }
 }

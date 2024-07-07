@@ -24,8 +24,8 @@ final class UserGender extends Enum
     protected static function labels(): array
     {
         return [
-            self::GENDER_MAN => 'Man',
-            self::GENDER_WOMAN => 'Woman',
+            self::GENDER_MAN => 'man',
+            self::GENDER_WOMAN => 'woman',
         ];
     }
 }
