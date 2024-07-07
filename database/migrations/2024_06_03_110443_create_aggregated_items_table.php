@@ -15,6 +15,7 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->integer('key');
             $table->unsignedBigInteger('invoice_id');
+            $table->unsignedBigInteger('type_id');
             $table->text('description_product');
             $table->decimal('total_area', 10, 3);
             $table->integer('total_quantity');
@@ -30,6 +31,11 @@ return new class extends Migration
             $table->foreign('invoice_id')
                 ->references('id')
                 ->on('invoices')
+                ->onDelete('cascade');
+
+            $table->foreign('type_id')
+                ->references('id')
+                ->on('type_items')
                 ->onDelete('cascade');
         });
     }

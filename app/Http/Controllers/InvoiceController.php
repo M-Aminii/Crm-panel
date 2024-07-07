@@ -55,9 +55,10 @@ class InvoiceController extends Controller
      */
     public function index(ListInvoiceRequest $request, $status)
     {
+
         $user = auth()->user();
         // تعریف وضعیت‌های معتبر
-        $validStatuses = [InvoiceStatus::Formal, InvoiceStatus::InFormal];
+        $validStatuses = [InvoiceStatus::Formal, InvoiceStatus::InFormal, InvoiceStatus::PreBuy];
 
         // بررسی معتبر بودن وضعیت
         if (!in_array($status, $validStatuses)) {
@@ -79,6 +80,8 @@ class InvoiceController extends Controller
                 $query->formal();
             } elseif ($status === InvoiceStatus::InFormal) {
                 $query->informal();
+            }elseif ($status === InvoiceStatus::PreBuy){
+                $query->prebuy();
             }
         }
 

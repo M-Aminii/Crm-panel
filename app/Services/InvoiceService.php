@@ -316,6 +316,7 @@ class InvoiceService
             // استفاده از updateOrCreate با استفاده از globalKeyIndex
             AggregatedItem::updateOrCreate([
                 'invoice_id' => $invoiceId,
+                'type_id'=>$typeItem->id,
                 'key' => $globalKeyIndex // استفاده از شمارنده سراسری به عنوان key
             ], [
                 'description_product' => $typeItem->description,
@@ -515,6 +516,27 @@ class InvoiceService
                 if ($validatedData['pre_payment'] < $userMinPayment) {
                     throw new HttpResponseException(response()->json([
                         'message' => 'پیش پرداخت باید حداقل ' . $userMinPayment . ' درصد باشد.'
+                    ], 422));
+                }
+            }
+
+            elseif ($invoice->status === InvoiceStatus::InFormal && $validatedData['status'] === InvoiceStatus::PreBuy) {
+                // بررسی وضعیت مشتری
+                $customer = $invoice->customer;
+                if ($customer->status === CustomerStatus::INCOMPLETE || $customer->status === CustomerStatus::INACTIVE) {
+                    throw new HttpResponseException(response()->json([
+                        'message' => 'وضعیت مشتری اجازه تغییر وضعیت فاکتور به رسمی را نمی‌دهد.'
+                    ], 422));
+                }
+
+            }
+
+            elseif ($invoice->status === InvoiceStatus::PreBuy && $validatedData['status'] === InvoiceStatus::InFormal) {
+                // بررسی وضعیت مشتری
+                $customer = $invoice->customer;
+                if ($customer->status === CustomerStatus::INCOMPLETE || $customer->status === CustomerStatus::INACTIVE) {
+                    throw new HttpResponseException(response()->json([
+                        'message' => 'وضعیت مشتری اجازه تغییر وضعیت فاکتور به رسمی را نمی‌دهد.'
                     ], 422));
                 }
             }

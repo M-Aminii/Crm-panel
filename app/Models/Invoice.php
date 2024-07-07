@@ -1,6 +1,7 @@
 <?php
 namespace App\Models;
 
+use App\Enums\InvoiceStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -46,13 +47,17 @@ class Invoice extends Model
 
     public function scopeFormal($query)
     {
-        return $query->where('status', 'formal');
+        return $query->where('status', InvoiceStatus::Formal);
     }
 
     // تعریف اسکوپ برای فاکتورهای informal
     public function scopeInformal($query)
     {
-        return $query->where('status', 'informal');
+        return $query->where('status', InvoiceStatus::InFormal);
+    }
+    public function scopePrebuy($query)
+    {
+        return $query->where('status', InvoiceStatus::PreBuy);
     }
     public function userDiscount()
     {
