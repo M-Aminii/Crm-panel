@@ -17,6 +17,7 @@ class InvoiceResource extends JsonResource
             'customer' => new CustomerResource($this->whenLoaded('customer')),
             'description' => $this->description,
             'status' => $this->status,
+            'informal_status'=>$this->informal_status,
             'discount' => $this->discount,
             'pre_payment' => $this->pre_payment,
             'before_delivery' => $this->before_delivery,

@@ -10,7 +10,7 @@ class Invoice extends Model
 
     protected $fillable = [
         'serial_number', 'user_id', 'customer_id',
-        'description', 'status','delivery','discount',
+        'description', 'status','informal_status','delivery','discount',
         'pre_payment','before_delivery',
         'cheque','amount_payable'
     ];

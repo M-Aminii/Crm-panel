@@ -28,6 +28,7 @@ class UpdateInvoiceRequest extends FormRequest
     {
         return [
             'status' => 'nullable|string',
+            'informal_status' => 'nullable',
             'pre_payment' => 'nullable|numeric',
             'before_delivery' => 'nullable|numeric',
             'cheque' => 'nullable|numeric',

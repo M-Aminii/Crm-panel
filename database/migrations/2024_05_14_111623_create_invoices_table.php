@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\InformalInvoiceStatus;
 use App\Enums\InvoiceDelivery;
 use App\Enums\InvoiceStatus;
 use Illuminate\Database\Migrations\Migration;
@@ -20,6 +21,7 @@ return new class extends Migration
             $table->unsignedBigInteger('customer_id');
             $table->string('description', 100);
             $table->enum('status', InvoiceStatus::toArray());
+            $table->enum('informal_status', InformalInvoiceStatus::toArray());
             $table->enum('delivery',InvoiceDelivery::toArray());
             $table->integer('discount')->nullable();
             $table->integer('pre_payment')->nullable();

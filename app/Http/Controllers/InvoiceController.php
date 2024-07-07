@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\InformalInvoiceStatus;
 use App\Enums\InvoiceStatus;
 use App\Enums\AccessPayment;
 use App\Exceptions\DimensionException;
@@ -64,7 +65,7 @@ class InvoiceController extends Controller
         }
 
         // ایجاد کوئری اصلی برای دریافت فاکتورها
-        $query = \App\Models\Invoice::select('id', 'serial_number', 'user_id', 'customer_id', 'description', 'status', 'pre_payment', 'before_delivery', 'cheque'
+        $query = \App\Models\Invoice::select('id', 'serial_number', 'user_id', 'customer_id', 'description', 'status','informal_status', 'pre_payment', 'before_delivery', 'cheque'
         )->with(['user:id,name,last_name', 'customer:id,name']);
 
         // اگر کاربر مدیر نیست، فاکتورها را بر اساس user_id فیلتر کنید
@@ -90,7 +91,7 @@ class InvoiceController extends Controller
         // ترکیب دستی نتایج
         $invoices->each(function ($invoice) use ($userDiscounts) {
             $access = $userDiscounts->get($invoice->user_id);
-            $invoice->max_discount = optional($access)->max_discount ?? 0;
+            $invoice->max_discount = optional($access)->max_discount ?? 20;
             $invoice->payment_terms = optional($access)->payment_terms ?? AccessPayment::CASH;
             $invoice->min_pre_payment = optional($access)->min_pre_payment ?? 30;
         });
@@ -116,6 +117,7 @@ class InvoiceController extends Controller
                 'customer_id' => $validatedData['buyer'],
                 'description' => $validatedData['description'], //TODO: در این مکان توضیحات برای فاکتور زده میشه ولیدیشن ها درست شود
                 'status' => InvoiceStatus::InFormal,
+                'informal_status' =>InformalInvoiceStatus::PENDING_APPROVAL,
                 'discount' => $validatedData['discount'],
                 'delivery' => $validatedData['delivery'],
             ]);
@@ -200,7 +202,8 @@ class InvoiceController extends Controller
 
                 // به‌روزرسانی وضعیت و سه مقدار جدید
                 $invoice->update([
-                    'status' => $validatedData['status'] ?? $invoice->discount,
+                    'status' => $validatedData['status'] ?? $invoice->status,
+                    'informal_status' => $validatedData['informal_status'] ?? $invoice->informal_status,
                     'discount' => $validatedData['discount'] ?? $invoice->discount,
                     'delivery' => $validatedData['delivery'] ?? $invoice->delivery,
                     'description' => $validatedData['description'] ?? $invoice->description,
@@ -209,8 +212,13 @@ class InvoiceController extends Controller
                     'cheque' => $validatedData['cheque'] ?? $invoice->cheque,
                 ]);
 
-                if (isset($validatedData['items'], $validatedData['discount'], $validatedData['delivery'])){
-                    $amountPayable = InvoiceService::processItems($invoice, $validatedData['items'], $validatedData['discount'], $validatedData['delivery']);
+                // به‌روزرسانی مبلغ قابل پرداخت بر اساس موجودیت موارد ارسال شده
+                if (isset($validatedData['items']) || isset($validatedData['discount']) || isset($validatedData['delivery'])) {
+                    $items = $validatedData['items'] ?? $invoice->items;
+                    $discount = $validatedData['discount'] ?? $invoice->discount;
+                    $delivery = $validatedData['delivery'] ?? $invoice->delivery;
+
+                    $amountPayable = InvoiceService::processItems($invoice, $items, $discount, $delivery);
                     $invoice->update(['amount_payable' => $amountPayable]);
                 }
 

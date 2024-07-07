@@ -462,62 +462,65 @@ class InvoiceService
    //validateInvoice
     public function validateInvoiceUpdate(Invoice $invoice, array $validatedData)
     {
-        // بررسی تغییر وضعیت از informal به formal
-        if ($invoice->status === InvoiceStatus::InFormal && $validatedData['status'] === InvoiceStatus::Formal) {
-            // بررسی وضعیت مشتری
-            $customer = $invoice->customer;
-            if ($customer->status === CustomerStatus::INCOMPLETE || $customer->status === CustomerStatus::INACTIVE) {
-                throw new HttpResponseException(response()->json([
-                    'message' => 'وضعیت مشتری اجازه تغییر وضعیت فاکتور به رسمی را نمی‌دهد.'
-                ], 422));
-            }
-
-            // بررسی مقداردهی فیلدها
-            if (!isset($validatedData['pre_payment']) || !isset($validatedData['before_delivery'])) {
-                throw new HttpResponseException(response()->json([
-                    'message' => 'برای تغییر وضعیت به رسمی، فیلدهای  پیش پرداخت و قبل از تحویل باید مقداردهی شوند.'
-                ], 422));
-            }
-
-            // بررسی وضعیت payment_terms کاربر
-            $userDiscount = Access::where('user_id', $invoice->user_id)->first();
-            $userPaymentTerms = $userDiscount->payment_terms ?? AccessPayment::CASH;
-            if ($userPaymentTerms === AccessPayment::CASH) {
-                // اگر کاربر فقط نقدی باشد، اجازه تعیین چک ندهد
-                if (isset($validatedData['cheque'])) {
+        // فقط اگر وضعیت تغییر کرده باشد بررسی وضعیت را انجام دهید
+        if (isset($validatedData['status'])) {
+            // بررسی تغییر وضعیت از informal به formal
+            if ($invoice->status === InvoiceStatus::InFormal && $validatedData['status'] === InvoiceStatus::Formal) {
+                // بررسی وضعیت مشتری
+                $customer = $invoice->customer;
+                if ($customer->status === CustomerStatus::INCOMPLETE || $customer->status === CustomerStatus::INACTIVE) {
                     throw new HttpResponseException(response()->json([
-                        'message' => 'کاربر فقط به صورت نقدی پرداخت می‌کند و نمی‌تواند چک تعیین کند.'
+                        'message' => 'وضعیت مشتری اجازه تغییر وضعیت فاکتور به رسمی را نمی‌دهد.'
                     ], 422));
                 }
 
-                // جمع درصد pre_payment و before_delivery باید 100 باشد
-                if (($validatedData['pre_payment'] + $validatedData['before_delivery']) !== 100) {
+                // بررسی مقداردهی فیلدها
+                if (!isset($validatedData['pre_payment']) || !isset($validatedData['before_delivery'])) {
                     throw new HttpResponseException(response()->json([
-                        'message' => 'برای پرداخت نقدی، جمع درصدهای پیش پرداخت و قبل از تحویل باید 100 باشد.'
+                        'message' => 'برای تغییر وضعیت به رسمی، فیلدهای پیش پرداخت و قبل از تحویل باید مقداردهی شوند.'
                     ], 422));
                 }
-            } else {
-                // اگر کاربر پرداخت به صورت چک دارد
-                if (($validatedData['pre_payment'] + $validatedData['before_delivery']) !== 100) {
-                    // اگر جمع درصدهای pre_payment و before_delivery برابر 100 نباشد، باید فیلد cheque پر شود
-                    if (!isset($validatedData['cheque'])) {
+
+                // بررسی وضعیت payment_terms کاربر
+                $userDiscount = Access::where('user_id', $invoice->user_id)->first();
+                $userPaymentTerms = $userDiscount->payment_terms ?? AccessPayment::CASH;
+                if ($userPaymentTerms === AccessPayment::CASH) {
+                    // اگر کاربر فقط نقدی باشد، اجازه تعیین چک ندهد
+                    if (isset($validatedData['cheque'])) {
                         throw new HttpResponseException(response()->json([
-                            'message' => 'برای تغییر وضعیت به رسمی و استفاده از چک، فیلد چک باید مقداردهی شود یا مجموع پیش پرداخت و قبل از تحویل 100 باشد .'
+                            'message' => 'کاربر فقط به صورت نقدی پرداخت می‌کند و نمی‌تواند چک تعیین کند.'
                         ], 422));
                     }
+
+                    // جمع درصد pre_payment و before_delivery باید 100 باشد
+                    if (($validatedData['pre_payment'] + $validatedData['before_delivery']) !== 100) {
+                        throw new HttpResponseException(response()->json([
+                            'message' => 'برای پرداخت نقدی، جمع درصدهای پیش پرداخت و قبل از تحویل باید 100 باشد.'
+                        ], 422));
+                    }
+                } else {
+                    // اگر کاربر پرداخت به صورت چک دارد
+                    if (($validatedData['pre_payment'] + $validatedData['before_delivery']) !== 100) {
+                        // اگر جمع درصدهای pre_payment و before_delivery برابر 100 نباشد، باید فیلد cheque پر شود
+                        if (!isset($validatedData['cheque'])) {
+                            throw new HttpResponseException(response()->json([
+                                'message' => 'برای تغییر وضعیت به رسمی و استفاده از چک، فیلد چک باید مقداردهی شود یا مجموع پیش پرداخت و قبل از تحویل 100 باشد.'
+                            ], 422));
+                        }
+                    }
+                }
+
+                $userMinPayment = $userDiscount->min_pre_payment ?? 30;
+
+                if ($validatedData['pre_payment'] < $userMinPayment) {
+                    throw new HttpResponseException(response()->json([
+                        'message' => 'پیش پرداخت باید حداقل ' . $userMinPayment . ' درصد باشد.'
+                    ], 422));
                 }
             }
-
-            $userMinPayment = $userDiscount->min_pre_payment ?? 30;
-
-            if ($validatedData['pre_payment'] < $userMinPayment) {
-                throw new HttpResponseException(response()->json([
-                    'message' => 'پیش پرداخت باید حداقل ' . $userMinPayment . ' درصد باشد.'
-                ], 422));
-            }
-
         }
     }
+
 
 
 
