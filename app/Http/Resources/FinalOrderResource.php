@@ -17,7 +17,7 @@ class FinalOrderResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'invoice'=> $this->invoice_id,
+            'invoice' => $this->invoice_id,
             'user' => new UserResource($this->whenLoaded('user')),
             'customer' => new CustomerResource($this->whenLoaded('customer')),
             'serial_number' => $this->serial_number,
@@ -28,10 +28,9 @@ class FinalOrderResource extends JsonResource
             'formal_invoice_date' => Jalalian::fromCarbon(Carbon::parse($this->formal_invoice_date))->format('Y/m/d'),
             'delivery_time' => $this->delivery_time,
             'pre_payment' => $this->pre_payment,
-            'before_delivery' => $this->before_delivery ,
+            'before_delivery' => $this->before_delivery,
             'cheque' => $this->cheque,
-
-
+            'items' => FinalOrderItemResource::collection($this->whenLoaded('items')),
         ];
     }
 }

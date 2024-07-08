@@ -233,6 +233,7 @@ class InvoiceService
         $invoiceService = new InvoiceService();
         $totalPayableAmount = 0; // متغیر برای نگهداری مجموع مبالغ
         $descriptionNames = [];
+        $keyCounter = 1; // شروع شمارنده کلید
 
         // ابتدا گروه‌بندی بر اساس descriptionIds و over
         $groupedDimensions = collect();
@@ -317,7 +318,7 @@ class InvoiceService
             AggregatedItem::updateOrCreate([
                 'invoice_id' => $invoiceId,
                 'type_id'=>$typeItem->id,
-                'key' => $globalKeyIndex // استفاده از شمارنده سراسری به عنوان key
+                'key' => $keyCounter++ // استفاده از شمارنده سراسری به عنوان key
             ], [
                 'description_product' => $typeItem->description,
                 'description' => $names,
@@ -332,7 +333,6 @@ class InvoiceService
 
             $globalKeyIndex++; // افزایش شمارنده سراسری برای استفاده در کلید بعدی
         }
-
         // بازگرداندن مجموع مبالغ
         return $totalPayableAmount;
     }
@@ -445,13 +445,13 @@ class InvoiceService
                 return $newSerialNumber;
             } else {
                 // اگر سریال وجود نداشت، سریال اولیه را برگردانید
-                return 'f-s186524';
+                return 'f-s4787051';
             }
         } catch (\Exception $e) {
             // لاگ کردن خطا
             Log::error('خطا در پردازش سریال: ' . $e->getMessage());
             // برگرداندن سریال پیش‌فرض در صورت بروز خطا
-            return 'f-s186524';
+            return 'f-s4787051';
         }
     }
 

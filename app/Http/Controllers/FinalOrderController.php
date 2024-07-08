@@ -11,14 +11,10 @@ class FinalOrderController extends Controller
     /**
      * Display a listing of the resource.
      */
-    // متد برای نمایش تمام سفارشات نهایی
     public function index()
     {
-       /* $finalOrders = FinalOrder::all();
-        return response()->json($finalOrders);*/
-
         // دریافت تمام سفارشات نهایی به همراه بارگذاری روابط
-        $finalOrders = FinalOrder::with(['user', 'customer'])->get();
+        $finalOrders = FinalOrder::with(['user', 'customer', 'items.product'])->get();
 
         // بازگرداندن ریسورس با لیست سفارشات نهایی
         return FinalOrderResource::collection($finalOrders);

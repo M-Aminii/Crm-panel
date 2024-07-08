@@ -37,4 +37,10 @@ class TypeItem extends Model
         return $this->hasMany(DimensionItem::class, 'type_id');
     }
 
+    public function finalOrderItems()
+    {
+        return $this->hasMany(FinalOrderItem::class, 'type_id');
+    }
+
+
 }

@@ -12,4 +12,10 @@ class AggregatedItem extends Model
     protected $fillable = [
         'invoice_id','type_id','key', 'description_product', 'total_area', 'total_quantity','total_weight', 'price_unit','price_discounted','value_added_tax', 'total_price', 'description'
     ];
+
+    public function finalOrderItems()
+    {
+        return $this->hasMany(FinalOrderItem::class, 'type_id', 'id');
+    }
+
 }
