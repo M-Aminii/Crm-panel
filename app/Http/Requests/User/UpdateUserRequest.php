@@ -34,8 +34,6 @@ class UpdateUserRequest extends FormRequest
             'username' => ['nullable', 'string', 'max:100', Rule::unique('users')->ignore($this->route('id'))],
             'mobile' => ['nullable', new MobileRule, Rule::unique('users')->ignore($this->route('id'))],
             'email' => ['nullable', 'email', Rule::unique('users')->ignore($this->route('id'))],
-
-
             'gender' =>  'nullable|in:' . implode(',', UserGender::toValues()),
             'status' => 'nullable|in:' . implode(',', UserStatus::toValues()),
             'role' => [ 'exists:roles,id'],

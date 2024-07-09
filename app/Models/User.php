@@ -103,8 +103,13 @@ class User extends Authenticatable implements JWTSubject
 
     public function hasAnyAdminRole(): bool
     {
-        return $this->hasAnyRole(['super-admin','sales-manager']);
+        return $this->hasAnyRole(['super-admin', 'sales-manager']);
     }
+
+    /*public function hasRole($role): bool
+    {
+        return $this->roles()->where('name', $role)->exists();
+    }*/
 
     public function access()
     {

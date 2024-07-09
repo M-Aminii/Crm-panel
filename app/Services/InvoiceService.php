@@ -263,6 +263,7 @@ class InvoiceService
             });
 
             $basePrice = $item['price_per_unit'];
+            //dd($basePrice);
 
             // استخراج descriptionIds و overPercentage از groupKey
             list($descriptionIdsKey, $overPercentage) = explode('-over-', $groupKey);

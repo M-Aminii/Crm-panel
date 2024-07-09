@@ -12,6 +12,12 @@ class CheckInvoices
     {
         $user = Auth::user();
 
+        // بررسی برای نقش ادمین یا مدیر فروش
+        if ($user->hasAnyAdminRole()) {
+            return $next($request);
+        }
+
+        // بررسی برای وجود فاکتورها
         if (!$user->invoices()->exists()) {
             return response()->json(['error' => 'فاکتوری برای نمایش به کاربر وجود ندارد'], 404);
         }

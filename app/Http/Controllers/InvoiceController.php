@@ -55,8 +55,8 @@ class InvoiceController extends Controller
      */
     public function index(ListInvoiceRequest $request, $status)
     {
-
         $user = auth()->user();
+
         // تعریف وضعیت‌های معتبر
         $validStatuses = [InvoiceStatus::Formal, InvoiceStatus::InFormal, InvoiceStatus::PreBuy];
 
@@ -66,10 +66,10 @@ class InvoiceController extends Controller
         }
 
         // ایجاد کوئری اصلی برای دریافت فاکتورها
-        $query = \App\Models\Invoice::select('id', 'serial_number', 'user_id', 'customer_id', 'description', 'status','informal_status', 'pre_payment', 'before_delivery', 'cheque'
-        )->with(['user:id,name,last_name', 'customer:id,name']);
+        $query = \App\Models\Invoice::select('id', 'serial_number', 'user_id', 'customer_id', 'description', 'status', 'informal_status', 'pre_payment', 'before_delivery', 'cheque')
+            ->with(['user:id,name,last_name', 'customer:id,name']);
 
-        // اگر کاربر مدیر نیست، فاکتورها را بر اساس user_id فیلتر کنید
+        // اگر کاربر نقش مدیر یا مدیر فروش ندارد، فاکتورها را بر اساس user_id فیلتر کنید
         if (!$user->hasAnyAdminRole()) {
             $query->where('user_id', $user->id);
         }
@@ -80,7 +80,7 @@ class InvoiceController extends Controller
                 $query->formal();
             } elseif ($status === InvoiceStatus::InFormal) {
                 $query->informal();
-            }elseif ($status === InvoiceStatus::PreBuy){
+            } elseif ($status === InvoiceStatus::PreBuy) {
                 $query->prebuy();
             }
         }
@@ -101,6 +101,7 @@ class InvoiceController extends Controller
 
         return response()->json($invoices, 200);
     }
+
 
 
     /**
