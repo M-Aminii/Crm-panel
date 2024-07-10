@@ -14,11 +14,17 @@ class FinalOrderController extends Controller
     public function index()
     {
         // دریافت تمام سفارشات نهایی به همراه بارگذاری روابط
-        $finalOrders = FinalOrder::with(['user', 'customer', 'items.product'])->get();
+        $finalOrders = FinalOrder::with([
+            'user',
+            'customer',
+            'items.product',
+            'invoice'
+        ])->get();
 
         // بازگرداندن ریسورس با لیست سفارشات نهایی
         return FinalOrderResource::collection($finalOrders);
     }
+
 
     /**
      * Store a newly created resource in storage.

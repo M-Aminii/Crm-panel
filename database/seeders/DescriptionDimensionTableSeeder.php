@@ -20,7 +20,6 @@ class DescriptionDimensionTableSeeder extends Seeder
         if (DescriptionDimension::count()) {
             DescriptionDimension::truncate();
         }
-
         $DescriptionDimensions = [
             ['name' => 'سیلیکون IG','percent'=> null,'price' => 5300000],
             ['name' => 'سیلیکون SG','percent'=> null,'price' => 7200000],

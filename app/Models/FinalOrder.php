@@ -25,5 +25,9 @@ class FinalOrder extends Model
     {
         return $this->hasMany(FinalOrderItem::class);
     }
+    public function invoice()
+    {
+        return $this->belongsTo(Invoice::class);
+    }
 
 }

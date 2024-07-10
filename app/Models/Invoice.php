@@ -63,5 +63,9 @@ class Invoice extends Model
     {
         return $this->hasOne(Access::class, 'user_id', 'user_id');
     }
+    public function finalOrders()
+    {
+        return $this->hasMany(FinalOrder::class);
+    }
 }
 
