@@ -25,10 +25,11 @@ return new class extends Migration
             $table->timestamp('informal_invoice_date')->nullable();
             $table->timestamp('formal_invoice_date')->nullable();
             $table->integer('delivery_time')->nullable();
-            $table->integer('pre_payment')->nullable();
-            $table->integer('before_delivery')->nullable();
-            $table->integer('cheque')->nullable();
-            $table->bigInteger('amount_payable')->nullable();    // خالی میخوره به این دلیل که در اخر سر برای اپدیت این اضافه میشه
+            $table->timestamp('financial_approval_date')->nullable();
+            $table->string('pdf_map')->nullable();
+            $table->string('cad_map')->nullable();
+            $table->string('pdf_dimension')->nullable();
+            $table->string('xml_dimension')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
 

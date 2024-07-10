@@ -20,6 +20,7 @@ class CreateInvoiceRequest extends FormRequest
     {
 
         $customer = Customer::find($this->buyer);
+
         if (!$customer) {
             throw new NotFoundHttpException('مشتری وجود ندارد');
         }

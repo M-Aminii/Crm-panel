@@ -22,7 +22,6 @@ class InvoicePolicy
      */
     public function view(User $user, Invoice $invoice): bool
     {
-        dd('456');
 
         return $user->id === $invoice->user_id || $user->hasAnyAdminRole();
 

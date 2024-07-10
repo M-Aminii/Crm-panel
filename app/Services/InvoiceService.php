@@ -271,15 +271,24 @@ class InvoiceService
             $overPercentage = floatval($overPercentage);
 
             $valueAddedTax = $basePrice;
+            $specialDescriptionIds = [ 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,31,32,33];
 
             foreach ($descriptionIds as $id) {
                 $description = DescriptionDimension::find($id);
                 if ($description) {
                     $descriptionNames[$id] = $description->name;
-                    if ($description->price) {
-                        $valueAddedTax += $description->price;
-                    } elseif ($description->percent) {
-                        $valueAddedTax += ($basePrice * $description->percent) / 100;
+                    // اگر محصول ID برابر با 2 بود و توضیحات شامل یکی از IDs خاص بود، قیمت یا درصد توضیحات را ضربدر 2 کنید
+                    if ($item['product'] == 2 && in_array($id, $specialDescriptionIds)) {
+                        if ($description->price) {
+                            $valueAddedTax += ($description->price * 2);
+                        } elseif ($description->percent) {
+                            $valueAddedTax += ($basePrice * $description->percent) / 100;                        }
+                    } else {
+                        if ($description->price) {
+                            $valueAddedTax += $description->price;
+                        } elseif ($description->percent) {
+                            $valueAddedTax += ($basePrice * $description->percent) / 100;
+                        }
                     }
                 }
             }

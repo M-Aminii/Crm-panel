@@ -111,6 +111,7 @@ class InvoiceController extends Controller
     {
         $validatedData = $request->validated();
 
+
         try {
             DB::beginTransaction();
 

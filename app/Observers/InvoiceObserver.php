@@ -27,9 +27,6 @@ class InvoiceObserver
                     'informal_invoice_date' => $invoice->getOriginal('updated_at'),
                     'formal_invoice_date' => $invoice->updated_at,
                     'delivery_time' => 25,
-                    'pre_payment' => $invoice->pre_payment,
-                    'before_delivery' => $invoice->before_delivery,
-                    'cheque' => $invoice->cheque,
                 ]
             );
 
