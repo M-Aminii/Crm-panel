@@ -10,7 +10,7 @@ class FinalOrderItem extends Model
     use HasFactory;
 
     protected $fillable = [
-        'key','final_order_id','type_id', 'product_id', 'area',
+        'key','final_order_id','type_id', 'product_id', 'area', 'delivery_date', // افزودن delivery_date
     ];
 
     public function product()

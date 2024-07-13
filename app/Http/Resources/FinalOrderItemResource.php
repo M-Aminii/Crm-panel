@@ -20,6 +20,7 @@ class FinalOrderItemResource extends JsonResource
             'key' => $this->key,
             'product' => new ProductResource($this->whenLoaded('product')),
             'type_id' => $this->type_id,
+            'delivery_date'=>$this->delivery_date,
             'area' => $this->area,
         ];
     }

@@ -14,7 +14,7 @@ class InvoiceObserver
     public function updated(Invoice $invoice)
     {
         if ($invoice->status === InvoiceStatus::Formal) {
-            $technicalItem = TechnicalItem::where('invoice_id', $invoice->id)->first();
+            $technicalItems = TechnicalItem::where('invoice_id', $invoice->id)->get();
 
             // به‌روزرسانی یا ایجاد رکورد در final_orders
             $finalOrder = FinalOrder::updateOrCreate(
@@ -43,11 +43,14 @@ class InvoiceObserver
                 $productId = $typeItem->product_id;
                 $typeId = $aggregatedItem->type_id;
 
+                $technicalItem = $technicalItems->where('type_id', $typeId)->first();
+
                 if (!isset($productAreas[$productId])) {
                     $productAreas[$productId] = [
                         'total_area' => 0,
                         'type_id' => $typeId,
-                        'key' => $keyCounter++ // تنظیم کلید و افزایش شمارنده
+                        'key' => $keyCounter++, // تنظیم کلید و افزایش شمارنده
+                        'delivery_date' => $technicalItem ? $technicalItem->delivery_date : null,
                     ];
                 }
                 $productAreas[$productId]['total_area'] += $aggregatedItem->total_area;
@@ -60,6 +63,7 @@ class InvoiceObserver
                     'area' => $data['total_area'],
                     'type_id' => $data['type_id'],
                     'key' => $data['key'], // اطمینان از مقداردهی key
+                    'delivery_date' => $data['delivery_date'], // افزودن delivery_date
                 ]);
             }
         } else {
@@ -67,5 +71,6 @@ class InvoiceObserver
         }
     }
 }
+
 
 
