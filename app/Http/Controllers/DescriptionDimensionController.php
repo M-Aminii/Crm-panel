@@ -22,6 +22,7 @@ class DescriptionDimensionController extends Controller
      */
     public function store(CreateDescriptionDimensionRequest $request)
     {
+
         DescriptionDimension::create($request->validated());
         return response(['message' => 'توضیحات ابعاد شیشه ثبت شد'], 201);
     }

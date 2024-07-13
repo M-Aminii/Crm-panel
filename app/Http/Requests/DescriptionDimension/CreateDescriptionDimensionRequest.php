@@ -29,9 +29,10 @@ class CreateDescriptionDimensionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required|string|max:100'],
-            'percent' => ['required_without:price|integer'],
-            'price' => ['required_without:percent|price,integer'],
+            'name' => 'required|string|max:100',
+            'percent' => 'required_without:price|integer',
+            'price' => 'required_without:percent|nullable|integer',
         ];
     }
+
 }
