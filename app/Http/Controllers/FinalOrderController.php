@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\FinalOrderResource;
 use App\Models\FinalOrder;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class FinalOrderController extends Controller
@@ -47,7 +48,15 @@ class FinalOrderController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+
+        // پیدا کردن FinalOrder با استفاده از شناسه
+        $finalOrder = FinalOrder::findOrFail($id);
+
+        // تنظیم تاریخ فعلی به عنوان financial_approval_date
+        $finalOrder->financial_approval_date = Carbon::now();
+        $finalOrder->save();
+
+        return response()->json(['message' => 'Financial approval date updated successfully', 'finalOrder' => $finalOrder]);
     }
 
     /**

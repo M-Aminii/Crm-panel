@@ -3,6 +3,9 @@
 namespace App\Http;
 
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
+use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use App\Jobs\UpdateDeliveryDates;
 
 class Kernel extends HttpKernel
 {
@@ -76,5 +79,12 @@ class Kernel extends HttpKernel
         'check.customers' => \App\Http\Middleware\CheckCustomers::class,
 
     ];
+    protected function schedule(Schedule $schedule)
+    {
+        // اجرای Job هر روز در ساعت 00:00
+        $schedule->job(new UpdateDeliveryDates())->dailyAt('00:00');
+    }
+
+
 
 }
