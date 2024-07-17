@@ -40,7 +40,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'sales-manager' => ['manage users', 'view users', 'manage customers', 'view customers', 'manage invoices', 'view invoices', 'manage access', 'view access', 'manage final_order', 'view final_order'],
             'financial-manager' => ['view invoices'],
             'executive-manager' => ['view users', 'view customers', 'view invoices'],
-            'sales-expert' => ['manage customers', 'view customers', 'manage invoices', 'view invoices'],
+            'sales-expert' => ['manage customers', 'view customers', 'manage invoices', 'view invoices', 'view description_dimension'],
             'financial-expert' => ['view invoices'],
             'executive-expert' => ['view users', 'view customers'],
         ];

@@ -79,8 +79,12 @@ class InvoiceService
     {
         $DescriptionService = new DescriptionService;
         $invoiceService = new InvoiceService();
-        $globalKeyIndex = 1; // شمارنده سراسری برای کلیدها
-        $totalPayableAmount = 0; // متغیر برای نگهداری مجموع مبالغ
+        $globalKeyIndex = 1;
+        $totalPayableAmount = 0;
+
+        // دریافت آیتم‌های موجود برای حذف آیتم‌های غیر موجود در درخواست جدید
+        $existingItems = TypeItem::where('invoice_id', $invoice->id)->pluck('id')->toArray();
+        $newItemsIds = [];
 
         foreach ($items as $itemIndex => $item) {
             $description_json = json_encode($item['description']);
@@ -100,7 +104,7 @@ class InvoiceService
                                 $dimension['description_ids'] = [];
                             }
                             if (!in_array(1, $dimension['description_ids'])) {
-                                $dimension['description_ids'][] = 1; // افزودن ID توضیحات
+                                $dimension['description_ids'][] = 1;
                             }
                         }
                     }
@@ -115,24 +119,30 @@ class InvoiceService
             $typeItem = TypeItem::updateOrCreate([
                 'invoice_id' => $invoice->id,
                 'key' => $itemIndex + 1,
-            ],
-                [
-                    'product_id' => $item['product'],
-                    'product_section_id' => $item['product_section'] ?? null,
-                    'description_json' => $description_json,
-                    'description' => $invoiceService->mergeProductStructures($convertDescriptions),
-                    'price' => $item['price_per_unit'] ?? 0,
-                    'image_path' => $productImagePath,
-                ]);
+            ], [
+                'product_id' => $item['product'],
+                'product_section_id' => $item['product_section'] ?? null,
+                'description_json' => $description_json,
+                'description' => $invoiceService->mergeProductStructures($convertDescriptions),
+                'price' => $item['price_per_unit'] ?? 0,
+                'image_path' => $productImagePath,
+            ]);
+
+            // افزودن آیتم جدید به آرایه newItemsIds
+            $newItemsIds[] = $typeItem->id;
 
             $totalPayableAmount += $invoiceService->processDimensions($invoice->id, $typeItem, $item, $weight, $globalKeyIndex, $discount, $delivery, $itemIndex);
-
 
             $invoiceService->updateOrCreateTechnicalItem($invoice->id, $typeItem, $item['technical_details']);
         }
 
+        // حذف آیتم‌هایی که در آرایه newItemsIds نیستند
+        $itemsToDelete = array_diff($existingItems, $newItemsIds);
+        TypeItem::destroy($itemsToDelete);
+
         return $totalPayableAmount;
     }
+
 
 
     public function calculateItemPrice($item)
