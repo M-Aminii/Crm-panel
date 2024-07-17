@@ -30,4 +30,39 @@ class FinalOrder extends Model
         return $this->belongsTo(Invoice::class);
     }
 
+    // متد به‌روزرسانی
+    public function updateMapsAndDimensions($pdfMapFile, $cadMapFile, $pdfDimensionFile, $xmlDimensionFile)
+    {
+        $pdfMapPath = $this->storeFile($pdfMapFile, 'maps', 'pdf_map');
+        $cadMapPath = $this->storeFile($cadMapFile, 'maps', 'cad_map');
+        $pdfDimensionPath = $this->storeFile($pdfDimensionFile, 'dimensions', 'pdf_dimension');
+        $xmlDimensionPath = $this->storeFile($xmlDimensionFile, 'dimensions', 'xml_dimension');
+
+        $this->update([
+            'pdf_map' => $pdfMapPath,
+            'cad_map' => $cadMapPath,
+            'pdf_dimension' => $pdfDimensionPath,
+            'xml_dimension' => $xmlDimensionPath,
+        ]);
+    }
+
+    // متد ذخیره‌سازی فایل
+    private function storeFile($file, $folder, $field)
+    {
+        if (!$file) {
+            return $this->{$field};
+        }
+
+        // حذف فایل قبلی
+        if ($this->{$field}) {
+            Storage::delete($this->{$field});
+        }
+
+        // ساخت نام فایل جدید
+        $fileName = $folder . '/' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '_' . $this->id . '.' . $file->getClientOriginalExtension();
+
+        // ذخیره‌سازی فایل جدید
+        return $file->storeAs($folder, $fileName);
+    }
+
 }

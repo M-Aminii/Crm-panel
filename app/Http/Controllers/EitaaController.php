@@ -53,4 +53,55 @@ class EitaaController extends Controller
     {
         return $this->botet('getme');
     }
+
+    public function sendToFactory(Request $request, $id)
+    {
+        $finalOrder = FinalOrder::findOrFail($id);
+
+        // Check which files are available
+        $filesToSend = [
+            'pdf_map' => $finalOrder->pdf_map,
+            'cad_map' => $finalOrder->cad_map
+        ];
+
+        $msg = "ارسال فایل‌ها به کارخانه برای سفارش نهایی: " . $finalOrder->serial_number;
+        $filesSent = false;
+
+        foreach ($filesToSend as $fileType => $filePath) {
+            if ($filePath) {
+                $fullFilePath = storage_path('app/' . $filePath); // Assuming the files are stored in the storage/app directory
+                if (file_exists($fullFilePath)) {
+                    $this->sendFile($fullFilePath, $msg);
+                    $filesSent = true;
+                }
+            }
+        }
+
+        if (!$filesSent) {
+            $filesToSend = [
+                'pdf_dimension' => $finalOrder->pdf_dimension,
+                'xml_dimension' => $finalOrder->xml_dimension
+            ];
+
+            foreach ($filesToSend as $fileType => $filePath) {
+                if ($filePath) {
+                    $fullFilePath = storage_path('app/' . $filePath); // Assuming the files are stored in the storage/app directory
+                    if (file_exists($fullFilePath)) {
+                        $this->sendFile($fullFilePath, $msg);
+                        $filesSent = true;
+                    }
+                }
+            }
+        }
+
+        if (!$filesSent) {
+            return response()->json(['message' => 'فایلی برای ارسال وجود ندارد.'], 404);
+        }
+
+        // Update the sent_to_factory flag
+        $finalOrder->sent_to_factory = true;
+        $finalOrder->save();
+
+        return response()->json(['message' => 'فایل‌ها با موفقیت به کارخانه ارسال شدند.'], 200);
+    }
 }

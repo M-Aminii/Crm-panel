@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\DescriptionDimension\CreateDescriptionDimensionRequest;
+use App\Http\Requests\DescriptionDimension\UpdateDescriptionDimensionRequest;
 use App\Models\DescriptionDimension;
 use Illuminate\Http\Request;
+
 
 class DescriptionDimensionController extends Controller
 {
@@ -42,7 +44,7 @@ class DescriptionDimensionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateDescriptionDimensionRequest $request, string $id)
     {
         $descriptionDimension = DescriptionDimension::find($id);
         if (is_null($descriptionDimension)) {

@@ -31,23 +31,23 @@ class RolesAndPermissionsSeeder extends Seeder
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
+            Permission::firstOrCreate(['name' => $permission]);
         }
 
         // Roles
         $roles = [
             'super-admin' => Permission::all(),
-            'sales-manager' => ['manage customers', 'view customers','manage invoices', 'view invoices','manage access', 'view access','manage final_order', 'view final_order'],
+            'sales-manager' => ['manage users', 'view users', 'manage customers', 'view customers', 'manage invoices', 'view invoices', 'manage access', 'view access', 'manage final_order', 'view final_order'],
             'financial-manager' => ['view invoices'],
             'executive-manager' => ['view users', 'view customers', 'view invoices'],
-            'sales-expert' => ['manage customers', 'view customers','manage invoices', 'view invoices'],
+            'sales-expert' => ['manage customers', 'view customers', 'manage invoices', 'view invoices'],
             'financial-expert' => ['view invoices'],
             'executive-expert' => ['view users', 'view customers'],
         ];
 
-        foreach ($roles as $role => $permissions) {
-            Role::create(['name' => $role])->givePermissionTo($permissions);
+        foreach ($roles as $roleName => $rolePermissions) {
+            $role = Role::firstOrCreate(['name' => $roleName]);
+            $role->syncPermissions($rolePermissions);
         }
-
     }
 }

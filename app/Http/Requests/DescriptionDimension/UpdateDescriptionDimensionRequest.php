@@ -2,14 +2,7 @@
 
 namespace App\Http\Requests\DescriptionDimension;
 
-use App\Enums\UserGender;
-use App\Enums\UserStatus;
-use App\Models\Customer;
-use App\Rules\MobileRule;
-use App\Rules\PasswordRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Gate;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class UpdateDescriptionDimensionRequest extends FormRequest
 {
@@ -18,8 +11,7 @@ class UpdateDescriptionDimensionRequest extends FormRequest
      */
     public function authorize(): bool
     {
-
-       return true;
+        return true;
     }
 
     /**
@@ -30,9 +22,10 @@ class UpdateDescriptionDimensionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required|string|max:100'],
-            'percent' => ['required_without:price|integer'],
-            'price' => ['required_without:percent|price,integer'],
+            'name' => ['nullable', 'string', 'max:100'],
+            'percent' => ['nullable', 'integer'],
+            'price' => ['nullable', 'numeric'],
         ];
     }
 }
+

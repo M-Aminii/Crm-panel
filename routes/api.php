@@ -123,6 +123,8 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'Admin'], function () {
         //Route::get('/{id}', [UserDiscountController::class, 'show'])->middleware('permission:view user_discount');
         Route::patch('/{id}', [FinalOrderController::class, 'update'])->middleware('permission:manage final_order');
         //Route::delete('/{id}', [UserDiscountController::class, 'destroy'])->middleware('permission:manage user_discount');
+        Route::post('/{id}/update-files', [FinalOrderController::class, 'updateFiles']);
+
     });
 
 });
