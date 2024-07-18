@@ -8,6 +8,8 @@ class AggregatedItemResource extends JsonResource
 {
     public function toArray($request)
     {
+
+
         return [
             'description_product' => $this->description_product,
             'total_area' => $this->total_area,

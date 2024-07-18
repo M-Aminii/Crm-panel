@@ -39,6 +39,7 @@ class TypeItemResource extends JsonResource
             'total_all_area' => round ($this->totalALLArea,3),
             'total_environment' => round ($this->totalEnvironment,3),
             'technical_details' => TechnicalItemResource::collection($this->whenLoaded('technicalItems')),
+
         ];
     }
 }

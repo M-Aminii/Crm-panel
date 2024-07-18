@@ -10,7 +10,7 @@ class TypeItem extends Model
     use HasFactory;
 
     protected $fillable = [
-        'key','invoice_id', 'product_id', 'product_section_id' , 'description','description_json', 'image_path' ,'price'
+        'key','invoice_id', 'product_id', 'product_section_id' , 'description','description_json', 'image_path' ,'price','description_structure'
     ];
 
     public function invoice()

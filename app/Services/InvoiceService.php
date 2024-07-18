@@ -126,6 +126,7 @@ class InvoiceService
                 'description' => $invoiceService->mergeProductStructures($convertDescriptions),
                 'price' => $item['price_per_unit'] ?? 0,
                 'image_path' => $productImagePath,
+                'description_structure' =>  $item['description_structure'] ?? null
             ]);
 
             // افزودن آیتم جدید به آرایه newItemsIds
@@ -273,7 +274,8 @@ class InvoiceService
             });
 
             $basePrice = $item['price_per_unit'];
-            //dd($basePrice);
+
+
 
             // استخراج descriptionIds و overPercentage از groupKey
             list($descriptionIdsKey, $overPercentage) = explode('-over-', $groupKey);
@@ -281,6 +283,7 @@ class InvoiceService
             $overPercentage = floatval($overPercentage);
 
             $valueAddedTax = $basePrice;
+            // الگویی ها برای ضریب 2 بودن
             $specialDescriptionIds = [ 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,31,32,33];
 
             foreach ($descriptionIds as $id) {
@@ -296,8 +299,10 @@ class InvoiceService
                     } else {
                         if ($description->price) {
                             $valueAddedTax += $description->price;
+
                         } elseif ($description->percent) {
-                            $valueAddedTax += ($basePrice * $description->percent) / 100;
+
+                            $valueAddedTax += ($valueAddedTax * $description->percent) / 100;
                         }
                     }
                 }
@@ -312,9 +317,7 @@ class InvoiceService
             if ($discount > $userMaxDiscount) {
                 throw new InvalidDiscountException();
             }
-
             $priceDiscounted = ($priceUnit / 100) * (100 - $discount);
-
             if ($delivery === 1) {
                 $priceDiscounted += intval($weight * 37500); // افزودن کرایه بار فقط در صورت انتخاب گزینه حمل و نقل
             }

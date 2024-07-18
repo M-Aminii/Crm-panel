@@ -10,6 +10,16 @@ class InvoiceResource extends JsonResource
 {
     public function toArray($request)
     {
+        $totalArea = 0;
+        $totalQuantity = 0;
+        $totalWeight = 0;
+
+        foreach ($this->aggregatedItems as $item) {
+            $totalArea += $item->total_area;
+            $totalQuantity += $item->total_quantity;
+            $totalWeight += $item->total_weight;
+        }
+
 
         return [
             'serial_number' => $this->serial_number,
@@ -27,8 +37,11 @@ class InvoiceResource extends JsonResource
             'items' => TypeItemResource::collection($this->whenLoaded('typeItems')),
             'aggregated_items' => AggregatedItemResource::collection($this->whenLoaded('aggregatedItems')),
             'amount_payable' => number_format($this->amount_payable),
-            'amount_payable_letters' =>NumberToWordsHelper::convertNumberToWords($this->amount_payable)
+            'amount_payable_letters' =>NumberToWordsHelper::convertNumberToWords($this->amount_payable),
 
+            'total_area_sum' => $totalArea,
+            'total_quantity_sum' => $totalQuantity,
+            'total_weight_sum'=>$totalWeight
         ];
     }
     private function getDeliveryCode($delivery)

@@ -40,6 +40,7 @@ class CreateInvoiceRequest extends FormRequest
             'items' => 'required|array',
             'items.*.product' => 'required|integer|exists:products,id',
             'items.*.product_section' => 'nullable|integer|exists:product_sections,id',
+            'items.*.description_structure' => 'nullable|string',
             'items.*.description' => 'required|array',
             'items.*.dimensions' => 'required|array',
             'items.*.technical_details' => 'required|array',
