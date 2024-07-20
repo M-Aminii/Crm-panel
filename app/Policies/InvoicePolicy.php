@@ -2,6 +2,8 @@
 
 namespace App\Policies;
 
+use App\Enums\CustomerStatus;
+use App\Enums\UserStatus;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\User;
@@ -32,8 +34,12 @@ class InvoicePolicy
      */
     public function create(User $user, Customer $customer): bool
     {
-        if ( $customer->status === "Inactive") {
+
+        if ( $customer->status === CustomerStatus::INACTIVE) {
             throw new \App\Exceptions\IncompleteOrInactiveCustomerException();
+        }
+        if ($user->status->value === UserStatus::INACTIVE){
+            throw new \App\Exceptions\IncompleteOrInactiveUserException();
         }
 
         return $user->id === $customer->user_id || $user->hasAnyAdminRole();

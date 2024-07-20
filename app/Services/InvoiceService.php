@@ -181,6 +181,14 @@ class InvoiceService
         $invoiceService = new InvoiceService();
         $dimensionGroups = collect();
 
+        // دریافت آیتم‌های موجود
+        $existingDimensions = DimensionItem::where('invoice_id', $invoiceId)
+            ->where('type_id', $typeItem->id)
+            ->pluck('id')
+            ->toArray();
+
+        $newDimensionsIds = [];
+
         foreach ($item['dimensions'] as $dimensionIndex => $dimension) {
             try {
                 $area = round($invoiceService->CalculateArea($dimension['height'], $dimension['width']), 3);
@@ -211,13 +219,19 @@ class InvoiceService
             }
             $dimensionGroups->get($descriptionKey)->push($dimensionItem);
 
+            $newDimensionsIds[] = $dimensionItem->id;
             $globalKeyIndex++;
         }
+
+        // حذف آیتم‌هایی که در آرایه newDimensionsIds نیستند
+        $dimensionsToDelete = array_diff($existingDimensions, $newDimensionsIds);
+        DimensionItem::destroy($dimensionsToDelete);
 
         $totalPayableAmount = $this->createOrUpdateAggregatedItems($invoiceId, $typeItem, $dimensionGroups, $item, $weight, $globalKeyIndex, $discount, $delivery);
 
         return $totalPayableAmount;
     }
+
 
 
     public function updateOrCreateTechnicalItem($invoiceId, $typeItem, $technicalDetails)

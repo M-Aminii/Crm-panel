@@ -34,12 +34,12 @@ class TypeItemResource extends JsonResource
             'description_json' => json_decode($this->description_json),
             'price' => $this->price,
             'image_path'=>$this->image_path,
+            'description_structure'=>$this->description_structure,
             'dimensions' => DimensionItemResource::collection($this->whenLoaded('dimensionItems')),
             'total_quantity' => $this->totalQuantity,
             'total_all_area' => round ($this->totalALLArea,3),
             'total_environment' => round ($this->totalEnvironment,3),
             'technical_details' => TechnicalItemResource::collection($this->whenLoaded('technicalItems')),
-
         ];
     }
 }
