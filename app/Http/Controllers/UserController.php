@@ -30,7 +30,7 @@ class UserController extends Controller
         if (!$query){
             throw new NotFoundHttpException('user not found');
         }
-        // اعمال فیلترها
+       /* // اعمال فیلترها
         $filters = [
             'last_name' => 'last_name',
             'mobile' => 'mobile',
@@ -38,7 +38,7 @@ class UserController extends Controller
             'status' => 'status',
         ];
 
-        $query = FilterService::ApplyFilterCustomers($query,$filters,$request);
+        $query = FilterService::ApplyFilterCustomers($query,$filters,$request);*/
         // انتخاب فیلدهای مورد نیاز
         $fields = [
             'id',

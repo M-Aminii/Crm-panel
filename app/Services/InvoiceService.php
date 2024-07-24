@@ -895,7 +895,7 @@ class InvoiceService
             return "";
         }
 
-        if (min($height, $width) > 3210) {
+        if (min($height, $width) > 3210 || max($height, $width) > 6000) {
             throw new \App\Exceptions\DimensionException($productIndex, $dimensionIndex);
         }
 
