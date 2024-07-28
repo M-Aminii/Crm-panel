@@ -39,7 +39,7 @@ class InvoiceResource extends JsonResource
             'amount_payable' => number_format($this->amount_payable),
             'amount_payable_letters' =>NumberToWordsHelper::convertNumberToWords($this->amount_payable),
 
-            'total_area_sum' => $totalArea,
+            'total_area_sum' => number_format($totalArea),
             'total_quantity_sum' => $totalQuantity,
             'total_weight_sum'=>$totalWeight
         ];
