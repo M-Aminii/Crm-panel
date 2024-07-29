@@ -257,11 +257,18 @@ class InvoiceService
     public function createOrUpdateAggregatedItems($invoiceId, $typeItem, $dimensionGroups, $item, $weight, &$globalKeyIndex, $discount, $delivery)
     {
         $invoiceService = new InvoiceService();
-        $totalPayableAmount = 0; // متغیر برای نگهداری مجموع مبالغ
+        $totalPayableAmount = 0;
         $descriptionNames = [];
-        $keyCounter = 1; // شروع شمارنده کلید
+        $keyCounter = 1;
 
-        // ابتدا گروه‌بندی بر اساس descriptionIds و over
+        // دریافت آیتم‌های تجمیعی موجود
+        $existingAggregatedItems = AggregatedItem::where('invoice_id', $invoiceId)
+            ->where('type_id', $typeItem->id)
+            ->pluck('id')
+            ->toArray();
+
+        $newAggregatedItemsIds = [];
+
         $groupedDimensions = collect();
 
         foreach ($dimensionGroups as $descriptionKey => $dimensions) {
@@ -290,33 +297,27 @@ class InvoiceService
 
             $basePrice = $item['price_per_unit'];
 
-
-
-            // استخراج descriptionIds و overPercentage از groupKey
             list($descriptionIdsKey, $overPercentage) = explode('-over-', $groupKey);
             $descriptionIds = explode('-', $descriptionIdsKey);
             $overPercentage = floatval($overPercentage);
 
             $valueAddedTax = $basePrice;
-            // الگویی ها برای ضریب 2 بودن
-            $specialDescriptionIds = [ 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,31,32,33];
+            $specialDescriptionIds = [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33];
 
             foreach ($descriptionIds as $id) {
                 $description = DescriptionDimension::find($id);
                 if ($description) {
                     $descriptionNames[$id] = $description->name;
-                    // اگر محصول ID برابر با 2 بود و توضیحات شامل یکی از IDs خاص بود، قیمت یا درصد توضیحات را ضربدر 2 کنید
                     if ($item['product'] == 2 && in_array($id, $specialDescriptionIds)) {
                         if ($description->price) {
                             $valueAddedTax += ($description->price * 2);
                         } elseif ($description->percent) {
-                            $valueAddedTax += ($basePrice * $description->percent) / 100;                        }
+                            $valueAddedTax += ($basePrice * $description->percent) / 100;
+                        }
                     } else {
                         if ($description->price) {
                             $valueAddedTax += $description->price;
-
                         } elseif ($description->percent) {
-
                             $valueAddedTax += ($valueAddedTax * $description->percent) / 100;
                         }
                     }
@@ -332,16 +333,16 @@ class InvoiceService
             if ($discount > $userMaxDiscount) {
                 throw new InvalidDiscountException();
             }
+
             $priceDiscounted = ($priceUnit / 100) * (100 - $discount);
             if ($delivery === 1) {
-                $priceDiscounted += intval($weight * 37500); // افزودن کرایه بار فقط در صورت انتخاب گزینه حمل و نقل
+                $priceDiscounted += intval($weight * 37500);
             }
 
             $priceValueAddedFinal = ($priceDiscounted * 110) / 100;
 
             $totalPrice = intval($totalMeterage * $priceValueAddedFinal);
 
-            // اضافه کردن مبلغ کل آیتم به مجموع قابل پرداخت
             $totalPayableAmount += $totalPrice;
 
             $names = collect($descriptionIds)->map(function ($id) use ($descriptionNames) {
@@ -352,11 +353,10 @@ class InvoiceService
                 $names .= '   درصد اور ' . $overPercentage;
             }
 
-            // استفاده از updateOrCreate با استفاده از globalKeyIndex
-            AggregatedItem::updateOrCreate([
+            $aggregatedItem = AggregatedItem::updateOrCreate([
                 'invoice_id' => $invoiceId,
-                'type_id'=>$typeItem->id,
-                'key' => $keyCounter++ // استفاده از شمارنده سراسری به عنوان key
+                'type_id' => $typeItem->id,
+                'key' => $keyCounter++
             ], [
                 'description_product' => $typeItem->description,
                 'description' => $names,
@@ -369,9 +369,15 @@ class InvoiceService
                 'total_price' => $totalPrice,
             ]);
 
-            $globalKeyIndex++; // افزایش شمارنده سراسری برای استفاده در کلید بعدی
+            $newAggregatedItemsIds[] = $aggregatedItem->id;
+
+            $globalKeyIndex++;
         }
-        // بازگرداندن مجموع مبالغ
+
+        // حذف آیتم‌های تجمیعی که در آرایه newAggregatedItemsIds نیستند
+        $aggregatedItemsToDelete = array_diff($existingAggregatedItems, $newAggregatedItemsIds);
+        AggregatedItem::destroy($aggregatedItemsToDelete);
+
         return $totalPayableAmount;
     }
 
