@@ -93,11 +93,12 @@ class InvoiceService
             $weight = $invoiceService->calculateWeight($convertDescriptions);
 
             foreach ($item['description'] as &$desc) {
-                if (isset($desc['adhesive']) && $desc['adhesive'] == 'پلی سولفاید') {
+                // اگر المان شامل 'adhesive' بود و مقدار آن برابر با 1 بود (معادل 'پلی سولفاید')
+                if (isset($desc['adhesive']) && $desc['adhesive'] == 1) {
+
                     foreach ($item['dimensions'] as $dimensionIndex => &$dimension) {
                         $area = round($invoiceService->CalculateArea($dimension['height'], $dimension['width']), 3);
                         $totalWeight = $weight * $area;
-
                         if ($totalWeight >= 250) {
                             $desc['adhesive'] = 'سیلیکون IG';
                             if (!isset($dimension['description_ids'])) {
