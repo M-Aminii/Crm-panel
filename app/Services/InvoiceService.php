@@ -177,7 +177,7 @@ class InvoiceService
     }
 
 
-    public function processDimensions($invoiceId, $typeItem, $item, $weight, &$globalKeyIndex, $discount, $delivery, $itemIndex)
+/*    public function processDimensions($invoiceId, $typeItem, $item, $weight, &$globalKeyIndex, $discount, $delivery, $itemIndex)
     {
         $invoiceService = new InvoiceService();
         $dimensionGroups = collect();
@@ -231,9 +231,83 @@ class InvoiceService
         $totalPayableAmount = $this->createOrUpdateAggregatedItems($invoiceId, $typeItem, $dimensionGroups, $item, $weight, $globalKeyIndex, $discount, $delivery);
 
         return $totalPayableAmount;
+    }*/
+
+    public function processDimensions($invoiceId, $typeItem, $item, $weight, &$globalKeyIndex, $discount, $delivery, $itemIndex)
+    {
+        $invoiceService = new InvoiceService();
+        $dimensionGroups = collect();
+
+        // دریافت آیتم‌های موجود
+        $existingDimensions = DimensionItem::where('invoice_id', $invoiceId)
+            ->where('type_id', $typeItem->id)
+            ->pluck('id')
+            ->toArray();
+
+        $newDimensionsIds = [];
+
+        // تولید یک عدد تصادفی چهار رقمی ثابت برای تمامی ابعاد در این فاکتور (در صورتی که کاربر عددی وارد نکرده باشد)
+        $fixedPosition = random_int(1000, 9999);
+
+        foreach ($item['dimensions'] as $dimensionIndex => $dimension) {
+            try {
+                $area = round($invoiceService->CalculateArea($dimension['height'], $dimension['width']), 3);
+                $over = $invoiceService->calculateAspectRatio($dimension['height'], $dimension['width'], $itemIndex + 1, $dimensionIndex + 1);
+            } catch (DimensionException $e) {
+                throw new DimensionException($itemIndex + 1, $dimensionIndex + 1, $e->getMessage());
+            }
+
+            // چک کردن وجود position
+            if (!isset($dimension['position'])) {
+                // اگر position برای این بعد قبلاً ذخیره شده بود، از همان استفاده می‌کنیم
+                $existingDimension = DimensionItem::where('invoice_id', $invoiceId)
+                    ->where('type_id', $typeItem->id)
+                    ->where('key', $globalKeyIndex)
+                    ->first();
+
+                if ($existingDimension) {
+                    $position = $existingDimension->position;
+                } else {
+                    $position = $fixedPosition;
+                }
+            } else {
+                $position = $dimension['position'];
+            }
+
+            $dimensionItem = DimensionItem::updateOrCreate(
+                ['invoice_id' => $invoiceId, 'type_id' => $typeItem->id, 'key' => $globalKeyIndex],
+                [
+                    'height' => $dimension['height'],
+                    'width' => $dimension['width'],
+                    'weight' => $weight * $area,
+                    'quantity' => $dimension['quantity'],
+                    'over' => $over,
+                    'position' => $position,
+                ]
+            );
+
+            if (isset($dimension['description_ids']) && is_array($dimension['description_ids'])) {
+                $dimensionItem->descriptionDimensions()->sync($dimension['description_ids']);
+            }
+
+            $descriptionKey = collect($dimension['description_ids'])->sort()->implode('-');
+            if (!$dimensionGroups->has($descriptionKey)) {
+                $dimensionGroups->put($descriptionKey, collect());
+            }
+            $dimensionGroups->get($descriptionKey)->push($dimensionItem);
+
+            $newDimensionsIds[] = $dimensionItem->id;
+            $globalKeyIndex++;
+        }
+
+        // حذف آیتم‌هایی که در آرایه newDimensionsIds نیستند
+        $dimensionsToDelete = array_diff($existingDimensions, $newDimensionsIds);
+        DimensionItem::destroy($dimensionsToDelete);
+
+        $totalPayableAmount = $this->createOrUpdateAggregatedItems($invoiceId, $typeItem, $dimensionGroups, $item, $weight, $globalKeyIndex, $discount, $delivery);
+
+        return $totalPayableAmount;
     }
-
-
 
     public function updateOrCreateTechnicalItem($invoiceId, $typeItem, $technicalDetails)
     {
@@ -297,6 +371,8 @@ class InvoiceService
 
             $basePrice = $item['price_per_unit'];
 
+            //dd($basePrice);
+
             list($descriptionIdsKey, $overPercentage) = explode('-over-', $groupKey);
             $descriptionIds = explode('-', $descriptionIdsKey);
             $overPercentage = floatval($overPercentage);
@@ -323,7 +399,7 @@ class InvoiceService
                     }
                 }
             }
-
+//dd($overPercentage);
             $valueAddedTax += ($valueAddedTax * $overPercentage) / 100;
             $priceUnit = intval(($valueAddedTax / 110) * 100);
 
@@ -652,7 +728,7 @@ class InvoiceService
             return 75;
         }
 
-        if (min($height, $width) > 2440 && min($height, $width) >= 2500) {
+        if (min($height, $width) > 2440 && min($height, $width) > 2500) {
             return 35;
         }
 

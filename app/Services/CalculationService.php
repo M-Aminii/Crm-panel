@@ -53,13 +53,15 @@ class CalculationService
             return 75;
         }
 
+        if ( max($height,$width)> 3660 || ( min($height,$width) > 2440 && min($height,$width) <= 2500)) {
+            return 20;
+        }
+
         if ( min($height,$width) > 2440 && min($height,$width)>= 2500) {
             return 35;
         }
 
-        if ( max($height,$width)> 3660 || ( min($height,$width) > 2440 && min($height,$width) <= 2500)) {
-            return 20;
-        }
+
 
         if ( max($height,$width) <= 3660 &&  min($height,$width) <= 2440 && $area > 6 && $area <= 8.9304) {
             return 15;
