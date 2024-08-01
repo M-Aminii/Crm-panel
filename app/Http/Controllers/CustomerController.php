@@ -26,28 +26,29 @@ class CustomerController extends Controller
     public function index(ListCustomerRequest $request)
     {
         $user = Auth::user();
-        // اگر کاربر ادمین است، همه مشتریان را دریافت کن
+        // اگر کاربر ادمین است، همه مشتریان را دریافت کن و اطلاعات کاربر را نیز بارگذاری کن
         if ($user->hasAnyAdminRole()) {
-            $query = Customer::all();
+            $query = Customer::with('user')->get();
         } else {
-            // در غیر این صورت، فقط مشتریان کاربر جاری را دریافت کن
-            $query = $user->customers()->get();
+            // در غیر این صورت، فقط مشتریان کاربر جاری را دریافت کن و اطلاعات کاربر را نیز بارگذاری کن
+            $query = $user->customers()->with('user')->get();
         }
+
         // بازگشت نتیجه به عنوان پاسخ
         return response()->json($query);
-
-     /*   $user = Auth::user();
-
-        if ($user->hasAnyAdminRole()) {
-            $customers = Customer::with(['province', 'city'])->get();
-        } else {
-            $customers = $user->customers()->with(['province', 'city'])->get();
-        }
-
-        // بازگشت نتیجه به عنوان پاسخ با استفاده از CustomerResource
-        return CustomerResource::collection($customers);*/
     }
 
+
+    /*   $user = Auth::user();
+
+            if ($user->hasAnyAdminRole()) {
+                $customers = Customer::with(['province', 'city'])->get();
+            } else {
+                $customers = $user->customers()->with(['province', 'city'])->get();
+            }
+
+            // بازگشت نتیجه به عنوان پاسخ با استفاده از CustomerResource
+            return CustomerResource::collection($customers);*/
     /**
      * Store a newly created resource in storage.
      */
