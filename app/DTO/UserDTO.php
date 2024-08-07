@@ -36,7 +36,7 @@ class UserDTO
         $this->status =$data['status'] ?? UserStatus::ACTIVE;
         $this->gender =$data['gender'] ?? UserGender::GENDER_MAN;
         $this->password = $data['password'];
-        $this->avatar = $this->saveAvatar($data['avatar']) ?? null;
+        $this->avatar = array_key_exists('avatar', $data) ? $this->saveAvatar($data['avatar']) : null;
         $this->about_me = $data['about_me'] ?? null;
     }
 

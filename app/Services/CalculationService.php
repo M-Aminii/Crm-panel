@@ -103,6 +103,7 @@ class CalculationService
             'رفلکس نقره ای' => 350000,
             'ساتینا' =>1300000,
             'ساتینا(زبرا)' => 2450000,
+            'دفیوز' =>2600000
 
         ],
         'material'=>[
@@ -161,6 +162,8 @@ class CalculationService
                     $finalPrice += $this->options['type']['ساتینا'];
                 }elseif ($selectedOptions['type'] === 'ساتینا(زبرا)'){
                     $finalPrice += $this->options['type']['ساتینا(زبرا)'];
+                }elseif ($selectedOptions['type'] === 'دفیوز'){
+                    $finalPrice += $this->options['type']['دفیوز'];
                 } elseif (array_key_exists($selectedOptions['type'], $this->options['type'])) {
                     // قیمت به ازای هر میلیمتر برای شیشه‌های دیگر
                     $width = $selectedOptions['width'];

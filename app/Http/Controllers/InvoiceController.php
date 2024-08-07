@@ -7,6 +7,7 @@ use App\Enums\InvoiceStatus;
 use App\Enums\AccessPayment;
 use App\Exceptions\DimensionException;
 use App\Exceptions\InvalidDiscountException;
+use App\Exceptions\WeightExceededException;
 use App\Helpers\Benchmark;
 use App\Http\Requests\Customer\ShowCustomerRequest;
 use App\Http\Requests\Invoice\CreateInvoiceRequest;
@@ -38,6 +39,7 @@ use LaravelDaily\Invoices\Invoice;
 use PhpParser\Node\Expr\New_;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
 
 class InvoiceController extends Controller
 {
@@ -121,7 +123,7 @@ class InvoiceController extends Controller
                 'customer_id' => $validatedData['buyer'],
                 'description' => $validatedData['description'], //TODO: در این مکان توضیحات برای فاکتور زده میشه ولیدیشن ها درست شود
                 'status' => InvoiceStatus::InFormal,
-                'informal_status' =>InformalInvoiceStatus::PENDING_APPROVAL,
+                'informal_status' => InformalInvoiceStatus::PENDING_APPROVAL,
                 'discount' => $validatedData['discount'],
                 'delivery' => $validatedData['delivery'],
             ]);
@@ -140,7 +142,12 @@ class InvoiceController extends Controller
         } catch (DimensionException $exception) {
             DB::rollBack();
             Log::error($exception);
-            $message = $exception->getMessage() . " ساختار شماره {$exception->getProductIndex()} ردیف  {$exception->getDimensionIndex()} وجود ندارد  " ;
+            $message = $exception->getMessage() . " ساختار شماره {$exception->getProductIndex()} ردیف  {$exception->getDimensionIndex()} وجود ندارد  ";
+            return response()->json(['message' => $message], 422);
+        } catch (WeightExceededException $exception) {
+            DB::rollBack();
+            Log::error($exception);
+            $message = "وزن ابعاد در ساختار شماره {$exception->getProductIndex()} و ردیف {$exception->getDimensionIndex()} برابر با {$exception->getWeight()} کیلوگرم است که بیش از حد مجاز می‌باشد.";
             return response()->json(['message' => $message], 422);
         } catch (\Exception $exception) {
             DB::rollBack();
@@ -148,6 +155,7 @@ class InvoiceController extends Controller
             return response()->json(['message' => 'خطایی به وجود آمده است: ' . $exception->getMessage()], 500);
         }
     }
+
 
 
 
@@ -238,6 +246,11 @@ class InvoiceController extends Controller
             DB::rollBack();
             Log::error($exception);
             $message = $exception->getMessage() . " ساختار شماره {$exception->getProductIndex()} ردیف  {$exception->getDimensionIndex()} وجود ندارد  " ;
+            return response()->json(['message' => $message], 422);
+        } catch (WeightExceededException $exception) {
+            DB::rollBack();
+            Log::error($exception);
+            $message = "وزن ابعاد در ساختار شماره {$exception->getProductIndex()} و ردیف {$exception->getDimensionIndex()} برابر با {$exception->getWeight()} کیلوگرم است که بیش از حد مجاز می‌باشد.";
             return response()->json(['message' => $message], 422);
         } catch (HttpResponseException $exception) {
             DB::rollBack();

@@ -29,12 +29,13 @@ class GlassTypeTableSeeder extends Seeder
             ['name' => 'رفلکس نقره ای', 'price' => 350000],
             ['name' => 'ساتینا', 'price' => 1300000],
             ['name' => 'ساتینا(زبرا)', 'price' => 2450000],
+            ['name' => 'دفیوز', 'price' => 2600000],
         ];
 
         foreach ($GlassTypes as $GlassType) {
             GlassType::create($GlassType);
-
         }
+
         $this->command->info('add GlassTypes to database');
     }
 }

@@ -8,8 +8,7 @@ use App\Enums\InvoiceStatus;
 use App\Enums\AccessPayment;
 use App\Exceptions\DimensionException;
 use App\Exceptions\InvalidDiscountException;
-use App\Exceptions\NotFoundPageException;
-use App\Helpers\NumberToWordsHelper;
+use App\Exceptions\WeightExceededException;
 use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\ProductSection;
@@ -23,58 +22,11 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+
 class InvoiceService
 {
 
-   /* public static function processItems($invoice, $items)
-    {
-        $invoiceService = new InvoiceService();
-        $dimensionGroups = collect();
-        $globalKeyIndex = 1; // شمارنده سراسری برای کلیدها
-        $totalPayableAmount = 0; // متغیر برای نگهداری مجموع مبالغ
 
-        foreach ($items as $itemIndex => $item) {
-            $item = $invoiceService->calculateItemPrice($item);
-            $weight = $invoiceService->calculateWeight($item['description']);
-
-            // افزودن شرط بررسی adhesive و تغییر آن در صورت لزوم
-            foreach ($item['description'] as &$desc) {
-                if (isset($desc['adhesive']) && $desc['adhesive'] == 'پلی سولفاید') {
-                    foreach ($item['dimensions'] as $dimensionIndex => &$dimension) {
-                        $area = round($invoiceService->CalculateArea($dimension['height'], $dimension['width']), 3);
-                        $totalWeight = $weight * $area;
-
-                        if ($totalWeight >= 250) {
-                            $desc['adhesive'] = 'سیلیکون IG';
-                            if (!isset($dimension['description_ids'])) {
-                                $dimension['description_ids'] = [];
-                            }
-                            if (!in_array(1, $dimension['description_ids'])) {
-                                $dimension['description_ids'][] = 1; // افزودن ID توضیحات
-                            }
-                        }
-                    }
-                }
-            }
-
-            $typeItem = TypeItem::updateOrCreate([
-                'invoice_id' => $invoice->id,
-                'key' => $itemIndex + 1 , // اضافه کردن مقدار key
-            ],
-            [
-                'product_id' => $item['product'],
-                'description' => $invoiceService->mergeProductStructures($item['description']),
-                'price' => $item['price_per_unit'] ?? 0,
-
-            ]);
-
-            // پردازش ابعاد و دریافت مجموع مبالغ و شمارنده کلید بعدی
-            $totalPayableAmount += $invoiceService->processDimensions($invoice->id, $typeItem, $item, $weight, $globalKeyIndex);
-            $invoiceService->updateOrCreateTechnicalItem($invoice->id, $typeItem, $item['technical_details']);
-        }
-
-        return $totalPayableAmount; // بازگرداندن مجموع مبالغ
-    }*/
     public static function processItems($invoice, $items, $discount, $delivery)
     {
         $DescriptionService = new DescriptionService;
@@ -257,6 +209,13 @@ class InvoiceService
                 throw new DimensionException($itemIndex + 1, $dimensionIndex + 1, $e->getMessage());
             }
 
+            $dimensionWeight = $weight * $area;
+
+            // بررسی وزن هر بعد
+            if ($dimensionWeight > 900) {
+                throw new WeightExceededException($itemIndex + 1, $dimensionIndex + 1, $dimensionWeight);
+            }
+
             // چک کردن وجود position
             if (!isset($dimension['position'])) {
                 // اگر position برای این بعد قبلاً ذخیره شده بود، از همان استفاده می‌کنیم
@@ -279,7 +238,7 @@ class InvoiceService
                 [
                     'height' => $dimension['height'],
                     'width' => $dimension['width'],
-                    'weight' => $weight * $area,
+                    'weight' => $dimensionWeight,
                     'quantity' => $dimension['quantity'],
                     'over' => $over,
                     'position' => $position,
@@ -371,7 +330,6 @@ class InvoiceService
 
             $basePrice = $item['price_per_unit'];
 
-            //dd($basePrice);
 
             list($descriptionIdsKey, $overPercentage) = explode('-over-', $groupKey);
             $descriptionIds = explode('-', $descriptionIdsKey);
@@ -399,7 +357,7 @@ class InvoiceService
                     }
                 }
             }
-//dd($overPercentage);
+
             $valueAddedTax += ($valueAddedTax * $overPercentage) / 100;
             $priceUnit = intval(($valueAddedTax / 110) * 100);
 
@@ -650,53 +608,7 @@ class InvoiceService
         $result = ($height * $width / 1000000 < 0.5) ? (($height * $width / 1000000 == 0) ? 0 : 0.5) : ($height * $width / 1000000);
         return $result;
     }
-   /* public function calculateAspectRatio($height, $width)
-    {
-        $area = $this->CalculateArea((float)$height,(float)$width );
 
-        if ($height == 0 || $width == 0) {
-            return "";
-        }
-
-        if (min($height,$width) > 3210) {
-            return "error";
-        }
-
-        if (max($height,$width) > 4880 && min($height,$width) < 3211 && min($height,$width) > 2500){
-            return 140;
-        }
-
-        if (max($height,$width) > 4880 && min($height,$width) <= 2500 ){
-
-            return 140 ;
-        }
-
-        if ( max($height,$width) > 4500 && min($height,$width) < 3211 && min($height,$width) >= 2500) {
-            return 75;
-        }
-
-        if ( max($height,$width) > 4500 &&  min($height,$width) <= 2500) {
-            return 75;
-        }
-
-        if ( min($height,$width) > 2440 && min($height,$width)>= 2500) {
-            return 35;
-        }
-
-        if ( max($height,$width)> 3660 || ( min($height,$width) > 2440 && min($height,$width) <= 2500)) {
-            return 20;
-        }
-
-        if ( max($height,$width) <= 3660 &&  min($height,$width) <= 2440 && $area > 6 && $area <= 8.9304) {
-            return 15;
-        }
-
-        if ( max($height,$width) <= 3660 && min($height,$width) <= 2440 && $area <= 6) {
-            return 0;
-        }
-
-        return "";
-    }*/
     public function calculateAspectRatio($height, $width, $productIndex, $dimensionIndex)
     {
 
