@@ -53,7 +53,7 @@ class DescriptionService
             if (isset($description['laminateColor']) && is_numeric($description['laminateColor'])) {
                 $glassLaminateColor = GlassLaminateColor::find($description['laminateColor']);
                 if ($glassLaminateColor) {
-                    $description['laminateColor'] = $glassLaminateColor->english_name;
+                    $description['laminateColor'] = $glassLaminateColor->name;
                 }
             }
             if (isset($description['spacer']) && is_numeric($description['spacer'])) {

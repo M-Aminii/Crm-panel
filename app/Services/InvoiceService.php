@@ -81,6 +81,7 @@ class InvoiceService
                 'image_path' => $productImagePath,
                 'description_structure' =>  $item['description_structure'] ?? null
             ]);
+            //dd($invoiceService->mergeProductStructures($convertDescriptions));
 
             // افزودن آیتم جدید به آرایه newItemsIds
             $newItemsIds[] = $typeItem->id;
@@ -129,62 +130,6 @@ class InvoiceService
     }
 
 
-/*    public function processDimensions($invoiceId, $typeItem, $item, $weight, &$globalKeyIndex, $discount, $delivery, $itemIndex)
-    {
-        $invoiceService = new InvoiceService();
-        $dimensionGroups = collect();
-
-        // دریافت آیتم‌های موجود
-        $existingDimensions = DimensionItem::where('invoice_id', $invoiceId)
-            ->where('type_id', $typeItem->id)
-            ->pluck('id')
-            ->toArray();
-
-        $newDimensionsIds = [];
-
-        foreach ($item['dimensions'] as $dimensionIndex => $dimension) {
-            try {
-                $area = round($invoiceService->CalculateArea($dimension['height'], $dimension['width']), 3);
-                $over = $invoiceService->calculateAspectRatio($dimension['height'], $dimension['width'], $itemIndex + 1, $dimensionIndex + 1);
-            } catch (DimensionException $e) {
-                throw new DimensionException($itemIndex + 1, $dimensionIndex + 1, $e->getMessage());
-            }
-
-            $dimensionItem = DimensionItem::updateOrCreate(
-                ['invoice_id' => $invoiceId, 'type_id' => $typeItem->id, 'key' => $globalKeyIndex],
-                [
-                    'height' => $dimension['height'],
-                    'width' => $dimension['width'],
-                    'weight' => $weight * $area,
-                    'quantity' => $dimension['quantity'],
-                    'over' => $over,
-                    'position' => $dimension['position'] === null ? random_int(1000, 9999) : $dimension['position'],
-                ]
-            );
-
-            if (isset($dimension['description_ids']) && is_array($dimension['description_ids'])) {
-                $dimensionItem->descriptionDimensions()->sync($dimension['description_ids']);
-            }
-
-            $descriptionKey = collect($dimension['description_ids'])->sort()->implode('-');
-            if (!$dimensionGroups->has($descriptionKey)) {
-                $dimensionGroups->put($descriptionKey, collect());
-            }
-            $dimensionGroups->get($descriptionKey)->push($dimensionItem);
-
-            $newDimensionsIds[] = $dimensionItem->id;
-            $globalKeyIndex++;
-        }
-
-        // حذف آیتم‌هایی که در آرایه newDimensionsIds نیستند
-        $dimensionsToDelete = array_diff($existingDimensions, $newDimensionsIds);
-        DimensionItem::destroy($dimensionsToDelete);
-
-        $totalPayableAmount = $this->createOrUpdateAggregatedItems($invoiceId, $typeItem, $dimensionGroups, $item, $weight, $globalKeyIndex, $discount, $delivery);
-
-        return $totalPayableAmount;
-    }*/
-
     public function processDimensions($invoiceId, $typeItem, $item, $weight, &$globalKeyIndex, $discount, $delivery, $itemIndex)
     {
         $invoiceService = new InvoiceService();
@@ -205,6 +150,27 @@ class InvoiceService
             try {
                 $area = round($invoiceService->CalculateArea($dimension['height'], $dimension['width']), 3);
                 $over = $invoiceService->calculateAspectRatio($dimension['height'], $dimension['width'], $itemIndex + 1, $dimensionIndex + 1);
+
+                // بررسی نوع شیشه در آرایه‌ی description
+                $isSatinGlass = false;
+                foreach ($item['description'] as $desc) {
+                    if (isset($desc['type']) && $desc['type'] == 1) { // فرض می‌کنیم مقدار 1 نمایانگر "ساتینا" است
+                        $isSatinGlass = true;
+                        break;
+                    }
+                }
+                //dd($isSatinGlass);
+
+                // اگر شیشه ساتینا بود، محدوده ارتفاع و عرض را بررسی می‌کنیم
+                if ($isSatinGlass) {
+                    //$minSize = min($dimension['height'], $dimension['width']);
+
+                    $maxSize = max($dimension['height'], $dimension['width']);
+
+                    if ( $maxSize > 3660) {
+                        throw new \Exception("ابعاد شیشه ساتینا نباید بیشتر از  3660  باشد.");
+                    }
+                }
             } catch (DimensionException $e) {
                 throw new DimensionException($itemIndex + 1, $dimensionIndex + 1, $e->getMessage());
             }
@@ -565,6 +531,7 @@ class InvoiceService
 
     public function mergeProductStructures($productStructures)
     {
+
         $description = '';
 
         foreach ($productStructures as $productStructure) {
@@ -583,8 +550,12 @@ class InvoiceService
 
             // سپس داده‌های laminate را اضافه می‌کنیم
             if (isset($productStructure['laminate'])) {
-                $tempDescription .= "+ طلق " . $productStructure['laminate'] . " + ";
+                $tempDescription .= "+ طلق " . $productStructure['laminate'] ;
             }
+            if (isset($productStructure['laminateColor'])){
+                $tempDescription .= "  " . $productStructure['laminateColor'] . " + ";
+            }
+
             if (isset($productStructure['spacer'])) {
                 $tempDescription .= "+ اسپیسر " . $productStructure['spacer'] . " + ";
             }

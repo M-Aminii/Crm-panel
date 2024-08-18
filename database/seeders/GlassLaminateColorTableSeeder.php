@@ -26,8 +26,10 @@ class GlassLaminateColorTableSeeder extends Seeder
         }
 
         $GlassLaminateColors = [
-            ['english_name' => 'normal', 'price' => 0],
-            ['english_name' => 'hued', 'price' => 4400000],
+            ['name' => 'شفاف', 'price' => 0],
+            ['name' => 'شیری', 'price' => 4400000],
+            ['name' => 'سفید', 'price' => 4400000],
+            ['name' => 'مشکی', 'price' => 4400000],
         ];
 
         foreach ($GlassLaminateColors as $GlassLaminateColor) {
