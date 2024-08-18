@@ -8,6 +8,7 @@ use App\Enums\InvoiceStatus;
 use App\Enums\AccessPayment;
 use App\Exceptions\DimensionException;
 use App\Exceptions\InvalidDiscountException;
+use App\Exceptions\SatinGlassDimensionException;
 use App\Exceptions\WeightExceededException;
 use App\Models\Invoice;
 use App\Models\Product;
@@ -163,14 +164,13 @@ class InvoiceService
 
                 // اگر شیشه ساتینا بود، محدوده ارتفاع و عرض را بررسی می‌کنیم
                 if ($isSatinGlass) {
-                    //$minSize = min($dimension['height'], $dimension['width']);
-
                     $maxSize = max($dimension['height'], $dimension['width']);
 
-                    if ( $maxSize > 3660) {
-                        throw new \Exception("ابعاد شیشه ساتینا نباید بیشتر از  3660  باشد.");
+                    if ($maxSize > 3660) {
+                        throw new SatinGlassDimensionException($itemIndex + 1, $dimensionIndex + 1, $dimension['height'], $dimension['width']);
                     }
                 }
+
             } catch (DimensionException $e) {
                 throw new DimensionException($itemIndex + 1, $dimensionIndex + 1, $e->getMessage());
             }
