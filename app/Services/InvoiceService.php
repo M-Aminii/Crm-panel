@@ -155,12 +155,11 @@ class InvoiceService
                 // بررسی نوع شیشه در آرایه‌ی description
                 $isSatinGlass = false;
                 foreach ($item['description'] as $desc) {
-                    if (isset($desc['type']) && $desc['type'] == 1) { // فرض می‌کنیم مقدار 1 نمایانگر "ساتینا" است
+                    if (isset($desc['type']) && $desc['type'] == 6) { // فرض می‌کنیم مقدار 1 نمایانگر "ساتینا" است
                         $isSatinGlass = true;
                         break;
                     }
                 }
-                //dd($isSatinGlass);
 
                 // اگر شیشه ساتینا بود، محدوده ارتفاع و عرض را بررسی می‌کنیم
                 if ($isSatinGlass) {
@@ -328,7 +327,7 @@ class InvoiceService
             $priceUnit = intval(($valueAddedTax / 110) * 100);
 
             $user = auth()->user();
-            $userMaxDiscount = $user->userDiscount->max_discount ?? 20;
+            $userMaxDiscount = $user->userDiscount->max_discount ?? 30;
 
             if ($discount > $userMaxDiscount) {
                 throw new InvalidDiscountException();

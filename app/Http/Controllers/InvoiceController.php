@@ -7,6 +7,7 @@ use App\Enums\InvoiceStatus;
 use App\Enums\AccessPayment;
 use App\Exceptions\DimensionException;
 use App\Exceptions\InvalidDiscountException;
+use App\Exceptions\SatinGlassDimensionException;
 use App\Exceptions\WeightExceededException;
 use App\Helpers\Benchmark;
 use App\Http\Requests\Customer\ShowCustomerRequest;
@@ -148,6 +149,11 @@ class InvoiceController extends Controller
             DB::rollBack();
             Log::error($exception);
             $message = "وزن ابعاد در ساختار شماره {$exception->getProductIndex()} و ردیف {$exception->getDimensionIndex()} برابر با {$exception->getWeight()} کیلوگرم است که بیش از حد مجاز می‌باشد.";
+            return response()->json(['message' => $message], 422);
+        }catch (SatinGlassDimensionException $exception) {
+            DB::rollBack();
+            Log::error($exception);
+            $message = "وزن ابعاد در ساختار شماره {$exception->getProductIndex()} و ردیف {$exception->getDimensionIndex()} برابر با {$exception->getWidth()} کیلوگرم است که بیش از حد مجاز می‌باشد.";
             return response()->json(['message' => $message], 422);
         } catch (\Exception $exception) {
             DB::rollBack();
