@@ -28,7 +28,7 @@ class CreateAccessRequest extends FormRequest
     {
         return [
             'user_id' => ['required', Rule::unique('access', 'user_id')],
-            'max_discount' => 'required|integer|min:0|max:20',
+            'max_discount' => 'required|integer|min:0|max:30',
             'payment_terms' => 'required',
             'min_pre_payment'=>'nullable|integer|min:0|max:100'
         ];

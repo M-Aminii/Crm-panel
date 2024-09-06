@@ -33,6 +33,7 @@ class UpdateInvoiceRequest extends FormRequest
             'before_delivery' => 'nullable|numeric',
             'cheque' => 'nullable|numeric',
             'description'=> 'nullable|string',
+            'discount' => 'required|integer|min:0|max:30', // افزودن فیلد تخفیف و اعتبارسنجی آن
             'items' => 'nullable|array',
             'items.*.product' => 'nullable|integer|exists:products,id',
             'items.*.description' => 'nullable|array',

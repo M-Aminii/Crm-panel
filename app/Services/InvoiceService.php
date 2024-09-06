@@ -8,7 +8,9 @@ use App\Enums\InvoiceStatus;
 use App\Enums\AccessPayment;
 use App\Exceptions\DimensionException;
 use App\Exceptions\InvalidDiscountException;
+use App\Exceptions\LaminatedColoredGlassDimensionException;
 use App\Exceptions\SatinGlassDimensionException;
+use App\Exceptions\SpecialGlassDimensionException;
 use App\Exceptions\WeightExceededException;
 use App\Models\Invoice;
 use App\Models\Product;
@@ -153,20 +155,40 @@ class InvoiceService
                 $over = $invoiceService->calculateAspectRatio($dimension['height'], $dimension['width'], $itemIndex + 1, $dimensionIndex + 1);
 
                 // بررسی نوع شیشه در آرایه‌ی description
-                $isSatinGlass = false;
+                $isSpecialGlass = false;
+                $glassType = '';
+
                 foreach ($item['description'] as $desc) {
-                    if (isset($desc['type']) && $desc['type'] == 6) { // فرض می‌کنیم مقدار 1 نمایانگر "ساتینا" است
-                        $isSatinGlass = true;
+                    if (isset($desc['type']) && in_array($desc['type'], [6, 2])) {
+                        $isSpecialGlass = true;
+                        $glassType = ($desc['type'] == 6) ? 'ساتینا' : 'دودی';
                         break;
                     }
                 }
 
-                // اگر شیشه ساتینا بود، محدوده ارتفاع و عرض را بررسی می‌کنیم
-                if ($isSatinGlass) {
+                // اگر شیشه ساتینا یا دودی بود، محدوده ارتفاع و عرض را بررسی می‌کنیم
+                if ($isSpecialGlass) {
                     $maxSize = max($dimension['height'], $dimension['width']);
-
                     if ($maxSize > 3660) {
-                        throw new SatinGlassDimensionException($itemIndex + 1, $dimensionIndex + 1, $dimension['height'], $dimension['width']);
+                        throw new SpecialGlassDimensionException($itemIndex + 1, $dimensionIndex + 1, $dimension['height'], $dimension['width'], $glassType);
+                    }
+                }
+
+                // بررسی لمینت و رنگی بودن
+                $hasColoredLaminate = false;
+
+                // بررسی تمامی لمینت‌های موجود در description
+                foreach ($item['description'] as $desc) {
+                    if (isset($desc['laminate']) && isset($desc['laminateColor']) && $desc['laminateColor'] != 1) {
+                        $hasColoredLaminate = true;
+                        break; // اگر لمینت رنگی پیدا شد، ادامه بررسی نیاز نیست
+                    }
+                }
+                // اگر لمینت رنگی وجود داشت، عرض بررسی شود
+                if ($hasColoredLaminate) {
+                    $maxWidth = $dimension['width'];
+                    if ($maxWidth > 2250) {
+                        throw new LaminatedColoredGlassDimensionException($itemIndex + 1, $dimensionIndex + 1, $dimension['height'], $dimension['width']);
                     }
                 }
 

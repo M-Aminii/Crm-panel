@@ -7,7 +7,9 @@ use App\Enums\InvoiceStatus;
 use App\Enums\AccessPayment;
 use App\Exceptions\DimensionException;
 use App\Exceptions\InvalidDiscountException;
+use App\Exceptions\LaminatedColoredGlassDimensionException;
 use App\Exceptions\SatinGlassDimensionException;
+use App\Exceptions\SpecialGlassDimensionException;
 use App\Exceptions\WeightExceededException;
 use App\Helpers\Benchmark;
 use App\Http\Requests\Customer\ShowCustomerRequest;
@@ -110,7 +112,7 @@ class InvoiceController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CreateInvoiceRequest $request)
+/*    public function store(CreateInvoiceRequest $request)
     {
         $validatedData = $request->validated();
 
@@ -160,7 +162,64 @@ class InvoiceController extends Controller
             Log::error($exception);
             return response()->json(['message' => 'خطایی به وجود آمده است: ' . $exception->getMessage()], 500);
         }
+    }*/
+    public function store(CreateInvoiceRequest $request)
+    {
+        $validatedData = $request->validated();
+
+        try {
+            DB::beginTransaction();
+
+            $lastInvoiceSerial = InvoiceService::generateNewSerial();
+            $invoice = \App\Models\Invoice::create([
+                'serial_number' => $lastInvoiceSerial,
+                'user_id' => auth()->id(),
+                'customer_id' => $validatedData['buyer'],
+                'description' => $validatedData['description'],
+                'status' => InvoiceStatus::InFormal,
+                'informal_status' => InformalInvoiceStatus::PENDING_APPROVAL,
+                'discount' => $validatedData['discount'],
+                'delivery' => $validatedData['delivery'],
+            ]);
+
+            $AmountPayable = InvoiceService::processItems($invoice, $validatedData['items'], $validatedData['discount'], $validatedData['delivery']);
+
+            $invoice->update(['amount_payable' => $AmountPayable]);
+
+            DB::commit();
+
+            return response()->json(['message' => 'فاکتور با موفقیت ایجاد شد'], 201);
+        } catch (InvalidDiscountException $exception) {
+            DB::rollBack();
+            Log::error($exception);
+            return response()->json(['message' => $exception->getMessage()], 422);
+        } catch (DimensionException $exception) {
+            DB::rollBack();
+            Log::error($exception);
+            $message = $exception->getMessage() . " ساختار شماره {$exception->getProductIndex()} ردیف {$exception->getDimensionIndex()} وجود ندارد.";
+            return response()->json(['message' => $message], 422);
+        } catch (WeightExceededException $exception) {
+            DB::rollBack();
+            Log::error($exception);
+            $message = "وزن ابعاد در ساختار شماره {$exception->getProductIndex()} و ردیف {$exception->getDimensionIndex()} برابر با {$exception->getWeight()} کیلوگرم است که بیش از حد مجاز می‌باشد.";
+            return response()->json(['message' => $message], 422);
+        } catch (SpecialGlassDimensionException $exception) {
+            DB::rollBack();
+            Log::error($exception);
+            $message = "ابعاد شیشه {$exception->getGlassType()} در ساختار شماره {$exception->getProductIndex()} و ردیف {$exception->getDimensionIndex()} برابر با ارتفاع: {$exception->getHeight()}، عرض: {$exception->getWidth()} است که بیش از حد مجاز می‌باشد.";
+            return response()->json(['message' => $message], 422);
+        }catch (LaminatedColoredGlassDimensionException $exception) {
+            DB::rollBack();
+            Log::error($exception);
+            $message = "عرض شیشه لمینت رنگی در محصول شماره {$exception->getProductIndex()} و بعد {$exception->getDimensionIndex()} برابر با {$exception->getWidth()} میلی‌متر است که بیش از حد مجاز می‌باشد.";
+            return response()->json(['message' => $message], 422);
+        } catch (\Exception $exception) {
+            DB::rollBack();
+            Log::error($exception);
+            return response()->json(['message' => 'خطایی به وجود آمده است: ' . $exception->getMessage()], 500);
+        }
     }
+
 
 
 
@@ -209,6 +268,7 @@ class InvoiceController extends Controller
     {
         // اعتبارسنجی داده‌های ورودی
         $validatedData = $request->all();
+
 
         $invoiceId = $id;
 
